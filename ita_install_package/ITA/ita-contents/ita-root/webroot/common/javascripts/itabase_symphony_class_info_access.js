@@ -230,6 +230,7 @@ function scramSymphonyInstance(boolCallProxy, aryResultOfCalledProxy){
     if( boolCallProxy===true ){
         if( symphony_instance_id != '' ){
             if( window.confirm(getSomeMessage("ITABASEC010110",{0:symphony_instance_id})) === true ){
+                clearInterval(timerID);
                 minorPhase = 22;
                 drawCommandButtons(minorPhase);
                 proxy.scramSymphonyInstance(symphony_instance_id);
@@ -401,6 +402,7 @@ function printSymphonyInstance(boolCallProxy, aryResultOfCalledProxy){
             case "7": //異常終了
             case "8": //想定外エラー
                 boolLoopExit = true;
+                minorPhase = 22;
                 break;
             default:
                 break;
@@ -1434,7 +1436,7 @@ function getRequestTargetFromQuery(checkRequestKey,boolGenericMode){
         var checkTargetValue = getQuerystring(checkKey);
         // シンフォニークラス№が取得された場合
         if ( checkTargetValue.length > 0 ){
-            if( typeof boolGenericMode!==true ){
+            if( typeof boolGenericMode!=true ){
                 // 整数チェック
                 if( checkTargetValue.match( /^[-]?[0-9]+(\.[0-9]+)?$/ ) ){
                     retValue = checkTargetValue;

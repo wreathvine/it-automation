@@ -30,6 +30,8 @@
     // ドライバに対応した変数の読み込み
     require ($root_dir_path . "/libs/backyardlibs/ansible_driver/ky_ansible_common_setenv.php");
 
+    require ($root_dir_path . "/libs/commonlibs/common_required_check.php");
+
     switch($tgt_driver_id) {
     case DF_LEGACY_DRIVER_ID:
         require ($root_dir_path . "/libs/backyardlibs/ansible_driver/ky_legacy_setenv.php");
@@ -168,6 +170,24 @@
         }
 
         ////////////////////////////////////////////////////////////////
+        // Symphonyインタフェース情報を取得                           //
+        ////////////////////////////////////////////////////////////////
+        $lv_Symphony_if_info = array();
+        $ret = cm_getSymphonyInterfaceInfo($dbobj,'-',$lv_Symphony_if_info,$FREE_LOG);
+        if($ret === false) {
+            $error_flag = 1; throw new Exception( $FREE_LOG );
+        }
+
+        ////////////////////////////////////////////////////////////////
+        // Conductorインタフェース情報を取得                          //
+        ////////////////////////////////////////////////////////////////
+        $lv_Conductor_if_info = array();
+        $ret = cm_getConductorInterfaceInfo($dbobj,'-',$lv_Conductor_if_info,$FREE_LOG);
+        if($ret === false) {
+            $error_flag = 1; throw new Exception( $FREE_LOG );
+        }
+
+        ////////////////////////////////////////////////////////////////
         // トランザクション開始
         ////////////////////////////////////////////////////////////////
         $ret = cm_transactionStart($tgt_execution_no,$FREE_LOG);
@@ -226,7 +246,6 @@
         $cln_execution_row['STATUS_ID']         = "7";  //想定外エラーに設定しておく
         $cln_execution_row['LAST_UPDATE_USER']  = $db_access_user_id;
 
-        
         //////////////////////////////////////////////////////////////////
         // inディレクトリ生成クラス生成
         //////////////////////////////////////////////////////////////////
@@ -236,6 +255,9 @@
                                              $lv_ans_if_info['ANSIBLE_STORAGE_PATH_LNX'],
                                              $lv_ans_if_info['ANSIBLE_STORAGE_PATH_ANS'],  
                                              $lv_ans_if_info['SYMPHONY_STORAGE_PATH_ANS'],
+                                             $lv_ans_if_info['CONDUCTOR_STORAGE_PATH_ANS'],
+                                             $lv_Symphony_if_info["SYMPHONY_STORAGE_PATH_ITA"],
+                                             $lv_Conductor_if_info["CONDUCTOR_STORAGE_PATH_ITA"],
                                              $vg_legacy_playbook_contents_dir,
                                              $vg_pioneer_playbook_contents_dir,
                                              $vg_template_contents_dir,
@@ -254,6 +276,8 @@
                                              $vg_ansible_role_varsDB,
                                              $lv_ans_if_info,
                                              $tgt_execution_no,
+                                             $cln_execution_row['I_ENGINE_VIRTUALENV_NAME'],
+                                             $cln_execution_row['I_ANSIBLE_CONFIG_FILE'],
                                              $objMTS,
                                              $objDBCA);
 
@@ -445,7 +469,8 @@
                                             $in_exec_playbook_hed_def,
                                             $in_exec_option,
                                             $in_OrchestratorSubId_dir,
-                                            $in_root_dir_path,$in_log_output_php){
+                                            $in_root_dir_path,$in_log_output_php,
+                                            $in_ans_if_info){
         global $objMTS;
         global $log_level;
         global $log_output_dir;
@@ -514,6 +539,15 @@
                
             return false;
         }
+
+        ///////////////////////////////////////////////////////////////////////////////////////
+        // Ansible Engin /virtualenv Path確認
+        ///////////////////////////////////////////////////////////////////////////////////////
+        $ret = $in_ansdrv->AnsibleEnginVirtualenvPathCheck();
+        if($ret === false) {
+            return false;
+        } 
+
         ///////////////////////////////////////////////////////////////////////////////////////
         // データベースから処理対象ホストの情報を取得
         // $hostlist:              ホスト一覧返却配列
@@ -549,7 +583,8 @@
                                          $hostprotocollist,
                                          $hostostypelist,
                                          $hostinfolist,
-                                         $in_winrm_id);
+                                         $in_winrm_id, 
+                                         $in_ans_if_info);
         if($ret <> true){
             // 例外処理へ
             $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50003",array(__FILE__,__LINE__,"00010000"));
@@ -639,7 +674,8 @@
                                             $vault_vars,
                                             $vault_host_vars_file_list,
                                             $host_child_vars,
-                                            $DB_child_vars_master);
+                                            $DB_child_vars_master,
+                                            $in_ans_if_info);
             if($ret <> true){
                 // 例外処理へ
                 $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50003",array(__FILE__,__LINE__,"00010003"));
@@ -657,7 +693,9 @@
             $ret = $in_ansdrv->getDBRoleVarList($in_pattern_id,
                                                 $in_operation_id,
                                                 $host_vars,
-                                                $MultiArray_vars_list,$All_vars_list);   // #1200 2017/06/19 Append
+                                                $MultiArray_vars_list,
+                                                $All_vars_list,
+                                                $in_ans_if_info);
 
             if($ret <> true){
                 // 例外処理へ
@@ -705,7 +743,7 @@
         return true;
     }
 
-    function getAnsiblePlaybookOptionParameter($OptionParameter,&$JobTemplatePropertyParameterAry,&$JobTemplatePropertyNameAry,&$ErrorMsgAry)
+    function getAnsiblePlaybookOptionParameter($OptionParameter,&$JobTemplatePropertyParameterAry,&$JobTemplatePropertyNameAry,&$ErrorMsgAry,&$ParamAryExc)
     {
         global $objMTS;
 
@@ -758,30 +796,204 @@
             return false;
         }
 
+        // 除外リスト定義
+        $ExcList = array();
+        // 除外された場合のリスト定義
+        $ParamAryExc = $ParamAry;
+
+        // KEY SHRT_KEYが混在した場合の対応
+        $KeyShortChk = array();
+
+        // tags skipのvalue用の配列
+        $TagSkipValueKey = array();
+        $TagSkipValueKeyS = array();
+
         foreach($JobTemplatePropertyInfo as $JobTemplatePropertyRecode) {
+
+            // 除外リストの初期化
+            $ExcList = array();
+
+            // KEY SHORT_KEYチェック用配列の初期化
+            $KeyShortChk = array();
+
+            // tags skipのvalue用の配列の初期化
+            $TagSkipValueKey = array();
+            $TagSkipValueKeyS = array();
+
             $JobTemplatePropertyNameAry[$JobTemplatePropertyRecode['PROPERTY_NAME']]= 0;   
             if(strlen(trim( $JobTemplatePropertyRecode['KEY_NAME'] )) != 0) {
                 $ret = makeJobTemplateProperty($JobTemplatePropertyRecode['KEY_NAME'],
                                                $JobTemplatePropertyRecode['PROPERTY_TYPE'],
                                                $JobTemplatePropertyRecode['PROPERTY_NAME'],
-                                               $JobTemplatePropertyParameterAry,
                                                $ParamAry,
-                                               $ErrorMsgAry);
+                                               $ErrorMsgAry,
+                                               $ExcList,
+                                               $TagSkipValueKey,
+                                               $VerboseCnt);
+
+
+                // 重複データの場合のみ
+                $exclst_cnt = count($ExcList);
+                $i=0;
+                if($exclst_cnt >= 1){
+                    foreach($ExcList as $exc_ele) {
+                        // 最後のデータは削除しない
+                        if($exclst_cnt - 1 === $i){
+                            // KEYのチェックデータ格納
+                            array_push($KeyShortChk,$exc_ele);
+                            break;
+                        }
+                        $j=0;
+                        foreach($ParamAryExc as $elementAry){
+                            // 除外リストと一致した場合
+                            if(strcmp($exc_ele,$elementAry) ===  0){
+                                // 要素を削除
+                                unset($ParamAryExc[$j]);
+                                $ParamAryExc = array_values($ParamAryExc);
+                                break;
+                            }
+                            $j++;
+                        }
+                        $i++;
+                    }
+                }
+
                 if($ret === false) {
                     $result=false;
                 }
+
+                // 除外リストの初期化
+                $ExcList = array();
+
             }
             if(strlen(trim( $JobTemplatePropertyRecode['SHORT_KEY_NAME'] )) != 0) {
                 $ret = makeJobTemplateProperty($JobTemplatePropertyRecode['SHORT_KEY_NAME'],
                                                $JobTemplatePropertyRecode['PROPERTY_TYPE'],
                                                $JobTemplatePropertyRecode['PROPERTY_NAME'],
-                                               $JobTemplatePropertyParameterAry,
                                                $ParamAry,
-                                               $ErrorMsgAry);
+                                               $ErrorMsgAry,
+                                               $ExcList,
+                                               $TagSkipValueKeyS,
+                                               $VerboseCnt);
+
+                // 重複データの場合のみ
+                $exclst_cnt = count($ExcList);
+                $i=0;
+                if($exclst_cnt >= 1){
+                    foreach($ExcList as $exc_ele) {
+                        // 最後のデータは削除しない
+                        if($exclst_cnt - 1 === $i){
+                            // KEY SHORTのチェックデータ格納
+                            array_push($KeyShortChk,$exc_ele);
+                            break;
+                        }
+                        $j=0;
+                        foreach($ParamAryExc as $elementAry){
+                            // 除外リストと一致した場合
+                            if(strcmp($exc_ele,$elementAry) ===  0){
+                                // 要素を削除
+                                unset($ParamAryExc[$j]);
+                                $ParamAryExc = array_values($ParamAryExc);
+                                break;
+                            }
+                            $j++;
+                        }
+                        $i++;
+                    }
+                }
+
                 if($ret === false) {
                     $result=false;
                 }
             }
+
+            // KEY SHORTのチェック
+            $k = 0;
+            if(count($KeyShortChk) >= 2) {
+            // KEY SHORTそれぞれ存在する場合,先頭データを削除
+                foreach($ParamAryExc as $ParamAryExcKeyChk){
+                    if(strcmp($ParamAryExcKeyChk,$KeyShortChk[0]) === 0){
+                        unset($ParamAryExc[$k]);
+                        $ParamAryExc = array_values($ParamAryExc);
+                        break;
+                    }
+                    if(strcmp($ParamAryExcKeyChk,$KeyShortChk[1]) === 0){
+                        unset($ParamAryExc[$k]);
+                        $ParamAryExc = array_values($ParamAryExc);
+                        break;
+                    }
+                    $k++;
+                }
+            }
+
+            // tags,skipの場合','区切りに修正する
+            if((strcmp('--tags=',$JobTemplatePropertyRecode['KEY_NAME']) === 0) || (strcmp('--skip-tags=',$JobTemplatePropertyRecode['KEY_NAME']) === 0)) {
+            // tags,skipの場合、','区切りにしてデータを渡す（文字列整形）
+                $ValuesParam='';
+                $l=0;
+                $m=0;
+                foreach($ParamAry as $ParamAryTmpTabSkip){
+                    $ChkParamString = '-' . $ParamAryTmpTabSkip . ' ';
+                    // KEYのtagsのvalueを取得
+                    if((preg_match('/^' . '--tags=' . '/', $ChkParamString) === 1) && (strcmp('--tags=',$JobTemplatePropertyRecode['KEY_NAME']) === 0)) {
+                        $ValuesParam = $ValuesParam . $TagSkipValueKey[$l] .',';
+                        $l++;
+                    }
+                    // KEYのskipのvalueを取得
+                    if((preg_match('/^' . '--skip-tags=' . '/', $ChkParamString) === 1) && (strcmp('--skip-tags=',$JobTemplatePropertyRecode['KEY_NAME']) === 0)) {
+                        $ValuesParam = $ValuesParam . $TagSkipValueKey[$l] .',';
+                        $l++;
+                    }
+                    // KEY SHORTのtagsのvalueを取得
+                    if((preg_match('/^' . '-t(\s)+' . '/', $ChkParamString) === 1) && (strcmp('-t(\s)+',$JobTemplatePropertyRecode['SHORT_KEY_NAME']) === 0)) {
+                        $ValuesParam = $ValuesParam . $TagSkipValueKeyS[$m] .',';
+                        $m++;
+                    }
+                }
+                // 末尾の','を削除
+                $ValuesParam = rtrim($ValuesParam, ',');
+
+                // リストのデータを書き換え
+                $n=0;
+                foreach($ParamAryExc as $ParamAryTmpKeyChg){
+                    $ChkParamStringChg = '-' . $ParamAryTmpKeyChg . ' ';
+                    if((preg_match('/^' . '--tags=' . '/', $ChkParamStringChg) === 1) && (strcmp('--tags=',$JobTemplatePropertyRecode['KEY_NAME']) === 0)) {
+                        // 要素を書き換え
+                        $ParamAryExc[$n] = '-tags=' . $ValuesParam;
+                        break;
+                    }
+                    if((preg_match('/^' . '--skip-tags=' . '/', $ChkParamStringChg) === 1) && (strcmp('--skip-tags=',$JobTemplatePropertyRecode['KEY_NAME']) === 0)) {
+                        // 要素を書き換え
+                        $ParamAryExc[$n] = '-skip-tags=' . $ValuesParam;
+                        break;
+                    }
+                    if((preg_match('/^' . '-t(\s)+' . '/', $ChkParamStringChg) === 1) && (strcmp('-t(\s)+',$JobTemplatePropertyRecode['SHORT_KEY_NAME']) === 0)) {
+                        // 要素を書き換え
+                        $ParamAryExc[$n] = 't ' . $ValuesParam;
+                        break;
+                    }
+                    $n++;
+                }
+            }
+
+            // JobTemplatePropertyParameterAryの作成
+            if(strlen(trim( $JobTemplatePropertyRecode['KEY_NAME'] )) != 0) {
+                $ret = makeJobTemplatePropertyParameterAry($JobTemplatePropertyRecode['KEY_NAME'],
+                                                           $JobTemplatePropertyRecode['PROPERTY_TYPE'],
+                                                           $JobTemplatePropertyRecode['PROPERTY_NAME'],
+                                                           $JobTemplatePropertyParameterAry,
+                                                           $ParamAryExc,
+                                                           $VerboseCnt);
+            }
+            if(strlen(trim( $JobTemplatePropertyRecode['SHORT_KEY_NAME'] )) != 0) {
+                $ret = makeJobTemplatePropertyParameterAry($JobTemplatePropertyRecode['SHORT_KEY_NAME'],
+                                                           $JobTemplatePropertyRecode['PROPERTY_TYPE'],
+                                                           $JobTemplatePropertyRecode['PROPERTY_NAME'],
+                                                           $JobTemplatePropertyParameterAry,
+                                                           $ParamAryExc,
+                                                           $VerboseCnt);
+            }
+
         }
         return $result;
     }
@@ -824,7 +1036,7 @@
         return true;
     }
 
-    function makeJobTemplateProperty($KeyString,$PropertyType,$PropertyName,&$JobTemplatePropertyParameterAry,$ParamAry,&$ErrorMsgAry) {
+    function makeJobTemplateProperty($KeyString,$PropertyType,$PropertyName,$ParamAry,&$ErrorMsgAry,&$ExcList,&$TagSkipValueKey,&$VerboseCnt) {
         global $objMTS;
         $result = true;
         foreach($ParamAry as $ParamString) {
@@ -837,6 +1049,10 @@
                 //6000001 = "値が設定されていないオプションパラメータがあります。(パラメータ: {})";
                 //6000002 = "重複しているオプションパラメータがあります。(パラメータ: {})";
                 //6000003 = "不正なオプションパラメータがあります。(パラメータ: {})";
+
+                // $ChkParamStringを除外リストに設定(追加)
+                array_push($ExcList,$ParamString);
+
                 switch($PropertyType) {
                 case DF_JobTemplateKeyValueProperty:
                     if(@strlen(@trim($PropertyAry[1])) == 0) {
@@ -845,14 +1061,21 @@
                         $result = false;
                         break;
                     } 
-                    if(isset($JobTemplatePropertyParameterAry[$PropertyName])) {
-                        $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000002",array($ChkParamString));
-                        $ErrorMsgAry[] = $FREE_LOG;
-                        $result = false;
-                        break;
+
+                    if(preg_match('/-f/',$KeyString)){
+                        if(is_numeric(trim($PropertyAry[1])) !== true){
+                            $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000003",array($ChkParamString));
+                            $ErrorMsgAry[] = $FREE_LOG;
+                            $result = false;
+                            break;
+                        }
                     }
 
-                    $JobTemplatePropertyParameterAry[$PropertyName] = trim($PropertyAry[1]);
+                    # tags skipの対応
+                    if((strcmp($KeyString,'--tags=') === 0) || (strcmp($KeyString,'-t(\s)+') === 0) ||
+                       (strcmp($KeyString,'--skip-tags=') === 0)) {
+                        array_push($TagSkipValueKey,trim($PropertyAry[1]));
+                    }
                     break;
                 case DF_JobTemplateVerbosityProperty:
                     $PropertyAry = preg_split('/^(v)*/', $ParamString);
@@ -863,19 +1086,7 @@
                         $result = false;
                         break;
                     } 
-                    if(isset($JobTemplatePropertyParameterAry[$PropertyName])) {
-                        $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000002",array($ChkParamString));
-                        $ErrorMsgAry[] = $FREE_LOG;
-                        $result = false;
-                        break;
-                    }
-                    if(@strlen(@trim($ParamString)) >= 6) {
-                        $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000003",array($ChkParamString));
-                        $ErrorMsgAry[] = $FREE_LOG;
-                        $result = false;
-                        break;
-                    } 
-                    $JobTemplatePropertyParameterAry[$PropertyName] = strlen(trim($ParamString));
+                    $VerboseCnt = $VerboseCnt + @strlen(@trim($ParamString));
                     break; 
                 case DF_JobTemplatebooleanTrueProperty:
                     if(@strlen(@trim($PropertyAry[1])) != 0)
@@ -885,13 +1096,6 @@
                         $result = false;
                         break;
                     } 
-                    if(isset($JobTemplatePropertyParameterAry[$PropertyName])) {
-                        $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000002",array($ChkParamString));
-                        $ErrorMsgAry[] = $FREE_LOG;
-                        $result = false;
-                        break;
-                    }
-                    $JobTemplatePropertyParameterAry[$PropertyName] = true;
                     break; 
                 case DF_JobTemplateExtraVarsProperty:
                     if(@strlen(@trim($PropertyAry[1])) == 0)
@@ -901,12 +1105,6 @@
                         $result = false;
                         break;
                     } 
-                    if(isset($JobTemplatePropertyParameterAry[$PropertyName])) {
-                        $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000002",array($ChkParamString));
-                        $ErrorMsgAry[] = $FREE_LOG;
-                        $result = false;
-                        break;
-                    }
                     $ExtVarString = trim($PropertyAry[1]);
                     $ret = makeExtraVarsParameter($ExtVarString);
                     if($ret === false) {
@@ -915,6 +1113,43 @@
                         $result = false;
                         break;
                     }
+                    break; 
+                }
+            }
+        }
+        return $result;
+    }
+
+    function makeJobTemplatePropertyParameterAry($KeyString,$PropertyType,$PropertyName,&$JobTemplatePropertyParameterAry,$ParamAry,$VerboseCnt) {
+        global $objMTS;
+        $result = true;
+
+        foreach($ParamAry as $ParamString) {
+            $ChkParamString = '-' . $ParamString . ' ';
+            $ret = preg_match('/^' . $KeyString . '/', $ChkParamString);
+            if($ret === 1)
+            {
+
+                $PropertyAry = preg_split('/^' . $KeyString . '/', $ChkParamString);
+
+                switch($PropertyType) {
+                case DF_JobTemplateKeyValueProperty:
+                    $JobTemplatePropertyParameterAry[$PropertyName] = trim($PropertyAry[1]);
+                    break;
+                case DF_JobTemplateVerbosityProperty:
+                    if($VerboseCnt >= 6) {
+                        $VerboseCnt = 5;
+                    }
+                    $JobTemplatePropertyParameterAry[$PropertyName] = $VerboseCnt;
+                    break; 
+                case DF_JobTemplatebooleanTrueProperty:
+                    $JobTemplatePropertyParameterAry[$PropertyName] = true;
+                    break; 
+                case DF_JobTemplateExtraVarsProperty:
+                    $ExtVarString = trim($PropertyAry[1]);
+                    $ExtVarString = trim($ExtVarString,"\"");
+                    $ExtVarString = trim($ExtVarString,"\'");
+                    $ExtVarString = str_replace("\\n","\n",$ExtVarString);
                     $JobTemplatePropertyParameterAry[$PropertyName] = $ExtVarString;
                     break; 
                 }
@@ -923,43 +1158,24 @@
         return $result;
     }
     function makeExtraVarsParameter(&$ExtVarString) {
-        $String = " " . $ExtVarString . " ";
-        $ValList = preg_split("/(\s)+(\S)+(\s)*=(\s)*/", $String);
-        if(count($ValList) > 1)
-        {
-            // 先頭に空が入るので取り除く
-            if(strlen(trim($ValList[0])) == 0)
-            {
-                unset($ValList[0]);
-            }
+
+        $ExtVarString = trim($ExtVarString,"\'");
+        $ExtVarString = trim($ExtVarString,"\"");
+        $ExtVarString = str_replace("\\n","\n",$ExtVarString);
+
+        // JSON形式のチェック
+        $chk_json = json_decode($ExtVarString,true);
+        if($chk_json !== null) {
+            return true;
         }
-        // 具体値の設定を確認
-        $Val = array();
-        foreach($ValList as $Val) {
-            if(strlen(trim($Val)) == 0) {
-                return false;
-            }
-            $ValAry[] = $Val;
+
+        // YAML形式のチェック
+        $val = @yaml_parse($ExtVarString);
+        if($val !== false) {
+            return true;
         }
-        $VarCount = preg_match_all("/(\s)+(\S)+(\s)*=(\s)*/", $String,$VarList);
-        if($VarCount == 0) {
-            return false;
-        }
-        if(count($ValAry) != $VarCount) {
-            return false;
-        }
-        $idx = 0;
-        $ExtVarString = "";
-        foreach($VarList[0] as $VarName)
-        {
-            $VarName = preg_split("/(\s)*=(\s)*/", $VarName);
-            $CR = "";
-            if(strlen($ExtVarString) != 0)
-                $CR = "\n";
-            $ExtVarString  .= $CR . trim($VarName[0]) . ': ' .  $ValAry[$idx];
-            $idx++;
-        }
-        return true;
+
+        return false;
     }
     function getMovementAnsibleExecOption($Pattern_id,&$ExecOption) {
 
@@ -1063,6 +1279,10 @@
             $lv_ans_exec_user         = $in_ans_if_info['ANSIBLE_EXEC_USER'];
             $lv_ans_exec_mode         = $in_ans_if_info['ANSIBLE_EXEC_MODE'];
 
+            $proxySetting              = array();
+            $proxySetting['address']   = $in_ans_if_info["ANSIBLE_PROXY_ADDRESS"];
+            $proxySetting['port']      = $in_ans_if_info["ANSIBLE_PROXY_PORT"];
+
             // Towerの接続情報
             $lv_anstwr_protocol       = $in_ans_if_info['ANSTWR_PROTOCOL'];
             $lv_anstwr_hostname       = $in_ans_if_info['ANSTWR_HOSTNAME'];
@@ -1113,7 +1333,8 @@
                                                   $exec_playbook_hed_def,
                                                   $exec_option,
                                                   $vg_OrchestratorSubId_dir,
-                                                  $root_dir_path,$log_output_php);
+                                                  $root_dir_path,$log_output_php,
+                                                  $in_ans_if_info);
             if($ret !== true) {
                 $prepare_err_flag = 1;
             }
@@ -1143,6 +1364,48 @@
                         $in_ansdrv->LocalLogPrint(basename(__FILE__),__LINE__,$ErrorMsg);
                         $prepare_err_flag = 1;
                     }
+
+                    if(strlen(trim($lv_anstwr_hostname)) == 0) {
+                        $item = $objMTS->getSomeMessage("ITAANSIBLEH-MNU-1203041");
+                        $ErrorMsg = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-2004",array($item));
+                        $in_ansdrv->LocalLogPrint(basename(__FILE__),__LINE__,$ErrorMsg);
+                        $prepare_err_flag = 1;
+                    }
+                    // Git関連情報 必須入力確認
+                    $chkObj  = new TowerHostListGitInterfaceParameterCheck();
+                    $ValueColumnName= 'Value';
+                    $ColumnArray = array();
+                    $ColumnArray['ANS_GIT_HOSTNAME'][$ValueColumnName]             = $in_ans_if_info['ANS_GIT_HOSTNAME'];
+                    $ColumnArray['ANS_GIT_USER'][$ValueColumnName]                 = $in_ans_if_info['ANS_GIT_USER'];
+                    $ColumnArray['ANS_GIT_SSH_KEY_FILE'][$ValueColumnName]         = $in_ans_if_info['ANS_GIT_SSH_KEY_FILE'];
+                    $RequiredCloumnName = 'Required';
+                    $ColumnArray['ANS_GIT_HOSTNAME'][$RequiredCloumnName]          = true;
+                    $ColumnArray['ANS_GIT_USER'][$RequiredCloumnName]              = true;
+                    $ColumnArray['ANS_GIT_SSH_KEY_FILE'][$RequiredCloumnName]      = true;
+                    $DelFlagCloumnName = 'del_flag_cloumn';
+                    $ColumnArray['ANS_GIT_HOSTNAME'][$DelFlagCloumnName]           = "";
+                    $ColumnArray['ANS_GIT_USER'][$DelFlagCloumnName]               = "";
+                    $ColumnArray['ANS_GIT_SSH_KEY_FILE'][$DelFlagCloumnName]       = "";
+
+                    // エラーメッセージに表示するカラム名設定
+                    $MyNameCloumnName = 'CloumnName';
+                    $errormsg    = sprintf("%s/%s",   $objMTS->getSomeMessage('ITAANSIBLEH-MNU-1200010000'),
+                                                      $objMTS->getSomeMessage("ITAANSIBLEH-MNU-1200010100"));
+                    $ColumnArray['ANS_GIT_HOSTNAME'][$MyNameCloumnName]     = sprintf("%s",$objMTS->getSomeMessage('ITAANSIBLEH-ERR-2004',array($errormsg)));
+                    $errormsg    = sprintf("%s/%s/%s",$objMTS->getSomeMessage('ITAANSIBLEH-MNU-1200010000'),
+                                                      $objMTS->getSomeMessage("ITAANSIBLEH-MNU-1200010200"),
+                                                      $objMTS->getSomeMessage("ITAANSIBLEH-MNU-1200010300"));
+                    $ColumnArray['ANS_GIT_USER'][$MyNameCloumnName]         = sprintf("%s",$objMTS->getSomeMessage('ITAANSIBLEH-ERR-2004',array($errormsg)));
+                    $errormsg    = sprintf("%s/%s/%s",$objMTS->getSomeMessage('ITAANSIBLEH-MNU-1200010000'),
+                                                      $objMTS->getSomeMessage("ITAANSIBLEH-MNU-1200010200"),
+                                                      $objMTS->getSomeMessage("ITAANSIBLEH-MNU-1200010400"));
+                    $ColumnArray['ANS_GIT_SSH_KEY_FILE'][$MyNameCloumnName] = sprintf("%s",$objMTS->getSomeMessage('ITAANSIBLEH-ERR-2004',array($errormsg)));
+
+                    $retBool = $chkObj->ParameterCheck($lv_ans_exec_mode, $ColumnArray, $ValueColumnName, $MyNameCloumnName, $RequiredCloumnName);
+                    if($retBool !== true) {
+                        $in_ansdrv->LocalLogPrint(basename(__FILE__),__LINE__,$retBool);
+                        $prepare_err_flag = 1;
+                    }
                 }
             }
 
@@ -1150,6 +1413,8 @@
                 // ansible-playbookのオプションパラメータを確認
                 getMovementAnsibleExecOption($in_execution_row["PATTERN_ID"],$MovementAnsibleExecOption);
                 $OptionParameter = $lv_ansible_exec_options . ' ' . $MovementAnsibleExecOption;
+
+                $OptionParameter = str_replace("--verbose","-v",$OptionParameter);
 
                 // Tower実行の場合にオプションパラメータをチェックする。
                 if($lv_ans_exec_mode != DF_EXEC_MODE_ANSIBLE) {
@@ -1164,7 +1429,10 @@
                         break;
                     }
 
-                    $ret = getAnsiblePlaybookOptionParameter($OptionParameter,$JobTemplatePropertyParameterAry,$JobTemplatePropertyNameAry,$ErrorMsgAry);
+                    // 重複除外用のオプションパラメータ
+                    $ParamAryExc = array();
+
+                    $ret = getAnsiblePlaybookOptionParameter($OptionParameter,$JobTemplatePropertyParameterAry,$JobTemplatePropertyNameAry,$ErrorMsgAry,$ParamAryExc);
                     if($ret === false)
                     {
                         $prepare_err_flag = 1;
@@ -1240,8 +1508,10 @@
                             "EXE_NO"=>$in_execution_no,
                             "PARALLEL_EXE"=>$tgt_exec_count,
                             "RUN_MODE"=>$tgt_run_mode,
-                            "EXEC_USER"=>$lv_ans_exec_user);
-                        
+                            "EXEC_USER"=>$lv_ans_exec_user,
+                            //Ansible Engin Virtualenv Path
+                            'ANS_ENGINE_VIRTUALENV_NAME'=>$in_ansdrv->GetEngineVirtualenvName());
+
                     $rest_api_response = ansible_restapi_access( $lv_ans_protocol,
                                                                  $lv_ans_hostname,
                                                                  $lv_ans_port,
@@ -1249,7 +1519,8 @@
                                                                  $lv_ans_secret_access_key,
                                                                  $RequestURI,
                                                                  $Method,
-                                                                 $RequestContents );
+                                                                 $RequestContents,
+                                                                 $proxySetting );
 
 
                     // トレースメッセージ
@@ -1424,6 +1695,10 @@
             $lv_ans_exec_user         = $in_ans_if_info['ANSIBLE_EXEC_USER'];
             $lv_ans_exec_mode         = $in_ans_if_info['ANSIBLE_EXEC_MODE'];
 
+            $proxySetting              = array();
+            $proxySetting['address']   = $in_ans_if_info["ANSIBLE_PROXY_ADDRESS"];
+            $proxySetting['port']      = $in_ans_if_info["ANSIBLE_PROXY_PORT"];
+
             // Towerの接続情報
             $lv_anstwr_protocol       = $in_ans_if_info['ANSTWR_PROTOCOL'];
             $lv_anstwr_hostname       = $in_ans_if_info['ANSTWR_HOSTNAME'];
@@ -1471,7 +1746,8 @@
                                                              $lv_ans_secret_access_key,
                                                              $RequestURI,
                                                              $Method,
-                                                             $RequestContents );
+                                                             $RequestContents,
+                                                             $proxySetting );
     
                 ////////////////////////////////////////////////////////////////
                 // REST API結果判定                                           //
@@ -1573,6 +1849,17 @@
                 // 8:緊急停止
 
                 /////////////////////////////////////////////////////
+                // 実行結果ファイルをTowerから転送
+                /////////////////////////////////////////////////////
+                // 実行エンジンを判定
+                if($lv_ans_exec_mode != DF_EXEC_MODE_ANSIBLE) {
+                    // 戻り値は確認しない。
+                    $MultipleLogMark = "";        // 定義のみ値は返却されない
+                    $MultipleLogFileJsonAry = ""; // 定義のみ値は返却されない
+                    AnsibleTowerExecution(DF_RESULTFILETRANSFER_FUNCTION,$in_ans_if_info,$TowerHostList,$in_execution_row,$in_ansdrv->getAnsible_out_Dir(),$UIExecLogPath,$UIErrorLogPath,$MultipleLogMark,$MultipleLogFileJsonAry,$Status);
+                }
+
+                /////////////////////////////////////////////////////
                 // 結果データ用ZIPファイル作成                     //
                 /////////////////////////////////////////////////////
                 $ret = fileCreateZIPFile($zip_data_source_dir,
@@ -1668,8 +1955,10 @@
             }
             // SQL(UPDATE)をEXECUTEすると判断した場合
             if( $sql_exec_flag == 1 ){
+
                 // 遅延中以外の場合に結果データ用ZIP 履歴ファイル作成
                 if($out_execution_row['STATUS_ID'] != 4) {
+
                     /////////////////////////////////////////////////////
                     // 結果データ用ZIP 履歴ファイル作成                //
                     /////////////////////////////////////////////////////
@@ -1918,6 +2207,29 @@
             shell_exec( $tmp_str_command );
 
             $in_utn_file_dir = $in_exe_ins_input_file_dir . "/" . $in_zip_subdir . "/" . str_pad( $in_execution_no, $intNumPadding, "0", STR_PAD_LEFT );
+
+            if( ! is_dir( $in_exe_ins_input_file_dir) ){
+                if( !mkdir( $in_exe_ins_input_file_dir, 0777,true) ){
+                    // 事前準備を中断
+                    $FREE_LOG = $objMTS->getSomeMessage($msg_code_1,array($in_execution_no));
+                    require ($root_dir_path . $log_output_php );
+
+                    return false;
+                }
+                if( !chmod( $in_exe_ins_input_file_dir, 0777 ) ){
+                    // 事前準備を中断
+                    $FREE_LOG = $objMTS->getSomeMessage($msg_code_2,array($in_execution_no));
+                    require ($root_dir_path . $log_output_php );
+                    return false;
+                }
+            } else {
+                if( !chmod( $in_exe_ins_input_file_dir, 0777 ) ){
+                    // 事前準備を中断
+                    $FREE_LOG = $objMTS->getSomeMessage($msg_code_2,array($in_execution_no));
+                    require ($root_dir_path . $log_output_php );
+                    return false;
+                }
+            }
 
             if( !is_dir( $in_utn_file_dir ) ){
                 // ここ(UTNのdir)だけは再帰的に作成する

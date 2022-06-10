@@ -144,6 +144,14 @@ callback.prototype = {
     //----Conductor系メソッド
     //----Conductor再描画用-----//
     printconductorClass : function( result ){
+        
+        var ary_result = getArrayBySafeSeparator(result);
+        if( ary_result[0] == "redirectOrderForHADACClient" ) {
+            var conductorClassId = location.search.split('&');
+            ary_result[2] = ary_result[2] + '&' + conductorClassId[1];
+            checkTypicalFlagInHADACResult(ary_result);
+        }
+
         conductorUseList.conductorData = result;
         if ( conductorGetMode === 'starting') {
           initEditor('view');
@@ -195,6 +203,21 @@ callback.prototype = {
     },
     //Conductor系メソッド----
     
+    // ---- Notice ----- //
+    printNoticeList : function( result ) {
+      conductorUseList.noticeList = JSON.parse( result );
+      if ( conductorGetMode === 'starting') {
+        proxy.printNoticeStatusList();
+      }
+    },
+    printNoticeStatusList : function( result ) {
+      conductorUseList.noticeStatusList = JSON.parse( result );
+      if ( conductorGetMode === 'starting') {
+        proxy.printOperationList();
+      }
+    }
+    // Notice ----
+    
 }
 
 // ロール一覧を取得する
@@ -222,8 +245,12 @@ function conductorResultMessage( type, result ) {
       message = '',
       trigger = '';
 
-  // セッション切れのチェック
   var ary_result = getArrayBySafeSeparator(result);
+  var conductorClassId = location.search.split('&');
+  //セッションが切れた際、url上にコンダクタークラスidがある場合取得。
+  if( conductorClassId.length == 2 && ary_result[0] == "redirectOrderForHADACClient"){
+    ary_result[2] = ary_result[2] + '&' + conductorClassId[1]
+  }
   checkTypicalFlagInHADACResult(ary_result);
 
   switch( result[0] ) {
@@ -484,7 +511,7 @@ const conductorClassID = editor.getParam('conductor_class_id');
 // DOM読み込み完了
 $( function(){
     // リスト取得開始
-    proxy.printOperationList();
+    proxy.printNoticeList( conductorClassID )
     // タブ切り替え
     editor.tabMenu();
     // 画面縦リサイズ

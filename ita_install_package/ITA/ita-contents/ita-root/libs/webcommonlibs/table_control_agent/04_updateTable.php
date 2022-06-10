@@ -29,6 +29,7 @@
         //----$ordMode=2[CSV]からのUPDATE
         //----$ordMode=3[JSON]からのUPDATE
         //----$ordMode=4[ブラウザからの新規登録(SQLトランザクション無し)
+        $g['ModeType'] = $ordMode;
 
         //----返し値:$varRet
         //----処理結果次第で書き換えるグローバル変数：$g['error_flag']
@@ -392,7 +393,7 @@
                     //----登録前の処理
                     foreach($arrayObjColumn as $objColumn){
                         $arrayTmp = $objColumn->beforeTableIUDAction($exeUpdateData, $reqUpdateData, $aryVariant);
-                        if($arrayTmp[0]===false){
+                        if(is_array($arrayTmp) && array_key_exists(0, $arrayTmp) && $arrayTmp[0]===false){
                             $intErrorType = $arrayTmp[1];
                             $error_str = $arrayTmp[3];
                             $strErrorBuf = $arrayTmp[4];
@@ -450,7 +451,6 @@
                             $error_str = $arrayTmp[3];
                             $strErrorBuf = $arrayTmp[4];
                             throw new Exception( '00002000-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
-                            break;
                         }
                     }
                     
@@ -502,12 +502,14 @@
                             $error_str = $arrayTmp[3];
                             $strErrorBuf = $arrayTmp[4];
                             throw new Exception( '00002400-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
-                            break;
                         }
                     }
 
                     //1行更新の場合
                     if( $varCommitSpan === 1 || $ordMode == 4 ){                     
+                        // loadtableでafterTrzStartActionにfunctionを登録しても、Excel/Rest経由の登録・更新の場合、上記の条件にマッチしないので
+                        // afterTrzStartActionで登録したfunctionが呼ばれません。
+                        // beforeTableIUDActionを使用して下さい。
                         foreach($arrayObjColumn as $objColumn){
                             $arrayTmp = $objColumn->afterTableIUDAction($exeUpdateData, $reqUpdateData, $aryVariant);
                             if($arrayTmp[0]===false){

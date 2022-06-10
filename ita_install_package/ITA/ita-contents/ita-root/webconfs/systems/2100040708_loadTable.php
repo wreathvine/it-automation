@@ -79,6 +79,18 @@ Ansible 共通 Ansible Tower インスタンス一覧
     $c = new IDColumn('ANSTWR_LOGIN_AUTH_TYPE',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010001020"),'D_TOWER_LOGIN_AUTH_TYPE','LOGIN_AUTH_TYPE_ID','LOGIN_AUTH_TYPE_NAME','',array('SELECT_ADD_FOR_ORDER'=>array('DISP_SEQ'),'ORDER'=>'ORDER BY ADD_SELECT_1'));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010001021"));//エクセル・ヘッダでの説明
     $c->setRequired(true);//登録/更新時には、入力必須
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('ANSTWR_LOGIN_AUTH_TYPE');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'D_TOWER_LOGIN_AUTH_TYPE_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'LOGIN_AUTH_TYPE_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'LOGIN_AUTH_TYPE_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
     //認証方式----
 
@@ -92,7 +104,7 @@ Ansible 共通 Ansible Tower インスタンス一覧
     //ログインユーザー----
 
     //----ログインパスワード
-    $objVldt = new SingleTextValidator(0,30,false);
+    $objVldt = new SingleTextValidator(0,128,false);
     $c = new PasswordColumn('ANSTWR_LOGIN_PASSWORD',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010001040"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010001041"));//エクセル・ヘッダでの説明
     $c->setValidator($objVldt);
@@ -131,6 +143,18 @@ Ansible 共通 Ansible Tower インスタンス一覧
     //----isolated Tower
     $c = new IDColumn('ANSTWR_ISOLATED_TYPE',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010001060"),'D_FLAG_LIST_01','FLAG_ID','FLAG_NAME','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010001061"));//エクセル・ヘッダでの説明
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('ANSTWR_ISOLATED_TYPE');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'D_FLAG_LIST_01_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'FLAG_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'FLAG_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
     //isolated Tower----
 
@@ -161,6 +185,10 @@ Ansible 共通 Ansible Tower インスタンス一覧
         // $arrayRegDataはUI入力ベースの情報
         // $arrayVariant['edit_target_row']はDBに登録済みの情報
         if($strModeId == "DTUP_singleRecRegister") {
+            // ホスト名
+            $strhostname   = array_key_exists('ANSTWR_HOSTNAME',$arrayRegData)?
+                                $arrayRegData['ANSTWR_HOSTNAME']:null;
+
             // 認証方式の設定値取得
             $strAuthMode   = array_key_exists('ANSTWR_LOGIN_AUTH_TYPE',$arrayRegData)?
                                 $arrayRegData['ANSTWR_LOGIN_AUTH_TYPE']:null;
@@ -173,7 +201,18 @@ Ansible 共通 Ansible Tower インスタンス一覧
             // 公開鍵ファイルの設定値取得
             $strsshKeyFile = array_key_exists('ANSTWR_LOGIN_SSH_KEY_FILE',$arrayRegData)?
                                 $arrayRegData['ANSTWR_LOGIN_SSH_KEY_FILE']:null;
+
+        } elseif ($strModeId == "DTUP_singleRecDelete") {
+
+            // ホスト名
+            $strhostname        = isset($arrayVariant['edit_target_row']['ANSTWR_HOSTNAME'])?
+                                        $arrayVariant['edit_target_row']['ANSTWR_HOSTNAME']:null;
+
         } elseif ($strModeId == "DTUP_singleRecUpdate") {
+            // ホスト名
+            $strhostname   = array_key_exists('ANSTWR_HOSTNAME',$arrayRegData)?
+                                $arrayRegData['ANSTWR_HOSTNAME']:null;
+
             // 認証方式の設定値取得
             $strAuthMode   = array_key_exists('ANSTWR_LOGIN_AUTH_TYPE',$arrayRegData)?
                                 $arrayRegData['ANSTWR_LOGIN_AUTH_TYPE']:null;
@@ -202,8 +241,8 @@ Ansible 共通 Ansible Tower インスタンス一覧
             // FileUploadColumnはファイルの更新がないと$arrayRegDataの設定は空になっているので
             // ダウンロード済みのファイルが削除されていると$arrayRegData['del_flag_COL_IDSOP_xx']がonになる
             // 更新されていない場合は設定済みのファイル名($arrayVariant['edit_target_row'])を取得
-            $strsshKeyFileDel  = array_key_exists('del_flag_COL_IDSOP_12',$arrayRegData)?
-                                    $arrayRegData['del_flag_COL_IDSOP_12']:null;
+            $strsshKeyFileDel  = array_key_exists('del_flag_COL_IDSOP_13',$arrayRegData)?
+                                    $arrayRegData['del_flag_COL_IDSOP_13']:null;
             if($strsshKeyFileDel == 'on') {
                 $strsshKeyFile = "";
             } else {
@@ -216,13 +255,32 @@ Ansible 共通 Ansible Tower インスタンス一覧
                 }
             }
         }
+        //ホスト名が数値文字列か判定
+        if(is_numeric($strhostname) === true) {
+            $retStrBody = $g['objMTS']->getSomeMessage("ITABASEH-MNU-101081");
+            $objClientValidator->setValidRule($retStrBody);
+            $retBool = false;
+            return $retBool;
+        }
 
         switch($strModeId) {
         case "DTUP_singleRecUpdate":
         case "DTUP_singleRecRegister":
             $errMsgParameterAry = array();
             $chkobj = new AuthTypeParameterRequiredCheck();
-            $retStrBody = $chkobj->TowerHostListAuthTypeRequiredParameterCheck($chkobj->chkType_Loadtable_TowerHostList,$g['objMTS'],$errMsgParameterAry,$strAuthMode,$strPasswd,$strsshKeyFile,$strPassphrase);
+
+            $del_password_arr = array();
+            
+            if(isset($arrayRegData['del_password_flag_COL_IDSOP_12']) && $arrayRegData['del_password_flag_COL_IDSOP_12'] == "on"){
+                $del_password_arr[] = "del_password_flag_COL_IDSOP_12";
+            }
+
+            if(isset($arrayRegData['del_password_flag_COL_IDSOP_14']) && $arrayRegData['del_password_flag_COL_IDSOP_14'] == "on"){
+                $del_password_arr[] = "del_password_flag_COL_IDSOP_14";
+            }
+
+            $retStrBody = $chkobj->TowerHostListAuthTypeRequiredParameterCheck($chkobj->chkType_Loadtable_TowerHostList,$g['objMTS'],$errMsgParameterAry,$strAuthMode,$strPasswd,$strsshKeyFile,$strPassphrase,$del_password_arr);
+            
             if($retStrBody === true) {
                 $retStrBody = "";
             } else {

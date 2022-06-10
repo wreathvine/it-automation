@@ -37,7 +37,8 @@ Ansibleインターフェース情報
         'TT_SYS_06_LUP_USER_ID'=>'LAST_UPDATE_USER',
         'TT_SYS_NDB_ROW_EDIT_BY_FILE_ID'=>'ROW_EDIT_BY_FILE',
         'TT_SYS_NDB_UPDATE_ID'=>'WEB_BUTTON_UPDATE',
-        'TT_SYS_NDB_LUP_TIME_ID'=>'UPD_UPDATE_TIMESTAMP'
+        'TT_SYS_NDB_LUP_TIME_ID'=>'UPD_UPDATE_TIMESTAMP',
+        'TT_SYS_08_DUPLICATE_ID'=>'WEB_BUTTON_DUPLICATE'
     );
 
     $table = new TableControlAgent('B_ANSIBLE_IF_INFO','ANSIBLE_IF_INFO_ID', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1202030"), 'B_ANSIBLE_IF_INFO_JNL', $tmpAry);
@@ -52,6 +53,7 @@ Ansibleインターフェース情報
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1202050"));
 
     $table->setAccessAuth(true);    // データごとのRBAC設定
+    $table->setNoRegisterFlg(true);    // 登録画面無し
 
 
     //--------------------------------------------------------------
@@ -60,6 +62,18 @@ Ansibleインターフェース情報
     $c = new IDColumn('ANSIBLE_EXEC_MODE',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1203065"),'B_ANSIBLE_EXEC_MODE','ID','NAME','', array('OrderByThirdColumn'=>'ID'));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1203066"));
     $c->setRequired(true);
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('ANSIBLE_EXEC_MODE');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_ANSIBLE_EXEC_MODE_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
     //実行区分----
 
@@ -147,6 +161,18 @@ Ansibleインターフェース情報
         $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1203042"));//エクセル・ヘッダでの説明
         $c->setValidator($objVldt);
         $c->setRequired(false);//必須チャックはDB登録前処理で実施
+        $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+        $objOT->setFirstSearchValueOwnerColumnID('ANSTWR_HOST_ID');
+        $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'D_ANS_TWR_HOST_JNL',
+            'TTT_SEARCH_KEY_COLUMN_ID'=>'ANSTWR_HOST_ID',
+            'TTT_GET_TARGET_COLUMN_ID'=>'ANSTWR_HOSTNAME',
+            'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+            'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+            'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+            )
+        );
+        $objOT->setTraceQuery($aryTraceQuery);
+        $c->setOutputType('print_journal_table',$objOT);
 	$tcg -> addColumn($c);
         //代表ホスト名----
 
@@ -172,6 +198,18 @@ Ansibleインターフェース情報
 	$c = new IDColumn('ANSTWR_ORGANIZATION',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000002"),'B_ANS_TWR_ORGANIZATION','ORGANIZATION_NAME','ORGANIZATION_NAME','');
 	$c -> setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000003")); // エクセル・ヘッダでの説明
         $c -> setRequired(false); //必須チャックはDB登録前処理で実施
+        $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+        $objOT->setFirstSearchValueOwnerColumnID('ANSTWR_ORGANIZATION');
+        $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_ANS_TWR_ORGANIZATION_JNL',
+            'TTT_SEARCH_KEY_COLUMN_ID'=>'ORGANIZATION_NAME',
+            'TTT_GET_TARGET_COLUMN_ID'=>'ORGANIZATION_NAME',
+            'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+            'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+            'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+            )
+        );
+        $objOT->setTraceQuery($aryTraceQuery);
+        $c->setOutputType('print_journal_table',$objOT);
 	$tcg->addColumn($c);
         //組織----
 
@@ -190,13 +228,100 @@ Ansibleインターフェース情報
 	$c = new IDColumn('ANSTWR_DEL_RUNTIME_DATA',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-907390509"),'B_ANS_TWER_RUNDATA_DEL_FLAG','FLAG_ID','FLAG_NAME','');
 	$c -> setDescription($g['objMTS']->getSomeMessage('ITAANSIBLEH-MNU-907350509'));//エクセル・ヘッダでの説明
         $c -> setRequired(false);
+        $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+        $objOT->setFirstSearchValueOwnerColumnID('ANSTWR_DEL_RUNTIME_DATA');
+        $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_ANS_TWER_RUNDATA_DEL_FLAG_JNL',
+            'TTT_SEARCH_KEY_COLUMN_ID'=>'FLAG_ID',
+            'TTT_GET_TARGET_COLUMN_ID'=>'FLAG_NAME',
+            'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+            'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+            'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+            )
+        );
+        $objOT->setTraceQuery($aryTraceQuery);
+        $c->setOutputType('print_journal_table',$objOT);
 	$tcg -> addColumn($c);
 	//実行時データ削除----
 
-
-
     $table -> addColumn($tcg);
     //Ansible Tower情報----
+
+   $cg = new ColumnGroup($g['objMTS']->getSomeMessage('ITAANSIBLEH-MNU-9010000021'));
+        //************************************************************************************
+        //----Proxyアドレス
+        //************************************************************************************
+        $c = new TextColumn('ANSIBLE_PROXY_ADDRESS', $g['objMTS']->getSomeMessage('ITAANSIBLEH-MNU-9010000022'));
+        $c->setDescription($g['objMTS']->getSomeMessage('ITAANSIBLEH-MNU-9010000023'));//エクセル・ヘッダでの説明
+        $c->setHiddenMainTableColumn(true);
+        $c->setValidator(new SingleTextValidator(0,128,false));
+        $cg->addColumn($c);
+
+        //************************************************************************************
+        //----Proxyポート
+        //************************************************************************************
+        $c = new NumColumn('ANSIBLE_PROXY_PORT', $g['objMTS']->getSomeMessage('ITAANSIBLEH-MNU-9010000024'));
+        $c->setDescription($g['objMTS']->getSomeMessage('ITAANSIBLEH-MNU-9010000025'));//エクセル・ヘッダでの説明
+        $c->setHiddenMainTableColumn(true);
+        $c->setSubtotalFlag(false);
+        $c->setValidator(new IntNumValidator(1,65535));
+        $cg->addColumn($c);
+    $table->addColumn($cg);
+
+    //--------------------------------------------------------------
+    //-- SCM管理　Git接続情報
+    //--------------------------------------------------------------
+    $cggit  = new ColumnGroup($g['objMTS']->getSomeMessage('ITAANSIBLEH-MNU-1200010000'));
+
+        //--------------------------------------------------------------
+        //-- ansibleバックヤード ホスト名・IP
+        //--------------------------------------------------------------
+        $objVldt = new SingleTextValidator(0,128,false);
+        $c = new TextColumn('ANS_GIT_HOSTNAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1200010100"));
+        $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1200010101"));
+        $c->setValidator($objVldt);
+        $c->setHiddenMainTableColumn(true);
+        $cggit->addColumn($c);
+
+        //--------------------------------------------------------------
+        //-- Linux アカウント
+        //--------------------------------------------------------------
+        $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1200010200"));
+    
+            //--------------------------------------------------------------
+            //-- Git ユーザー  必須入力:false 
+            //--------------------------------------------------------------
+            $objVldt = new SingleTextValidator(0,128,false);
+            $c = new TextColumn('ANS_GIT_USER',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1200010300"));
+            $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1200010301"));
+            $c->setValidator($objVldt);
+            $c->setHiddenMainTableColumn(true);
+            $cg->addColumn($c);
+    
+            //--------------------------------------------------------------
+            //-- 秘密鍵ファイル
+            //--------------------------------------------------------------
+            $c = new FileUploadColumn('ANS_GIT_SSH_KEY_FILE',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1200010400"));
+            $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1200010401"));
+            $c->setMaxFileSize(4*1024*1024*1024);//単位はバイト
+            $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
+            $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
+            $c->setFileHideMode(true);
+            // ANS_GIT_SSH_KEY_FILEをアップロード時に「ky__encrypt」で暗号化する設定
+            $c->setFileEncryptFunctionName("ky_file_encrypt");
+            $cg->addColumn($c);
+
+            //--------------------------------------------------------------
+            //-- 秘密鍵ファイル パスフレーズ
+            //--------------------------------------------------------------
+            $objVldt = new SingleTextValidator(0,256,false);
+            $c = new PasswordColumn('ANS_GIT_SSH_KEY_FILE_PASSPHRASE',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1200010500"));
+            $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1200010501"));
+            $c->setEncodeFunctionName("ky_encrypt");
+            $cg->addColumn($c);
+
+        $cggit->addColumn($cg);
+
+    $table->addColumn($cggit);
 
     //--------------------------------------------------------------
     //----データリレイストレージパス(ITA)
@@ -259,6 +384,18 @@ Ansibleインターフェース情報
     $c = new IDColumn('NULL_DATA_HANDLING_FLG',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-6000000"),'B_VALID_INVALID_MASTER','FLAG_ID','FLAG_NAME','', array('OrderByThirdColumn'=>'FLAG_ID'));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-6000002"));
     $c->setRequired(true);
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('NULL_DATA_HANDLING_FLG');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_VALID_INVALID_MASTER_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'FLAG_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'FLAG_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
     //パラメータシートの具体値がNULLでも代入値管理に登録するかのフラグ----
 
@@ -322,7 +459,7 @@ Ansibleインターフェース情報
 
         if($strModeId == "DTUP_singleRecDelete"){
             //----更新前のレコードから、各カラムの値を取得
-            $strMode        = isset($arrayVariant['edit_target_row']['ANSIBLE_EXEC_MODE'])?
+            $strExecMode    = isset($arrayVariant['edit_target_row']['ANSIBLE_EXEC_MODE'])?
                                     $arrayVariant['edit_target_row']['ANSIBLE_EXEC_MODE']:null;
             $strTwrHostID   = isset($arrayVariant['edit_target_row']['ANSTWR_HOST_ID'])?
                                     $arrayVariant['edit_target_row']['ANSTWR_HOST_ID']:null;
@@ -338,7 +475,7 @@ Ansibleインターフェース情報
             $PkeyID = $strNumberForRI;
             //更新前のレコードから、各カラムの値を取得----
         }else if( $strModeId == "DTUP_singleRecUpdate" || $strModeId == "DTUP_singleRecRegister" ){
-            $strMode        = array_key_exists('ANSIBLE_EXEC_MODE',$arrayRegData)?
+            $strExecMode    = array_key_exists('ANSIBLE_EXEC_MODE',$arrayRegData)?
                                  $arrayRegData['ANSIBLE_EXEC_MODE']:null;
             $strTwrHostID   = array_key_exists('ANSTWR_HOST_ID',$arrayRegData)?
                                  $arrayRegData['ANSTWR_HOST_ID']:null;
@@ -370,7 +507,7 @@ Ansibleインターフェース情報
             $ary[] = array("VALUE"=>$strOrgName,    "MSG_CODE"=>"ITAANSIBLEH-MNU-9010000002");
             $ary[] = array("VALUE"=>$strToken,      "MSG_CODE"=>"ITAANSIBLEH-MNU-9010000000");
             // 実行エンジンがTowerの場合の、Ansible Towerインターフェースの必須入力チェック
-            if($strMode == DF_EXEC_MODE_TOWER) {
+            if($strExecMode != DF_EXEC_MODE_ANSIBLE) {
                 foreach($ary as $values) {
                     if(trim(strlen($values['VALUE'])) == 0) {
                         $msg1 = $g['objMTS']->getSomeMessage($values['MSG_CODE']);
@@ -386,8 +523,62 @@ Ansibleインターフェース情報
         }
         if($retBool===false){
             $objClientValidator->setValidRule($retStrBody);
+            return $retBool;
         }
-        return $retBool;
+
+        // SCM管理 git接続情報入力確認
+        require_once ($root_dir_path . '/libs/commonlibs/common_required_check.php' );
+
+        // 必須入力設定
+        $chkObj  = new TowerHostListGitInterfaceParameterCheck();
+        $RequiredCloumnName = 'Required';
+        $ColumnArray = array();
+        $ColumnArray['ANS_GIT_HOSTNAME'][$RequiredCloumnName]                = true;
+        $ColumnArray['ANS_GIT_USER'][$RequiredCloumnName]                    = true;
+        $ColumnArray['ANS_GIT_SSH_KEY_FILE'][$RequiredCloumnName]            = true;
+        $ColumnArray['ANS_GIT_SSH_KEY_FILE_PASSPHRASE'][$RequiredCloumnName] = false;
+        // 削除チェックボタン設定
+        $DelFlagCloumnName = 'del_flag_cloumn';
+        $ColumnArray['ANS_GIT_HOSTNAME'][$DelFlagCloumnName]                 = "";
+        $ColumnArray['ANS_GIT_USER'][$DelFlagCloumnName]                     = "";
+        $ColumnArray['ANS_GIT_SSH_KEY_FILE'][$DelFlagCloumnName]             = "del_flag_COL_IDSOP_27";
+        $ColumnArray['ANS_GIT_SSH_KEY_FILE_PASSPHRASE'][$DelFlagCloumnName]  = "del_password_flag_COL_IDSOP_28";
+
+        // エラーメッセージに表示するカラム名設定
+        $MyNameCloumnName = 'CloumnName';
+        $errormsg    = sprintf("%s/%s",   $g['objMTS']->getSomeMessage('ITAANSIBLEH-MNU-1200010000'),
+                                          $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1200010100"));
+        $ColumnArray['ANS_GIT_HOSTNAME'][$MyNameCloumnName]         = sprintf("%s",$g['objMTS']->getSomeMessage('ITAANSIBLEH-ERR-2000',array($errormsg)));
+        $errormsg    = sprintf("%s/%s/%s",$g['objMTS']->getSomeMessage('ITAANSIBLEH-MNU-1200010000'),
+                                          $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1200010200"),
+                                          $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1200010300"));
+        $ColumnArray['ANS_GIT_USER'][$MyNameCloumnName]             = sprintf("%s",$g['objMTS']->getSomeMessage('ITAANSIBLEH-ERR-2000',array($errormsg)));
+        $errormsg    = sprintf("%s/%s/%s",$g['objMTS']->getSomeMessage('ITAANSIBLEH-MNU-1200010000'),
+                                          $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1200010200"),
+                                          $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1200010400"));
+        $ColumnArray['ANS_GIT_SSH_KEY_FILE'][$MyNameCloumnName]     = sprintf("%s",$g['objMTS']->getSomeMessage('ITAANSIBLEH-ERR-2000',array($errormsg)));
+        $errormsg    = sprintf("%s/%s/%s",$g['objMTS']->getSomeMessage('ITAANSIBLEH-MNU-1200010000'),
+                                          $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1200010200"),
+                                          $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1200010500"));
+        $ColumnArray['ANS_GIT_SSH_KEY_FILE_PASSPHRASE'][$MyNameCloumnName]  = sprintf("%s",$g['objMTS']->getSomeMessage('ITAANSIBLEH-ERR-2000',array($errormsg)));
+        $ColumnValueArray = array();
+        foreach($ColumnArray as $ColumnName=>$Type) {
+            // $arrayRegDataはUI入力ベースの情報
+            // $arrayVariant['edit_target_row']はDBに登録済みの情報
+            $ValueColumnName = 'Value';
+            $ColumnArray[$ColumnName][$ValueColumnName] = $chkObj->getColumnDataFunction($strModeId, $ColumnName, $Type, $DelFlagCloumnName, $arrayVariant, $arrayRegData);
+        }
+     
+        $retBool = $chkObj->ParameterCheck($strExecMode, $ColumnArray, $ValueColumnName, $MyNameCloumnName, $RequiredCloumnName);
+        if($retBool !== true) {
+            $retStrBody = $retBool;
+            $retBool    = false;
+            $objClientValidator->setValidRule($retStrBody);
+            return $retBool;
+        } else {
+            $retBool    = true;
+            return $retBool;
+        }
     };
 
     $objVarVali = new VariableValidator();
@@ -419,6 +610,13 @@ Ansibleインターフェース情報
     $tmpAryColumn['DISUSE_FLAG']->getOutputType('print_journal_table')->setVisible(false);
     $tmpAryColumn['DISUSE_FLAG']->getOutputType('excel')->setVisible(false);
     $tmpAryColumn['DISUSE_FLAG']->getOutputType('json')->setVisible(false);
+
+    // 複製ボタン
+    $tmpAryColumn['WEB_BUTTON_DUPLICATE']->getOutputType('filter_table')->setVisible(false);
+    $tmpAryColumn['WEB_BUTTON_DUPLICATE']->getOutputType('print_table')->setVisible(false);
+    $tmpAryColumn['WEB_BUTTON_DUPLICATE']->getOutputType('print_journal_table')->setVisible(false);
+    $tmpAryColumn['WEB_BUTTON_DUPLICATE']->getOutputType('excel')->setVisible(false);
+    $tmpAryColumn['WEB_BUTTON_DUPLICATE']->getOutputType('json')->setVisible(false);
 
     return $table;
 };

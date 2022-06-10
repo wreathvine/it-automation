@@ -37,7 +37,8 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         'TT_SYS_06_LUP_USER_ID'=>'LAST_UPDATE_USER',
         'TT_SYS_NDB_ROW_EDIT_BY_FILE_ID'=>'ROW_EDIT_BY_FILE',
         'TT_SYS_NDB_UPDATE_ID'=>'WEB_BUTTON_UPDATE',
-        'TT_SYS_NDB_LUP_TIME_ID'=>'UPD_UPDATE_TIMESTAMP'
+        'TT_SYS_NDB_LUP_TIME_ID'=>'UPD_UPDATE_TIMESTAMP',
+        'TT_SYS_08_DUPLICATE_ID'=>'WEB_BUTTON_DUPLICATE'
     );
 
     $table = new TableControlAgent('C_COLLECT_IF_INFO','COLLECT_IF_INFO_ID', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1207201"), 'C_COLLECT_IF_INFO_JNL', $tmpAry);
@@ -52,6 +53,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1207203"));
 
     $table->setAccessAuth(true);    // データごとのRBAC設定
+    $table->setNoRegisterFlg(true);      // 登録画面無し
 
 
     //ホスト名
@@ -93,6 +95,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c = new IDColumn('HOST_DESIGNATE_TYPE_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1207212"),'    B_HOST_DESIGNATE_TYPE_LIST','HOST_DESIGNATE_TYPE_ID','HOST_DESIGNATE_TYPE_NAME','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1207213"));//エクセル・ヘッダでの説明
     $c->setRequired(true);
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('HOST_DESIGNATE_TYPE_ID');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_HOST_DESIGNATE_TYPE_LIST_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'HOST_DESIGNATE_TYPE_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'HOST_DESIGNATE_TYPE_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     //プロトコル
@@ -136,6 +150,13 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $tmpAryColumn['DISUSE_FLAG']->getOutputType('print_journal_table')->setVisible(false);
     $tmpAryColumn['DISUSE_FLAG']->getOutputType('excel')->setVisible(false);
     $tmpAryColumn['DISUSE_FLAG']->getOutputType('json')->setVisible(false);
+
+    // 複製ボタン
+    $tmpAryColumn['WEB_BUTTON_DUPLICATE']->getOutputType('filter_table')->setVisible(false);
+    $tmpAryColumn['WEB_BUTTON_DUPLICATE']->getOutputType('print_table')->setVisible(false);
+    $tmpAryColumn['WEB_BUTTON_DUPLICATE']->getOutputType('print_journal_table')->setVisible(false);
+    $tmpAryColumn['WEB_BUTTON_DUPLICATE']->getOutputType('excel')->setVisible(false);
+    $tmpAryColumn['WEB_BUTTON_DUPLICATE']->getOutputType('json')->setVisible(false);
 
     return $table;
 };

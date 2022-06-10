@@ -30,6 +30,7 @@
 ##       log_file_dir:       プライベートログ出力先ディレトクリ
 ##       ssh_key_file:       SSH秘密鍵ファイル
 ##       extra_args:         ssh/telnet接続時の追加パラメータ
+##       lang:               文字コード
 ##      <<返却値>>
 ##       なし
 ##
@@ -73,7 +74,11 @@ option:
     required: true
     description:
       - private log path
-author: Hiroyuki Seike
+  lang:
+    required: true
+    description:
+      - target host lang 
+author: exastro
 '''
 
 import yaml
@@ -137,6 +142,7 @@ def main():
       log_file_dir=dict(required=True),
       ssh_key_file=dict(required=True),
       extra_args=dict(required=True),
+      lang=dict(required=True),
     ),
 #  ドライランモード許可設定
     supports_check_mode=True
@@ -148,18 +154,25 @@ def main():
   host_vars_file = module.params['host_vars_file']
   shell_name = module.params['grep_shell_dir']
   shell_name = shell_name + '/ky_pionner_grep_side_Ansible.sh'
-  log_file_name = module.params['log_file_dir'] + '/private.log'
+  log_file_name = module.params['log_file_dir'] + '/' + host_name + '_private.log'
   ssh_key_file   = module.params['ssh_key_file']
   extra_args = module.params['extra_args']
+  lang       = module.params['lang']
   if not module.params['exec_file']:
     #########################################################
     # normal exit
     #########################################################
     private_fail_json(obj=module,msg='exec_file no found fail exit')
 
+  # PyYAMLのバージョン取得
+  yaml_var = str(yaml.__version__).split('.')[0]
   # 対話ファイルを読み込む
   try:
-    config = yaml.load(open(module.params['exec_file']).read())
+    if yaml_var >= str(5):
+      config = yaml.load(open(module.params['exec_file']).read(), Loader=yaml.FullLoader)
+    else:
+      config = yaml.load(open(module.params['exec_file']).read())
+  
   # パーサーの例外をキャッチするようにする
   except Exception as e:
     msg = "dialog file yaml load failure."
@@ -178,7 +191,10 @@ def main():
   with_tmp = with_tmp.replace("/dialog_files/", "/original_dialog_files/")
 
   try:
-    with_file = yaml.load(open(with_tmp).read())
+    if yaml_var >= str(5):
+      with_file = yaml.load(open(with_tmp).read(), Loader=yaml.FullLoader)
+    else:
+      with_file = yaml.load(open(with_tmp).read())
   # パーサーの例外をキャッチするようにする
   except Exception as e:
     msg = "Original dialog file yaml load failure."
@@ -193,7 +209,10 @@ def main():
 
   # ホスト変数ファイルにyaml文法エラーがない事を確認する。
   try:
-    with_def = yaml.load(open(module.params['host_vars_file']).read())
+    if yaml_var >= str(5):
+      with_def = yaml.load(open(module.params['host_vars_file']).read(), Loader=yaml.FullLoader)
+    else:
+      with_def = yaml.load(open(module.params['host_vars_file']).read())
   # パーサーの例外をキャッチするようにする
   except Exception as e:
     msg = "Host variable file yaml load failure."
@@ -263,9 +282,10 @@ def main():
     private_log_output(log_file_name,host_name,exec_name)
     exec_log_output(exec_name)
 
-    # python2ではencodingは機能しない
-    #p = pexpect.spawn(exec_cmd,  encoding='utf-8',codec_errors='replace')
-    p = pexpect.spawn(exec_cmd)
+    loger = str(os.environ)
+    exec_log_output(exec_name)
+
+    p = pexpect.spawn(exec_cmd,  encoding=lang ,codec_errors='replace')
 
     # ドライランモードを退避しタイムアウト値を5秒にする。
     if module.check_mode:
@@ -279,7 +299,10 @@ def main():
     vault_vars_file = vault_vars_file.replace("/original_host_vars/", "/vault_host_vars/")
     # パーサーの例外をキャッチするようにする
     try:
-      vault_vars_def = yaml.load(open(vault_vars_file).read())
+      if yaml_var >= str(5):
+        vault_vars_def = yaml.load(open(vault_vars_file).read(), Loader=yaml.FullLoader)
+      else:
+        vault_vars_def = yaml.load(open(vault_vars_file).read())
     except Exception as e:
       msg = "Cryptographic variable file yaml load failure."
       private_log_output(log_file_name,host_name,msg)
@@ -405,7 +428,7 @@ def main():
               private_fail_json(obj=module,msg=host_name + ':' + logstr,exec_log=exec_log)
 
         # localaction実行
-        exec_localaction(module,p,log_file_name,host_name,exec_cmd,ignore_errors)
+        exec_localaction(module,log_file_name,host_name,exec_cmd,ignore_errors)
 
       # state command ?
       elif 'state' in input:
@@ -629,7 +652,11 @@ def main():
             with_tmp = with_tmp.replace("/dialog_files/", "/original_dialog_files/")
 
             try:
-              with_file = yaml.load(open(with_tmp).read())
+              if yaml_var >= str(5):
+                with_file = yaml.load(open(with_tmp).read(), Loader=yaml.FullLoader)
+              else:
+                with_file = yaml.load(open(with_tmp).read())
+
             # パーサーの例外をキャッチするようにする
             except Exception as e:
               msg = "Original dialog file yaml load failure."
@@ -644,7 +671,10 @@ def main():
 
             # ホスト変数ファイルを読み込む
             try:
-              with_def = yaml.load(open(module.params['host_vars_file']).read())
+              if yaml_var >= str(5):
+                with_def = yaml.load(open(module.params['host_vars_file']).read(), Loader=yaml.FullLoader)
+              else:
+                with_def = yaml.load(open(module.params['host_vars_file']).read())
             # パーサーの例外をキャッチするようにする
             except Exception as e:
               msg = "Host variable file yaml load failure."
@@ -2862,6 +2892,9 @@ def main():
   except pexpect.TIMEOUT:
     exec_log_output('except command timeout')
     private_log_output(log_file_name,host_name,'except command timeout')
+    loger = 'buffer:[' + unicode2encode(p.before) + ']'
+    exec_log_output(loger)
+    private_log_output(log_file_name,host_name,loger)
     #########################################################
     # fail exit
     #########################################################
@@ -4392,7 +4425,7 @@ def exec_command(p,log_file_name,host_name,cmd):
 
   private_log_output(log_file_name,host_name,"Ok")
 
-def exec_localaction(module,p,log_file_name,host_name,cmd,ignore_errors):
+def exec_localaction(module,log_file_name,host_name,cmd,ignore_errors):
   global localaction_log_str
   global exec_log
   global vault_vars_def

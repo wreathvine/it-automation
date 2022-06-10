@@ -124,6 +124,28 @@ class ListFormatter {
         return $strFileName;
     }
 
+    function makeLocalFileNameHistory($strFilePostFix, $intUnixTime){
+        global $g;
+        //----設定がミスしていた場合は[null]を返す
+        $strTempName = $this->objTable->getDBMainTableLabel();
+        if( $this->checkForbiddenPattern($strTempName)===false ){
+            web_log($g['objMTS']->getSomeMessage("ITAWDCH-ERR-21004"));
+            $strFileName = null;
+        }
+        else{
+            // 128文字に短縮する
+            $strFileHead = mb_substr($strTempName, 0, 128, "UTF-8");
+
+            if($intUnixTime === null){
+                $strFileName = $strFileHead.$g['objMTS']->getSomeMessage("ITAWDCH-STD-30071")."_".$strFilePostFix;
+            }
+            else{
+                $strFileName = $strFileHead."_".$g['objMTS']->getSomeMessage("ITAWDCH-STD-30071")."_".date("YmdHis",$intUnixTime).$strFilePostFix;
+            }
+        }
+        return $strFileName;
+    }
+
 }
 
 class QMFileSendAreaFormatter extends ListFormatter {
@@ -161,7 +183,7 @@ class CSVFormatter extends ListFormatter {
         return $boolRet;
     }
 
-    function fileStreamAdd($strStream,$refIntRet=null){
+    function fileStreamAdd($strStream){
         $boolRet = false;
         if( $this->handleTmpFile !== null ){
             $tmpRet = @fwrite($this->handleTmpFile, $strStream);
@@ -169,7 +191,6 @@ class CSVFormatter extends ListFormatter {
                 $boolRet = false;
             }else{
                 $boolRet = true;
-                $refIntRet = $tmpRet;
             }
         }
         return $boolRet;
@@ -180,7 +201,7 @@ class CSVFormatter extends ListFormatter {
         return $tmpRet;
     }
 
-    function format($tableTagId = null){
+    function format($tableTagId = null, $historyCsvFlg = null){
         //----クラス(Table)のメソッド(getPrintFormat)から呼ばれる。
 
         $aryObjColumn = $this->objTable->getColumns();
@@ -208,6 +229,8 @@ class CSVFormatter extends ListFormatter {
 
         $objREBFColumn = $aryObjColumn[$lcRequiredRowEditByFileColumnId];
 
+        $passwordMaskStr = "********";
+
         if( $strOutputFileType == "SafeCSV" ){
             //----SafeCSVモード出力の場合
 
@@ -219,7 +242,10 @@ class CSVFormatter extends ListFormatter {
                 $arrayMasterData=$this->getRowArrayFromIdColumns();
                 for($dlcFnv1=0;$dlcFnv1<count($arrayMasterData);$dlcFnv1++){
                     $arrayMasterRows=$arrayMasterData[$dlcFnv1];
-                    $strHdd.=$objSCSVAdmin->makeSafeCSVRecordRowFromRowArray($arrayMasterRows,array("\r","\n",",","SAFECSV"),array("%R","%L","%C","%escTag"));
+                    // 変更履歴の場合、実行処理種別出力しない
+                    if($historyCsvFlg != 1 || ($arrayMasterRows[0] != "実行処理種別" && $arrayMasterRows[0] != "Execution process type")){
+                        $strHdd.=$objSCSVAdmin->makeSafeCSVRecordRowFromRowArray($arrayMasterRows,array("\r","\n",",","SAFECSV"),array("%R","%L","%C","%escTag"));
+                    }
                 }
                 $strHdd.="</SAFECSV>\r\n"; 
 
@@ -248,7 +274,10 @@ class CSVFormatter extends ListFormatter {
                         }else{
                             $objColumn->getOutputType($this->strFormatterId)->getHead()->setOutputPrintType("noWrapLabel", $strColSepa);
                         }
-                        $arrayColumn[]=$objColumn->getOutputHeader($this->strFormatterId);
+                        // 変更履歴の場合、実行処理種別・更新用の最終更新日時を出力しない
+                        if( $historyCsvFlg != 1 || ($objColumn->getID() != $lcRequiredUpdateDate4UColumnId && $objColumn->getID() != $lcRequiredRowEditByFileColumnId) ){
+                            $arrayColumn[]=$objColumn->getOutputHeader($this->strFormatterId);
+                        }
 
                         $objColumn->getOutputType($this->strFormatterId)->getBody()->setOutputPrintType("noWrapData", $strColSepa);
                         //Class(CSVHFmt系)----
@@ -271,7 +300,19 @@ class CSVFormatter extends ListFormatter {
                                 }
                             }
                             //----Class(CSVBFmt系)
-                            $arrayFocusRow[] = $objColumn->getOutputBody($this->strFormatterId,$objRow->getRowData());
+                            if( $historyCsvFlg != 1 || ($objColumn->getID() != $lcRequiredUpdateDate4UColumnId && $objColumn->getID() != $lcRequiredRowEditByFileColumnId) ){
+                                //IDColumn系かつprint_tableに表示する文字列が『********』なら値を空に上書き。（メニュー作成の「参照項目」機能で、参照元がPasswordColumnだった場合を想定。）
+                                $printStaticText = "";
+                                if(is_a($objColumn, "IDColumn") === true && method_exists($objColumn->getOutputType('print_table')->getBody(), 'getText')){
+                                    $printStaticText = $objColumn->getOutputType('print_table')->getBody()->getText();
+                                }
+
+                                if( is_a($objColumn, "IDColumn") === true && $printStaticText == $passwordMaskStr){
+                                    $arrayFocusRow[] = "";
+                                }else{
+                                    $arrayFocusRow[] = $objColumn->getOutputBody($this->strFormatterId,$objRow->getRowData());
+                                }
+                            }
                             //Class(CSVBFmt系)----
                         }
                     }
@@ -520,6 +561,8 @@ class CSVFormatter extends ListFormatter {
 
         $strHeaderType = $this->getGeneValue("csvHeaderType");
 
+        $passwordMaskStr = "********";
+
         if($boolUPDColHide !== true){
             $intIDColumnLen += 1;
 
@@ -540,7 +583,13 @@ class CSVFormatter extends ListFormatter {
         }
         foreach($aryObjColumn as $objColumn){
             if( $objColumn->getOutputType($this->strFormatterId)->isVisible() === true ){
-                if(is_a($objColumn, "IDColumn") === true ){
+                //IDColumn系かつprint_tableに表示する文字列が『********』ならIDColumn用の処理をスキップ。（メニュー作成の「参照項目」機能で、参照元がPasswordColumnだった場合を想定。）
+                $printStaticText = "";
+                if(is_a($objColumn, "IDColumn") === true && method_exists($objColumn->getOutputType('print_table')->getBody(), 'getText')){
+                    $printStaticText = $objColumn->getOutputType('print_table')->getBody()->getText();
+                }
+
+                if(is_a($objColumn, "IDColumn") === true && $printStaticText != $passwordMaskStr){
 
                     $intIDColumnLen += 1;
 
@@ -595,6 +644,34 @@ class CSVFormatter extends ListFormatter {
                 $objQuery =& $retArray[1];
                 $chkobj = null;
                 while ( $row = $objQuery->resultFetch() ){
+                    // ----dispRestrictValue対応
+                    $aryDispRestrictValue = $objTable->getDispRestrictValue();
+                    if($aryDispRestrictValue != null){
+                        $matchFlg = false;
+                        foreach($aryDispRestrictValue as $columnName => $aryValue){
+                            if(array_key_exists($columnName, $row)){
+                                foreach($aryValue as $value){
+                                    //対象のカラムのデータと$aryValueに格納された値が一致した場合は処理を続行
+                                    if($value == "" || $value == null || $value == "null" || $value == "NULL"){
+                                        if($row[$columnName] == "" || $row[$columnName] == null || $row[$columnName] == "null" || $row[$columnName] == "NULL"){
+                                            $matchFlg = true;
+                                        }
+                                    }else{
+                                        if($row[$columnName] == $value){
+                                            $matchFlg = true;
+                                        }
+                                    }
+                                }
+
+                                //一致する値が無い場合は、処理をスキップ
+                                if($matchFlg == false){
+                                    continue 2;
+                                }
+                            }
+                        }
+                    }
+                    // dispRestrictValue対応----
+
                     // ---- 判定対象レコードのACCESS_AUTHカラムでアクセス権を判定
                     list($ret,$permission) = chkTargetRecodePermission($objTable->getAccessAuth(),$chkobj,$row);
                     if($ret === false) {
@@ -604,6 +681,31 @@ class CSVFormatter extends ListFormatter {
                     if($permission === false) {
                         continue;
                     }
+
+                    if($objTable->getAccessAuth() === true) {
+                        $AccessAuthColumnName = $objTable->getAccessAuthColumnName();
+                        if(array_key_exists($AccessAuthColumnName,$row)) {
+                            $RoleIDString   = $row[$AccessAuthColumnName];
+                            $RoleNameString = "";
+                            if(strlen($RoleIDString) != 0) {
+                                // ロールID文字列のアクセス権をロール名称の文字列に変換
+                                // 廃止されているロールはID変換失敗で表示
+                                $obj = new RoleBasedAccessControl($g['objDBCA']);
+                                $RoleNameString = $obj->getRoleIDStringToRoleNameString($g['login_id'],$RoleIDString,true);  // 廃止を含む
+                                unset($obj);
+                            }
+                            if($RoleNameString === false) {
+                                $message = sprintf("[%s:%s]getRoleIDStringToRoleNameString Failed.",basename(__FILE__),__LINE__);
+                                web_log($message);
+                                $intErrorType = 500;
+                                throw new Exception( '00000700-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                            }
+                            // 登録するアクセス権をロール名称の文字列に設定
+                            $row[$AccessAuthColumnName] = $RoleNameString;
+                        } else {
+                        }
+                    }
+
                     $intFetchCount += 1;
                     $objTable->addData($row, false);
                     if( ($intFetchCount % 10000) === 0){
@@ -657,6 +759,178 @@ class CSVFormatter extends ListFormatter {
         dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
         return $retArray;
     }
+
+
+
+function writeToFileHistory($sql, $arrayFileterBody, $objTable, $objFunction01ForOverride, $strFormatterId, $filterData, $aryVariant, &$arySetting, $sqllatest){
+    global $g;
+    $intControlDebugLevel01=250;
+
+    $intRowLength = null;
+    $intErrorType = null;
+    $aryErrMsgBody = array();
+    $strErrMsg = "";
+    $datalatest = array();
+    //----データタイプを判別する
+    // latest / history のみの想定
+    // history は $strOutputFileType が csv or excel の場合のみ独自処理が存在
+    // 値が存在しない場合は latest とする
+    list($strOutputDataType,$boolKeyExists) = isSetInArrayNestThenAssign($_POST,array('datatype'),"latest");
+    switch ($strOutputDataType) {
+        case 'history':
+            break;
+        default:
+            // 規定値以外は latest とする
+            $strOutputDataType = "latest";
+            break;
+    }
+    //データタイプを判別する----
+
+    $strFxName = __CLASS__."::".__FUNCTION__;
+    dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-3",array(__FILE__,$strFxName)),$intControlDebugLevel01);
+
+    try{
+        if( is_callable($objFunction01ForOverride) !== true ){
+            //----標準writeToFile句
+
+            $this->setGeneValue("csvFieldRowAdd",false);
+            $this->setGeneValue("csvRecordShowAdd",true);
+
+            $intFetchCount = 0;
+
+            $retArray = singleSQLExecuteAgent($sqllatest, $arrayFileterBody, $strFxName);
+            if( $retArray[0] !== true ){
+                $intErrorType = 501;
+                throw new Exception( '00000100-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
+            }
+
+            $objQuery =& $retArray[1];
+            $chkobj = null;
+            while ( $row = $objQuery->resultFetch() ){
+                // ---- 判定対象レコードのACCESS_AUTHカラムでアクセス権を判定
+                list($ret,$permission) = chkTargetRecodePermission($objTable->getAccessAuth(),$chkobj,$row);
+                if($ret === false) {
+                    $intErrorType = 501;
+                    throw new Exception( '00000101-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
+                }
+                if($permission === false) {
+                    continue;
+                }
+                $datalatest[] = $row[$objTable->getRIColumnID()];
+            }
+
+
+            $retArray = singleSQLExecuteAgent($sql, $arrayFileterBody, $strFxName);
+            if( $retArray[0] !== true ){
+                $intErrorType = 501;
+                throw new Exception( '00000100-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
+            }
+
+            // ---- RBAC対応
+            $objQuery =& $retArray[1];
+            $chkobj = null;
+            while ( $row = $objQuery->resultFetch() ){
+                // ----dispRestrictValue対応
+                $aryDispRestrictValue = $objTable->getDispRestrictValue();
+                if($aryDispRestrictValue != null){
+                    $matchFlg = false;
+                    foreach($aryDispRestrictValue as $columnName => $aryValue){
+                        if(array_key_exists($columnName, $row)){
+                            foreach($aryValue as $value){
+                                //対象のカラムのデータと$aryValueに格納された値が一致した場合は処理を続行
+                                if($value == "" || $value == null || $value == "null" || $value == "NULL"){
+                                    if($row[$columnName] == "" || $row[$columnName] == null || $row[$columnName] == "null" || $row[$columnName] == "NULL"){
+                                        $matchFlg = true;
+                                    }
+                                }else{
+                                    if($row[$columnName] == $value){
+                                        $matchFlg = true;
+                                    }
+                                }
+                            }
+
+                            //一致する値が無い場合は、処理をスキップ
+                            if($matchFlg == false){
+                                continue 2;
+                            }
+                        }
+                    }
+                }
+                // dispRestrictValue対応----
+
+                // ---- 判定対象レコードのACCESS_AUTHカラムでアクセス権を判定
+                list($ret,$permission) = chkTargetRecodePermission($objTable->getAccessAuth(),$chkobj,$row);
+                if($ret === false) {
+                    $intErrorType = 501;
+                    throw new Exception( '00000101-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
+                }
+                if($permission === false || !in_array($row[$objTable->getRIColumnID()], $datalatest)) {
+                    continue;
+                }
+                $intFetchCount += 1;
+                $objTable->addData($row, false);
+
+                if( ($intFetchCount % 10000) === 0){
+                    //----10000行ずつファイルへ書き込み
+                    if($strOutputDataType === "history"){
+                        $boolRet = $this->fileStreamAdd($objTable->getPrintFormat($strFormatterId, null, null, 1));
+                    }else{
+                        $boolRet = $this->fileStreamAdd($objTable->getPrintFormat($strFormatterId));
+                    }
+                    if( $boolRet !== true ){
+                        $intErrorType = 501;
+                        throw new Exception( '00000200-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
+                    }
+                    //----メモリを確保するためにデータを解放
+                    $objTable->setData(array());
+                    //メモリを確保するためにデータを解放---- 
+                    //10000行ずつファイルへ書き込み----
+                }
+            }
+            // RBAC対応 ----
+
+            if( ($intFetchCount % 10000) !== 0 ){
+
+                if($strOutputDataType === "history"){
+                    $boolRet = $this->fileStreamAdd($objTable->getPrintFormat($strFormatterId, null, null, 1));
+                }else{
+                    $boolRet = $this->fileStreamAdd($objTable->getPrintFormat($strFormatterId));
+                } 
+
+                if( $boolRet !== true ){
+                    $intErrorType = 501;
+                    throw new Exception( '00000300-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
+                }
+                //----メモリを確保するためにデータを解放
+                $objTable->setData(array());
+                //メモリを確保するためにデータを解放---- 
+            }
+
+            unset($objQuery);
+            unset($retArray);
+
+            //標準writeToFile句----
+        }
+        else{
+            $tmpAryRet = $objFunction01ForOverride($objTable, $strFormatterId, $filterData, $aryVariant, $arySetting);
+            if( $tmpAryRet[1] !== null ){
+                $intErrorType = $tmpAryRet[1];
+                $aryErrMsgBody = $tmpAryRet[2];
+                throw new Exception( '00000200-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
+            }
+            $intRowLength = $tmpAryRet[0];
+            unset($tmpAryRet);
+        }
+    }
+    catch(Exception $e){
+        $tmpErrMsgBody = $e->getMessage();
+        web_log($g['objMTS']->getSomeMessage("ITAWDCH-ERR-5001",$tmpErrMsgBody));
+    }
+
+    $retArray = array($intRowLength,$intErrorType,$aryErrMsgBody,$strErrMsg);
+    dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
+    return $retArray;
+}
 
 }
 
@@ -739,6 +1013,8 @@ class JSONFormatter extends ListFormatter {
 
         $aryRowsOfDataHeader = $this->getLabelListOfOpendColumn();
 
+        $passwordMaskStr = "********";
+
         //----ここからレコード本体行を処理
         $aryRowsOfData = array();
         $aryUploadFile = array();
@@ -770,6 +1046,16 @@ class JSONFormatter extends ListFormatter {
 
                     }
                     // RBAC対応 ----
+
+                    //IDColumn系かつprint_tableに表示する文字列が『********』なら値を空に上書き。（メニュー作成の「参照項目」機能で、参照元がPasswordColumnだった場合を想定。）
+                    $printStaticText = "";
+                    if(is_a($objColumn, "IDColumn") === true && method_exists($objColumn->getOutputType('print_table')->getBody(), 'getText')){
+                        $printStaticText = $objColumn->getOutputType('print_table')->getBody()->getText();
+                    }
+
+                    if( is_a($objColumn, "IDColumn") === true && $printStaticText == $passwordMaskStr){
+                        $arrayFocusRow[$intPrinteSeq] = "";
+                    }
 
                     // アップロードファイルがある場合、中身を復号化する
                     if("FileUploadColumn" === get_class($objColumn)){
@@ -819,6 +1105,34 @@ class JSONFormatter extends ListFormatter {
                     // ---- RBAC対応
                     $chkobj = null;
                     while ( $row = $objQuery->resultFetch() ){
+                        // ----dispRestrictValue対応
+                        $aryDispRestrictValue = $objTable->getDispRestrictValue();
+                        if($aryDispRestrictValue != null){
+                            $matchFlg = false;
+                            foreach($aryDispRestrictValue as $columnName => $aryValue){
+                                if(array_key_exists($columnName, $row)){
+                                    foreach($aryValue as $value){
+                                        //対象のカラムのデータと$aryValueに格納された値が一致した場合は処理を続行
+                                        if($value == "" || $value == null || $value == "null" || $value == "NULL"){
+                                            if($row[$columnName] == "" || $row[$columnName] == null || $row[$columnName] == "null" || $row[$columnName] == "NULL"){
+                                                $matchFlg = true;
+                                            }
+                                        }else{
+                                            if($row[$columnName] == $value){
+                                                $matchFlg = true;
+                                            }
+                                        }
+                                    }
+
+                                    //一致する値が無い場合は、処理をスキップ
+                                    if($matchFlg == false){
+                                        continue 2;
+                                    }
+                                }
+                            }
+                        }
+                        // dispRestrictValue対応----
+
                         // ---- 対象レコードのACCESS_AUTHカラムでアクセス権を判定
                         list($ret,$permission) = chkTargetRecodePermission($objTable->getAccessAuth(),$chkobj,$row);
                         if($ret === false) {
@@ -931,15 +1245,16 @@ class ExcelFormatter extends ListFormatter {
         return \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($column).$row;
     }
 
+    static function cr2sDollar($column, $row){
+        $str = "$". \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($column) . "$" . $row;
+        return $str;
+    }
+
     function cashModeAdjust($intMode=0){
         global $g;
 
-        switch($intMode){
-            default:
-                $strCacheDirPath = $g['root_dir_path'] . "/temp";
-                $cashSettings = array('dir'=>$strCacheDirPath);
-                break;
-        }
+        $strCacheDirPath = $g['root_dir_path'] . "/temp";
+        $cashSettings = array('dir'=>$strCacheDirPath);
     }
 
     function setTemplateFilePath($filePath, $requireFormatFlag=TRUE, $bodyTopColumn=3, $bodyTopRow=10){
@@ -1012,6 +1327,8 @@ class ExcelFormatter extends ListFormatter {
         $aryObjColumn = $this->objTable->getColumns();
         $objREBFColumn = $aryObjColumn[$lcRequiredRowEditByFileColumnId];
 
+        $passwordMaskStr = "********";
+
         $sheet = $X->createSheet();
         if( $mode == 0 ){
             $sheet->setTitle($strTextExplain01);
@@ -1031,7 +1348,14 @@ class ExcelFormatter extends ListFormatter {
             //----ヘッダを追加
             $sheet->setCellValue(self::cr2s(self::DATA_START_COL+$intCountAddColOfEditSheet,1), $objColumn->getColLabel(true));
             //ヘッダを追加----
-            if( is_a($objColumn, "IDColumn") === true ){
+
+            //IDColumn系かつprint_tableに表示する文字列が『********』ならIDColumn用の処理をスキップ（メニュー作成の「参照項目」機能で、参照元がPasswordColumnだった場合を想定。）
+            $printStaticText = "";
+            if(is_a($objColumn, "IDColumn") === true && method_exists($objColumn->getOutputType('print_table')->getBody(), 'getText')){
+                $printStaticText = $objColumn->getOutputType('print_table')->getBody()->getText();
+            }
+
+            if( is_a($objColumn, "IDColumn") === true && $printStaticText != $passwordMaskStr){
                 $intFocusRowOfMasterSheet = self::DATA_START_ROW_ON_MASTER;
                 if( $mode == 0 ){
                     //----入力制限版をフィルタに設定する
@@ -1064,7 +1388,7 @@ class ExcelFormatter extends ListFormatter {
                 else{
                     $intSetRow = self::DATA_START_ROW_ON_MASTER;
                 }
-                $range = self::cr2s(self::DATA_START_COL+$intCountAddColOfEditSheet, self::DATA_START_ROW_ON_MASTER).":".self::cr2s(self::DATA_START_COL+$intCountAddColOfEditSheet, $intSetRow);
+                $range = self::cr2sDollar(self::DATA_START_COL+$intCountAddColOfEditSheet, self::DATA_START_ROW_ON_MASTER).":".self::cr2sDollar(self::DATA_START_COL+$intCountAddColOfEditSheet, $intSetRow);
                 $namedRange = new \PhpOffice\PhpSpreadsheet\NamedRange("FILTER_".$objColumn->getID(), $sheet, $range);
                 $X->addNamedRange($namedRange);
             }
@@ -1085,7 +1409,7 @@ class ExcelFormatter extends ListFormatter {
             $intSetRow = self::DATA_START_ROW_ON_MASTER;
         }
         
-        $range = self::cr2s(self::DATA_START_COL-1, self::DATA_START_ROW_ON_MASTER).":".self::cr2s(self::DATA_START_COL-1, $intSetRow);
+        $range = self::cr2sDollar(self::DATA_START_COL-1, self::DATA_START_ROW_ON_MASTER).":".self::cr2sDollar(self::DATA_START_COL-1, $intSetRow);
         $namedRange = new \PhpOffice\PhpSpreadsheet\NamedRange("FILTER_".$objREBFColumn->getID(), $sheet, $range);
         $X->addNamedRange($namedRange);
 
@@ -1315,6 +1639,7 @@ class ExcelFormatter extends ListFormatter {
         if($rows>1){
             $sheet->mergeCells(self::cr2s(1,1).":".self::cr2s(1, $rows));
             $sheet->mergeCells(self::cr2s(2,1).":".self::cr2s(2, $rows));
+            $sheet->mergeCells(self::cr2s(3,1).":".self::cr2s(3, $rows));
         }
     }
 
@@ -1354,6 +1679,25 @@ class ExcelFormatter extends ListFormatter {
 
         //フィルタ条件用シートの作成
         $this->makeFilterSheet($X);
+    }
+
+    function editHelpWorkSheetAddHistory(){
+        global $g;
+        $X = $this->objFocusWB;
+
+        $strTextExplain01 = $g['objMTS']->getSomeMessage("ITAWDCH-STD-16201");
+
+        $varMinorPrintTypeMode = $this->getGeneValue("minorPrintTypeMode");
+
+        //----マスタ用シートの作成
+        $this->makeMasterSheet($X,"",0);
+
+        if( $varMinorPrintTypeMode == "forDeveloper" ){
+            //----マスターの鍵値が付加されたシートを追加する
+            $this->makeMasterSheet($X,"",1,$strTextExplain01);
+            //マスターの鍵値が付加されたシートを追加する----
+        }
+        //マスタ用シートの作成----
     }
 
     function editWorkSheetHeaderCreate(){
@@ -1569,6 +1913,8 @@ class ExcelFormatter extends ListFormatter {
         $strFormula1FilterID = "";             // マスターテーブルのID文字列用変数 setFormula1引数用の結合文字列に利用
         $aryValidationCellPropaties = array();
 
+        $passwordMaskStr = "********";
+
         $i_col = 0;
         foreach($aryObjColumn as $objColumn){
             if( $objColumn->getID() == $lcRequiredRowEditByFileColumnId ){
@@ -1581,7 +1927,13 @@ class ExcelFormatter extends ListFormatter {
             // データシート開始行フェッチ時初回のみバリデーション設定列情報を取得
             if( $intEditSheetRecordCount === 0 ){
 
-                if( is_a($objColumn, "IDColumn") === true ){
+                //IDColumn系かつprint_tableに表示する文字列が『********』ならIDColumn用の処理をスキップ（メニュー作成の「参照項目」機能で、参照元がPasswordColumnだった場合を想定。）
+                $printStaticText = "";
+                if(is_a($objColumn, "IDColumn") === true && method_exists($objColumn->getOutputType('print_table')->getBody(), 'getText')){
+                    $printStaticText = $objColumn->getOutputType('print_table')->getBody()->getText();
+                }
+
+                if( is_a($objColumn, "IDColumn") === true && $printStaticText != $passwordMaskStr){
                     //----IDColumnは文字をマスタテーブルのIDに置き換える。
                     if($varMinorPrintTypeMode == ""){
 
@@ -1629,6 +1981,15 @@ class ExcelFormatter extends ListFormatter {
                         $rowData = $row->getRowData();
                         $inputType=0;
                         $focusValue = $objColumn->getOutputBody($this->strPrintTargetListFormatterId, $rowData);
+
+                        //IDColumn系かつprint_tableに表示する文字列が『********』なら$focusValueに空を上書き。（メニュー作成の「参照項目」機能で、参照元がPasswordColumnだった場合を想定。）
+                        $printStaticText = "";
+                        if(method_exists($objColumn->getOutputType('print_table')->getBody(), 'getText')){
+                            $printStaticText = $objColumn->getOutputType('print_table')->getBody()->getText();
+                        }
+                        if(is_a($objColumn, "IDColumn") === true && $printStaticText == $passwordMaskStr){
+                            $focusValue = "";
+                        }
 
                         if( get_class($objColumn) == "NumColumn" ){
                             $inputType = 1;
@@ -1771,7 +2132,7 @@ class ExcelFormatter extends ListFormatter {
                         $dataValidation->setShowErrorMessage(true);
                         $dataValidation->setShowDropDown(true);
                         $sheet->setDataValidation( $strPreAreaAddress , $dataValidation);
-    
+
                         unset($dataValidation);
                         $strPreAreaAddress = NULL;
     
@@ -1840,6 +2201,8 @@ class ExcelFormatter extends ListFormatter {
         $strFormula1FilterID = "";             // マスターテーブルのID用変数 setFormula1用の結合文字列に利用
         $aryValidationCellPropaties = array();
 
+        $passwordMaskStr = "********";
+
         // ---- RBAC対応
         $RoleList = array();
         $obj = new RoleBasedAccessControl($g['objDBCA']);
@@ -1873,7 +2236,200 @@ class ExcelFormatter extends ListFormatter {
                 }
             }
             // RBAC対応 ----
-            if( is_a($objColumn, "IDColumn") === true ){
+
+            //IDColumn系かつprint_tableに表示する文字列が『********』ならIDColumn用の処理をスキップ（メニュー作成の「参照項目」機能で、参照元がPasswordColumnだった場合を想定。）
+            $printStaticText = "";
+            if(is_a($objColumn, "IDColumn") === true && method_exists($objColumn->getOutputType('print_table')->getBody(), 'getText')){
+                $printStaticText = $objColumn->getOutputType('print_table')->getBody()->getText();
+            }
+            if( is_a($objColumn, "IDColumn") === true && $printStaticText != $passwordMaskStr){
+                //----IDColumnは文字をマスタテーブルのIDに置き換える。
+                if($varMinorPrintTypeMode == ""){
+                    $strFormula1FilterID = $objColumn->getID();
+                    $arraykey = self::DATA_START_COL+$i_col;               // Cell column number
+                    $aryValidationCellPropaties[0] = $intThisStartRow;     // Cell Start row number
+                    $aryValidationCellPropaties[1] = $strFormula1FilterID; // Cell Formula1 Filter ColumnID
+                    // ヴァリデーション対象カラムのアドレス情報とフィルターカラムを配列化
+                    $this->aryValidationTail += array( $arraykey => $aryValidationCellPropaties );
+                }
+            }   //IDColumnは文字をマスタテーブルのIDに置き換える。----
+
+            //----ボディのスタイル(データ1行目のスタイルをコピー)
+            $sheet->duplicateStyle($sheet->getStyleByColumnAndRow(self::DATA_START_COL+$i_col, $this->bodyTopRow), 
+                    self::cr2s(self::DATA_START_COL+$i_col, $intThisStartRow).":".self::cr2s(self::DATA_START_COL+$i_col, $intThisStartRow+self::WHITE_ROWS));
+            //ボディのスタイル(データ1行目のスタイルをコピー)----
+
+            $i_col++;
+        }
+
+        //処理種別の書式設定
+        //ボディのスタイル(データ1行目のスタイルをコピー)
+        $sheet->duplicateStyle($sheet->getStyleByColumnAndRow(self::DATA_START_COL-1, $this->bodyTopRow),
+                               self::cr2s(self::DATA_START_COL-1, $intThisStartRow).":".self::cr2s(self::DATA_START_COL-1, $intThisStartRow+self::WHITE_ROWS));
+
+        //----処理種別カラムの設定
+
+        $sheet->setCellValue(self::cr2s(self::DATA_START_COL-1,1),$colREBFName);
+        $sheet->setCellValue(self::cr2s(self::DATA_START_COL-1,$this->bodyTopRow-1),$colREBFName);
+
+        $dataValidation = $sheet->getDataValidation(self::cr2s(self::DATA_START_COL-1, $this->bodyTopRow));
+        if($varMinorPrintTypeMode == ""){
+            for($i = $intThisStartRow; $i <= $intThisStartRow+self::WHITE_ROWS; ++$i){
+                $sheet->setCellValue(self::cr2s(self::DATA_START_COL-1,$i),"-");
+            }
+            $this->aryValidationTailHeader[0] = $intThisStartRow;                  // Column Top
+            $this->aryValidationTailHeader[1] = $dataValidation;                   // ValidationObject
+        }
+
+        //空白欄に登録用の初期値データを埋め込む ----
+        $i_col = self::DATA_START_COL;
+        foreach($aryObjColumn as $objColumn){
+            if( $objColumn->getOutputType($this->strPrintTargetListFormatterId)->isVisible()===false ){
+                if( $varMinorPrintTypeMode!="forDeveloper"){
+                    continue;
+                }
+            }
+            $registerDefaultValue = $objColumn->getOutputType('register_table')->getDefaultInputValue();
+            if($registerDefaultValue != ''){
+                if(is_a($objColumn, "IDColumn") === true){
+                    //IDは文字列に変換
+                    $aryMasterData = $objColumn->getMasterTableArrayForInput();
+                    if(array_key_exists($registerDefaultValue, $aryMasterData)){
+                        $registerDefaultValue = $aryMasterData[$registerDefaultValue];
+                    }else{
+                        $registerDefaultValue = "";
+                    }
+                }
+                //空白欄に初期値データを入れる
+                for($i = $intThisStartRow; $i <= $intThisStartRow+self::WHITE_ROWS; ++$i){
+                    $sheet->setCellValueExplicitByColumnAndRow($i_col-1, $i ,$registerDefaultValue, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+                }
+            }
+            $i_col++;
+        }
+        //---- 空白欄に初期値データを埋め込む
+
+        //処理種別カラムの設定----
+
+        $maxCol = $this->intEditSheetMaxCol;
+
+        //----最終白行の次の行に、注意書きの行を追加する
+        $lastRowNumber = $intThisStartRow + self::WHITE_ROWS;
+        $lastColNumber = self::DATA_START_COL + $maxCol - 1;
+
+        //$strMessage = "行を増やす場合は、この行より上の行をコピーして挿入下さい。";
+        $strMessage = $strTextExplain08;
+
+        $sheet->getStyleByColumnAndRow(1, $lastRowNumber+1)->getFont()->getColor()->setARGB("FFFFFFFF");
+        $sheet->setCellValueExplicitByColumnAndRow(1, $lastRowNumber+1 ,$strMessage, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+
+        $sheet->getStyleByColumnAndRow(1, $lastRowNumber+1)->getAlignment()->setWrapText(false);
+
+        for($fnv1=1;$fnv1<=$lastColNumber;$fnv1++){
+            $sheet->getStyleByColumnAndRow($fnv1, $lastRowNumber+1)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
+            $sheet->getStyleByColumnAndRow($fnv1, $lastRowNumber+1)->getFill()->getStartColor()->setARGB($strRRBBGGLastContentRow);
+            $sheet->getStyleByColumnAndRow($fnv1, $lastRowNumber+1)->getFont()->setName($strFontNameOnExcel);
+            $sheet->getStyleByColumnAndRow($fnv1, $lastRowNumber+1)->getFont()->setSize(8);
+        }
+
+        //幅指定とウィンドウ枠の固定とオートフィルタ
+        //オートに設定後、幅を計算、オート設定を戻す
+        for($i_col = self::DATA_START_COL-1; $i_col <= $maxCol; ++$i_col){
+            $sheet->getColumnDimension(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($i_col))->setAutoSize(true);
+        }
+        $sheet->calculateColumnWidths();
+        for($i_col = self::DATA_START_COL-1; $i_col <= $maxCol; ++$i_col){
+            $sheet->getColumnDimension(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($i_col))->setAutoSize(false);
+        }
+
+        $description_array = $this->aryEditSheetDescription;
+
+        // RBAC対応 ----
+        if($varMinorPrintTypeMode == ""){
+            $AccessAuthColumn_idx += self::DATA_START_COL;
+            for($i_row = $intThisStartRow; $i_row <= $intThisStartRow+self::WHITE_ROWS; ++$i_row){
+                $sheet->setCellValueExplicitByColumnAndRow($AccessAuthColumn_idx, $i_row ,$DefaultAccessRoleString, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            }
+        }
+        // ---- RBAC対応
+
+        $sheet->fromArray($description_array, "null", self::cr2s(self::DATA_START_COL, $this->bodyTopRow-2));
+        $sheet->freezePane(self::cr2s(self::DATA_START_COL, $this->bodyTopRow));
+        $sheet->setAutoFilter(self::cr2s(self::DATA_START_COL-1, $this->bodyTopRow-1).":".self::cr2s(self::DATA_START_COL-1+$maxCol,$intThisStartRow+self::WHITE_ROWS));
+
+        foreach($aryObjColumn as $objColumn){
+            $objColumn->setFormatterRef(null);
+        }
+    }
+
+    function editWorkSheetTailerFixHistory(){
+        global $g;
+        $strFontNameOnExcel = $g['objMTS']->getSomeMessage("ITAWDCH-STD-16209");//"メイリオ";
+
+        $this->objFocusWB->setActiveSheetIndex(0);
+        $sheet = $this->objFocusWB->getActiveSheet();
+
+        $aryObjColumn = $this->objTable->getColumns();
+        foreach($aryObjColumn as $objColumn){
+            $objColumn->setFormatterRef($this);
+        }
+        $varMinorPrintTypeMode = $this->getGeneValue("minorPrintTypeMode");
+
+        $lcRequiredNoteColId = $this->objTable->getRequiredNoteColumnID();  //"NOTE"
+        $lcRequiredUpdateDate4UColumnId = $this->objTable->getRequiredUpdateDate4UColumnID(); //"UPD_UPDATE_TIMESTAMP"
+        $lcRequiredRowEditByFileColumnId = $this->objTable->getRequiredRowEditByFileColumnID();
+
+        $colREBFName = $aryObjColumn[$lcRequiredRowEditByFileColumnId]->getColLabel();
+
+        $strRRBBGGLastContentRow = "FF".$this->getRGBOfLastContentRow();
+
+        $intThisStartRow = $this->bodyTopRow + $this->intEditSheetRecord;
+
+        $strFormula1FilterID = "";             // マスターテーブルのID用変数 setFormula1用の結合文字列に利用
+        $aryValidationCellPropaties = array();
+
+        $passwordMaskStr = "********";
+
+        // ---- RBAC対応
+        $RoleList = array();
+        $obj = new RoleBasedAccessControl($g['objDBCA']);
+        // デフォルトアクセス権のあるロール名リストを取得
+        $DefaultAccessRoleString = $obj->getDefaultAccessRoleString($g['login_id'],'NAME',true);  // 廃止を含む
+        unset($obj);
+        if($DefaultAccessRoleString === false) {
+            $message = sprintf("[%s:%s]Failed get Role information.",basename(__FILE__),__LINE__);
+            web_log($message);
+            throw new Exception($message);
+        }
+        // RBAC対応 ----
+
+        $i_col = 0;
+        $AccessAuthColumn_idx = -1;
+        foreach($aryObjColumn as $objColumn){
+            if( $objColumn->getID() == $lcRequiredRowEditByFileColumnId ){
+                continue;
+            // Excel出力の対象カラムか判定
+            }else if( $objColumn->getOutputType($this->strPrintTargetListFormatterId)->isVisible() === false ){
+                if( $varMinorPrintTypeMode!="forDeveloper"){
+                    continue;
+                }
+            }
+            // ---- RBAC対応 
+            // アクセス権カラムの判定
+            if($this->objTable->getAccessAuth() === true) {
+                if($objColumn->getID() == $this->objTable->getAccessAuthColumnName()) {
+                    // アクセス権カラムの位置を退避
+                    $AccessAuthColumn_idx = $i_col;
+                }
+            }
+            // RBAC対応 ----
+
+            //IDColumn系かつprint_tableに表示する文字列が『********』ならIDColumn用の処理をスキップ（メニュー作成の「参照項目」機能で、参照元がPasswordColumnだった場合を想定。）
+            $printStaticText = "";
+            if(is_a($objColumn, "IDColumn") === true && method_exists($objColumn->getOutputType('print_table')->getBody(), 'getText')){
+                $printStaticText = $objColumn->getOutputType('print_table')->getBody()->getText();
+            }
+            if( is_a($objColumn, "IDColumn") === true && $printStaticText != $passwordMaskStr){
                 //----IDColumnは文字をマスタテーブルのIDに置き換える。
                 if($varMinorPrintTypeMode == ""){
                     $strFormula1FilterID = $objColumn->getID();
@@ -1919,21 +2475,6 @@ class ExcelFormatter extends ListFormatter {
         $lastRowNumber = $intThisStartRow + self::WHITE_ROWS;
         $lastColNumber = self::DATA_START_COL + $maxCol - 1;
 
-        //$strMessage = "行を増やす場合は、この行より上の行をコピーして挿入下さい。";
-        $strMessage = $strTextExplain08;
-
-        $sheet->getStyleByColumnAndRow(1, $lastRowNumber+1)->getFont()->getColor()->setARGB("FFFFFFFF");
-        $sheet->setCellValueExplicitByColumnAndRow(1, $lastRowNumber+1 ,$strMessage, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-
-        $sheet->getStyleByColumnAndRow(1, $lastRowNumber+1)->getAlignment()->setWrapText(false);
-
-        for($fnv1=1;$fnv1<=$lastColNumber;$fnv1++){
-            $sheet->getStyleByColumnAndRow($fnv1, $lastRowNumber+1)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
-            $sheet->getStyleByColumnAndRow($fnv1, $lastRowNumber+1)->getFill()->getStartColor()->setARGB($strRRBBGGLastContentRow);
-            $sheet->getStyleByColumnAndRow($fnv1, $lastRowNumber+1)->getFont()->setName($strFontNameOnExcel);
-            $sheet->getStyleByColumnAndRow($fnv1, $lastRowNumber+1)->getFont()->setSize(8);
-        }
-
         //幅指定とウィンドウ枠の固定とオートフィルタ
         //オートに設定後、幅を計算、オート設定を戻す
         for($i_col = self::DATA_START_COL-1; $i_col <= $maxCol; ++$i_col){
@@ -1961,6 +2502,7 @@ class ExcelFormatter extends ListFormatter {
             $objColumn->setFormatterRef(null);
         }
     }
+
 
     /*
         Validationルール適用処理関数 Tail部(白行)のみ適用タイプ 新規登録用やテーブルレコードなしで”ColumnID"をもつEXCELファイルへバリデーションルールを適用する
@@ -2056,6 +2598,59 @@ class ExcelFormatter extends ListFormatter {
         return $retBool;
     }
 
+    function formatBulkExcel($taskId, $fileName, $menuId){
+        global $g;
+        $result = false;
+
+        try{
+            $X = $this->objFocusWB;
+
+            require_once $g["root_dir_path"]."/libs/backyardlibs/common/common_functions.php";
+            $menuInfo = getMenuInfoByMenuId($menuId);
+            $menuGroupId = $menuInfo["MENU_GROUP_ID"];
+            $tmpMenuGroupNameAry = explode("/", $menuInfo["MENU_GROUP_NAME"]);
+            $menuGroupName = implode("_", $tmpMenuGroupNameAry);
+            $dirName = $menuGroupId."_".$menuGroupName;
+            // windowsのフォルダ名制限対策で244文字以内に収める
+            if (strlen($dirName) > 200) {
+                web_log("dirName => $dirName");
+                $dirName = substr($dirName, 0, 200);
+                web_log("dirName => $dirName");
+            }
+
+            //----保存
+            $objWriter = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($X, "Xlsx");
+            //----ファイルへの保存または（引数が空白の場合）標準出力へ
+            // $ret = $objWriter->save($this->getExportFilePath());
+
+            if (!is_dir($g["root_dir_path"]."/temp/bulk_excel/export/$taskId/tmp_zip/")) {
+                $res = mkdir($g["root_dir_path"]."/temp/bulk_excel/export/$taskId/tmp_zip/");
+                if ($res == false) {
+                    throw new Exception($g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-55202", array($g["root_dir_path"]."/temp/bulk_excel/export/$taskId/tmp_zip/")));
+                }
+            }
+            if (!is_dir($g["root_dir_path"]."/temp/bulk_excel/export/$taskId/tmp_zip/$dirName")) {
+                $res = mkdir($g["root_dir_path"]."/temp/bulk_excel/export/$taskId/tmp_zip/$dirName");
+                if ($res == false) {
+                    throw new Exception($g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-55202", array($g["root_dir_path"]."/temp/bulk_excel/export/$taskId/tmp_zip/$dirName")));
+                }
+            }
+            $tmpFilePath = $g["root_dir_path"]."/temp/bulk_excel/export/$taskId/tmp_zip/$dirName/$fileName";
+            $objWriter->save($tmpFilePath);
+            //ファイルへの保存または（引数が空白の場合）標準出力へ----
+            //保存----
+
+            $X->disconnectWorksheets();
+            unset($X);
+            $result = $tmpFilePath;
+        }
+        catch(Exception $e){
+            web_log($e->getMessage());
+            $result = false;
+        }
+        return $result;
+    }
+
     function getSheetNameForEditSheet(&$refBoolSetting=true){
         global $g;
         $strText02 = $g['objMTS']->getSomeMessage("ITAWDCH-STD-16211");  //"履歴";
@@ -2107,6 +2702,34 @@ class ExcelFormatter extends ListFormatter {
                     // ---- RBAC対応
                     $chkobj = null;
                     while ( $row = $objQuery->resultFetch() ){
+                        // ----dispRestrictValue対応
+                        $aryDispRestrictValue = $objTable->getDispRestrictValue();
+                        if($aryDispRestrictValue != null){
+                            $matchFlg = false;
+                            foreach($aryDispRestrictValue as $columnName => $aryValue){
+                                if(array_key_exists($columnName, $row)){
+                                    foreach($aryValue as $value){
+                                        //対象のカラムのデータと$aryValueに格納された値が一致した場合は処理を続行
+                                        if($value == "" || $value == null || $value == "null" || $value == "NULL"){
+                                            if($row[$columnName] == "" || $row[$columnName] == null || $row[$columnName] == "null" || $row[$columnName] == "NULL"){
+                                                $matchFlg = true;
+                                            }
+                                        }else{
+                                            if($row[$columnName] == $value){
+                                                $matchFlg = true;
+                                            }
+                                        }
+                                    }
+
+                                    //一致する値が無い場合は、処理をスキップ
+                                    if($matchFlg == false){
+                                        continue 2;
+                                    }
+                                }
+                            }
+                        }
+                        // dispRestrictValue対応----
+
                         // ---- 判定対象レコードのACCESS_AUTHカラムでアクセス権を判定
                         list($ret,$permission) = chkTargetRecodePermission($objTable->getAccessAuth(),$chkobj,$row);
                         if($ret === false) {
@@ -2181,6 +2804,175 @@ class ExcelFormatter extends ListFormatter {
         $retArray = array($intRowLength,$intErrorType,$aryErrMsgBody,$strErrMsg);
         dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
         return $retArray;
+    }
+
+    function selectResultFetchHistory($sql, $arrayFileterBody, $objTable, $intXlsLimit, $objFunction01ForOverride, $strFormatterId, $filterData, $aryVariant, &$arySetting,$sqllatest){
+        global $g;
+        $intControlDebugLevel01=250;
+
+        $intRowLength = null;
+        $intErrorType = null;
+        $aryErrMsgBody = array();
+        $strErrMsg = "";
+        $datalatest = array();
+        $lcRequiredUpdateDate4UColumnId = $objTable->getRequiredUpdateDate4UColumnID(); //"UPD_UPDATE_TIMESTAMP"
+
+        $strFxName = __CLASS__."::".__FUNCTION__;
+        dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-3",array(__FILE__,$strFxName)),$intControlDebugLevel01);
+
+        try{
+            if( is_callable($objFunction01ForOverride) !== true ){
+                $intFetchCount = 0;
+                
+                $retArray = singleSQLExecuteAgent($sqllatest, $arrayFileterBody, $strFxName);
+                if( $retArray[0] === true ){
+                    $objQuery =& $retArray[1];
+                    // ---- RBAC対応
+                    $chkobj = null;
+                    while ( $row = $objQuery->resultFetch() ){
+                        // ---- 判定対象レコードのACCESS_AUTHカラムでアクセス権を判定
+                        list($ret,$permission) = chkTargetRecodePermission($objTable->getAccessAuth(),$chkobj,$row);
+                        if($ret === false) {
+                            $intErrorType = 501;
+                            throw new Exception( '00000101-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
+                        }
+                        if($permission === true) {
+                            $datalatest[] = $row[$objTable->getRIColumnID()];
+                        }
+                    }
+                }else{
+                    $intErrorType = 501;
+                    throw new Exception( '00000100-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
+                }
+
+                //----標準selectResultFetch句
+                $retArray = singleSQLExecuteAgent($sql, $arrayFileterBody, $strFxName);
+                if( $retArray[0] === true ){
+                    $objQuery =& $retArray[1];
+                    // ---- RBAC対応
+                    $chkobj = null;
+                    while ( $row = $objQuery->resultFetch() ){
+                        // ----dispRestrictValue対応
+                        $aryDispRestrictValue = $objTable->getDispRestrictValue();
+                        if($aryDispRestrictValue != null){
+                            $matchFlg = false;
+                            foreach($aryDispRestrictValue as $columnName => $aryValue){
+                                if(array_key_exists($columnName, $row)){
+                                    foreach($aryValue as $value){
+                                        //対象のカラムのデータと$aryValueに格納された値が一致した場合は処理を続行
+                                        if($value == "" || $value == null || $value == "null" || $value == "NULL"){
+                                            if($row[$columnName] == "" || $row[$columnName] == null || $row[$columnName] == "null" || $row[$columnName] == "NULL"){
+                                                $matchFlg = true;
+                                            }
+                                        }else{
+                                            if($row[$columnName] == $value){
+                                                $matchFlg = true;
+                                            }
+                                        }
+                                    }
+
+                                    //一致する値が無い場合は、処理をスキップ
+                                    if($matchFlg == false){
+                                        continue 2;
+                                    }
+                                }
+                            }
+                        }
+                        // dispRestrictValue対応----
+
+                        // ---- 判定対象レコードのACCESS_AUTHカラムでアクセス権を判定
+                        list($ret,$permission) = chkTargetRecodePermission($objTable->getAccessAuth(),$chkobj,$row);
+                        if($ret === false) {
+                            $intErrorType = 501;
+                            throw new Exception( '00000101-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
+                        }
+                        if($permission === true && in_array($row[$objTable->getRIColumnID()], $datalatest)) {
+                            if($objTable->getAccessAuth() === true) {
+                                $AccessAuthColumnName = $objTable->getAccessAuthColumnName();
+                                if(array_key_exists($AccessAuthColumnName,$row)) {
+                                    $RoleIDString   = $row[$AccessAuthColumnName];
+                                    $RoleNameString = "";
+                                    if(strlen($RoleIDString) != 0) {
+                                        // ロールID文字列のアクセス権をロール名称の文字列に変換
+                                        // 廃止されているロールはID変換失敗で表示
+                                        $obj = new RoleBasedAccessControl($g['objDBCA']);
+                                        $RoleNameString = $obj->getRoleIDStringToRoleNameString($g['login_id'],$RoleIDString,true);  // 廃止を含む
+                                        unset($obj);
+                                    }
+                                    if($RoleNameString === false) {
+                                        $message = sprintf("[%s:%s]getRoleIDStringToRoleNameString Failed.",basename(__FILE__),__LINE__);
+                                        web_log($message);
+                                        $intErrorType = 500;
+                                        throw new Exception( '00000700-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                                    }
+                                    // 登録するアクセス権をロール名称の文字列に設定
+                                    $row[$AccessAuthColumnName] = $RoleNameString;
+                                } else {
+                                }
+                            }
+                            $intFetchCount += 1;
+                            if( $intXlsLimit === null || $intFetchCount <= $intXlsLimit ){
+                                $objTable->addData($row, false);
+                                //----注意ポイント（エクセルフォーマッタへデータ転写）
+                                $this->editWorkSheetRecordAdd();
+                                //注意ポイント（エクセルフォーマッタへデータ転写）----
+                                $objTable->setData(array());
+                            }
+                        } else {
+                        }
+                    }
+                    // RBAC対応 ----
+
+                    // ----取得したレコード数を取得
+                    $intRowLength = $intFetchCount;
+                    // 取得したレコード数を取得----
+                    unset($objQuery);
+                }
+                else{
+                    $intErrorType = 501;
+                    throw new Exception( '00000100-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
+                }
+                unset($retArray);
+                //標準selectResultFetch句----
+            }
+            else{
+                $tmpAryRet = $objFunction01ForOverride($arrayFileterBody, $objTable, $intXlsLimit, $strFormatterId, $filterData, $aryVariant, $arySetting);
+                if( $tmpAryRet[1] !== null ){
+                    $intErrorType = $tmpAryRet[1];
+                    $aryErrMsgBody = $tmpAryRet[2];
+                    throw new Exception( '00000200-([CLASS]' . __CLASS__ . ',[FUNCTION]' . __FUNCTION__ . ')' );
+                }
+                $intRowLength = $tmpAryRet[0];
+                unset($tmpAryRet);
+            }
+        }
+        catch(Exception $e){
+            $tmpErrMsgBody = $e->getMessage();
+            web_log($g['objMTS']->getSomeMessage("ITAWDCH-ERR-5001",$tmpErrMsgBody));
+        }
+
+        $retArray = array($intRowLength,$intErrorType,$aryErrMsgBody,$strErrMsg);
+        dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
+        return $retArray;
+    }
+
+    function editWorkSheetHistoryNonusedData() {
+        $this->objFocusWB->setActiveSheetIndex(0);
+        $sheet = $this->objFocusWB->getActiveSheet();
+        $mergeCells = $sheet->getMergeCells();
+
+        $sheet->unmergeCells(reset($mergeCells));
+        $sheet->unmergeCells(current(array_slice($mergeCells, 1, 1, true)));
+        $sheet->unmergeCells(current(array_slice($mergeCells, 2, 1, true)));
+        
+        $sheet -> removeRow($this->headerRows+1,5);
+        $sheet->removeColumn('A',3);
+        $max_col = $sheet -> getHighestColumn();
+        $max_colvalue =  \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($max_col);
+        $max_colvalue--;
+        $delete_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($max_colvalue);
+
+        $sheet->removeColumn($delete_col,1);
     }
 }
 
@@ -2389,6 +3181,24 @@ class SingleRowTableFormatter extends TableFormatter {
                     if($this->strFormatterId == "register_table") {
                         $RoleList = array();
                         $obj = new RoleBasedAccessControl($g['objDBCA']);
+                        if(!is_array($outputRowData) || !array_key_exists($AccessAuthColumnName, $outputRowData) || $outputRowData[$AccessAuthColumnName] == ""){
+                            $RoleList = array();
+                            // 廃止以外のロールリスト
+                            $DefaultAccessRoleString = $obj->getDefaultAccessRoleString($g['login_id'],'NAME',true); // 廃止を含む
+
+                            if($DefaultAccessRoleString === false) {
+                                $message = sprintf("[%s:%s]Failed get Role information.",basename(__FILE__),__LINE__);
+                                web_log($message);
+                                throw new Exception($message);
+                            }
+                            // 登録画面に表示するアクセス権をロール名称の文字列に設定
+                            $outputRowData[$AccessAuthColumnName] = $DefaultAccessRoleString;
+                        } else {
+                            $RoleIDString   = $outputRowData[$AccessAuthColumnName];
+                            $RoleNameString = $obj->getRoleIDStringToRoleNameString($g['login_id'],$RoleIDString,true);  // 廃止を含む
+                            // 登録画面に表示するアクセス権をロール名称の文字列に設定
+                            $outputRowData[$AccessAuthColumnName] = $RoleNameString;
+                        }
                         // 廃止以外のロールリスト
                         $DefaultAccessRoleString = $obj->getDefaultAccessRoleString($g['login_id'],'NAME',true); // 廃止を含む
 
@@ -2425,7 +3235,30 @@ class SingleRowTableFormatter extends TableFormatter {
                 }
             }
             // RBAC対応 ----
-            $tmpStr .= $objColumn->getOutputBody($this->strFormatterId, $outputRowData);
+            $objColumnId = $objColumn->getID();
+           
+            if( get_class($this) == "RegisterTableFormatter" && get_class($objColumn) == "FileUploadColumn" ) {
+
+                if( $objColumn->getFileEncryptFunctionName() == false ) {
+                    $tmpStr .= $objColumn->getOutputBodyDuplicate($this->strFormatterId, $outputRowData, false);
+                } else {
+                    $tmpStr .= $objColumn->getOutputBodyDuplicate($this->strFormatterId, $outputRowData, true);
+                }
+                
+            } elseif( get_class($this) == "RegisterTableFormatter" && 
+                ( get_class($objColumn) == "SensitiveMultiTextColumn" || get_class($objColumn) == "SensitiveSingleTextColumn" )) {
+                if(is_array($outputRowData) && array_key_exists('SENSITIVE_FLAG', $outputRowData)){
+                    $sensitiveFlg = $outputRowData['SENSITIVE_FLAG'];
+                }
+                else{
+                    $sensitiveFlg = null;
+                }
+                $tmpStr .= $objColumn->getOutputBodyDuplicate($this->strFormatterId, $outputRowData, $sensitiveFlg);
+            } elseif( get_class($this) == "RegisterTableFormatter" && get_class($objColumn) == "PasswordColumn") {
+                $tmpStr .= $objColumn->getOutputBodyDuplicate($this->strFormatterId, $outputRowData, 1);
+            } else {
+                $tmpStr .= $objColumn->getOutputBody($this->strFormatterId, $outputRowData);
+            }
         }
 
         if( $tmpStr == "" ){
@@ -2536,7 +3369,6 @@ class RegisterTableFormatter extends SingleRowTableFormatter{
 
             $strFiterTable01TagId = "Filter1Tbl";
         }
-
         if($objTable->getJsEventNamePrefix()===true){
             $strShowTable01FunctionPreFix = $strShowTable01TagId."_";
             $strFiterTable01FunctionPreFix = $strFiterTable01TagId."_";
@@ -2597,6 +3429,101 @@ class RegisterTableFormatter extends SingleRowTableFormatter{
 EOD;
 
             $strOutputStr .= $objTable->getPrintFormat($strFormatterId, $strShowTable01TagId);
+
+            $strOutputStr .= 
+<<< EOD
+            </div>
+            &nbsp&nbsp&nbsp&nbsp※<span class="input_required">*</span>{$g['objMTS']->getSomeMessage("ITAWDCH-STD-353")}<br><br>
+            {$strEdit01ButtonBody}
+            {$strEdit02ButtonBody}
+EOD;
+
+            $strOutputStr .= "<div class=\"editing_flag\" style=\"display:none;\"></div>";
+        }
+        return $strOutputStr;
+    }
+
+    function printWebUIEditFormDuplicate($arySetting,$objTable,$aryVariant,$strFormatterId,$strNumberForRI,$editTgtRow){
+        global $g;
+        $strOutputStr ='';
+        //----共通
+        $strShowTable01TagId = "";
+        $strShowTable01WrapDivClass = "";
+        $strShowTable01FunctionPreFix = "";
+        $strFiterTable01TagId = "";
+        $strFiterTable01FunctionPreFix = "";
+        //----出力されるタグの属性値
+        if(array_key_exists("printTagId",$arySetting)===true){
+            $strShowTable01TagId = $arySetting['printTagId'][0];
+            $strShowTable01WrapDivClass = $arySetting['printTagId'][1];
+
+            $strFiterTable01TagId = $arySetting['printTagId'][2];
+        }else{
+            $strShowTable01TagId = "Mix2_1";
+            $strShowTable01WrapDivClass = "fakeContainer_Register2";
+
+            $strFiterTable01TagId = "Filter1Tbl";
+        }
+
+        if($objTable->getJsEventNamePrefix()===true){
+            $strShowTable01FunctionPreFix = $strShowTable01TagId."_";
+            $strFiterTable01FunctionPreFix = $strFiterTable01TagId."_";
+        }
+        //出力されるTableタグの属性値----
+        $strModeTypeName = $this->getModeTypeName($arySetting);
+        //共通----
+        if(array_key_exists("register_edit_scene", $arySetting)===true){
+            $strOutputStr  = $arySetting['register_edit_scene'];
+        }else{
+
+            $objTable->addData($editTgtRow);
+
+            $strOutputStr = 
+<<< EOD
+            <div class="{$strShowTable01WrapDivClass}">
+EOD;
+            //----登録用テーブルhtmlの出力
+            $strOutputStr .= $objTable->getPrintFormat($strFormatterId, $strShowTable01TagId, $strNumberForRI);
+            //登録用テーブルhtmlの出力----
+
+            $strEdit01ButtonShow     = true;
+            $strEdit01ButtonFace     = $g['objMTS']->getSomeMessage("ITAWDCH-STD-354");
+            $strEdit01ButtonJsFxPrfx = $strShowTable01FunctionPreFix;
+            $strEdit01ButtonJsFxName = "pre_register_async";
+            $strEdit01ButtonJsFxVars = "0";
+            $strEdit01ButtonJsFxAddVars = "";
+
+            $strEdit02ButtonShow     = true;
+            $strEdit02ButtonFace     = $strModeTypeName;
+            $strEdit02ButtonJsFxPrfx = $strShowTable01FunctionPreFix;
+            $strEdit02ButtonJsFxName = "register_async";
+            $strEdit02ButtonJsFxVars = "2";
+            $strEdit02ButtonJsFxAddVars = "";
+
+            if(array_key_exists("register_edit_setting", $arySetting)===true){
+                $tmpArray1Setting = $arySetting["register_edit_setting"];
+                if( array_key_exists("Edit01Button",$tmpArray1Setting)===true){
+                    $tmpArray2Setting = $tmpArray1Setting["Edit01Button"];
+                    if(isset($tmpArray2Setting['Show'])===true) $strEdit01ButtonShow = $tmpArray2Setting['Show'];
+                    if(isset($tmpArray2Setting['Face'])===true) $strEdit01ButtonFace = $tmpArray2Setting['Face'];
+                    if(isset($tmpArray2Setting['JsFunctionPrefix'])===true) $strEdit01ButtonJsFxPrfx = $tmpArray2Setting['JsFunctionPrefix'];
+                    if(isset($tmpArray2Setting['JsFunctionName'])===true) $strEdit01ButtonJsFxName = $tmpArray2Setting['JsFunctionName'];
+                    if(isset($tmpArray2Setting['JsFunctionAddVars'])===true) $strEdit01ButtonJsFxAddVars = $tmpArray2Setting['JsFunctionAddVars'];
+                    unset($tmpArray2Setting);
+                }
+                if( array_key_exists("Edit02Button",$tmpArray1Setting)===true){
+                    $tmpArray2Setting = $tmpArray1Setting["Edit02Button"];
+                    if(isset($tmpArray2Setting['Show'])===true) $strEdit02ButtonShow = $tmpArray2Setting['Show'];
+                    if(isset($tmpArray2Setting['Face'])===true) $strEdit02ButtonShow = $tmpArray2Setting['Face'];
+                    if(isset($tmpArray2Setting['JsFunctionPrefix'])===true) $strEdit02ButtonShow = $tmpArray2Setting['JsFunctionPrefix'];
+                    if(isset($tmpArray2Setting['JsFunctionName'])===true) $strEdit02ButtonJsFxName = $tmpArray2Setting['JsFunctionName'];
+                    if(isset($tmpArray2Setting['JsFunctionAddVars'])===true) $strEdit02ButtonJsFxAddVars = $tmpArray2Setting['JsFunctionAddVars'];
+                    unset($tmpArray2Setting);
+                }
+                unset($tmpArray1Setting);
+            }
+            $strEdit01ButtonBody=($strEdit01ButtonShow===true)?"<input class=\"linkbutton\" type=\"button\" value=\"{$strEdit01ButtonFace}\" onClick=location.href=\"javascript:{$strEdit01ButtonJsFxPrfx}{$strEdit01ButtonJsFxName}({$strEdit01ButtonJsFxVars}{$strEdit01ButtonJsFxAddVars});\" >":"";
+            $strEdit02ButtonBody=($strEdit02ButtonShow===true)?"<input class=\"disableAfterPush\" type=\"button\" value=\"{$strEdit02ButtonFace}\" onClick=location.href=\"javascript:{$strEdit02ButtonJsFxPrfx}{$strEdit02ButtonJsFxName}({$strEdit02ButtonJsFxVars}{$strEdit02ButtonJsFxAddVars});\" >":"";
 
             $strOutputStr .= 
 <<< EOD

@@ -16,17 +16,18 @@
 ////ja_JP_UTF-8_ITABASEH_MNU
 $ary["ITABASEH-MNU-101020"]         = "作業対象ホストの情報をメンテナンス(閲覧/登録/更新/廃止)できます。<BR>各オーケストレータの実行前に作業対象ホストに応じた必要情報を登録してください。";
 $ary["ITABASEH-MNU-101030"]         = "管理システム項番";
-$ary["ITABASEH-MNU-101040"]         = "ITA管理対象システム一覧";
-$ary["ITABASEH-MNU-101050"]         = "ITA管理対象システム一覧";
+$ary["ITABASEH-MNU-101040"]         = "機器一覧";
+$ary["ITABASEH-MNU-101050"]         = "機器一覧";
 $ary["ITABASEH-MNU-101060"]         = "HW機器種別";
 $ary["ITABASEH-MNU-101070"]         = "HW機器の種別を選択します。\n・NW(ネットワーク)\n・ST(ストレージ)\n・SV(サーバー)";
 $ary["ITABASEH-MNU-101080"]         = "ホスト名";
+$ary["ITABASEH-MNU-101081"]         = "ホスト名が不正です。数値のホスト名は設定出来ません。";
 $ary["ITABASEH-MNU-101090"]         = "[最大長]128バイト";
 $ary["ITABASEH-MNU-102010"]         = "IPアドレス";
 $ary["ITABASEH-MNU-102020"]         = "[最大長]15バイト\nxxx.xxx.xxx.xxxの形式で入力してください。";
 $ary["ITABASEH-MNU-102024"]         = "Ansible利用情報";
 $ary["ITABASEH-MNU-102025"]         = "Pioneer利用情報";
-$ary["ITABASEH-MNU-102026"]         = "Tower利用情報";
+$ary["ITABASEH-MNU-102026"]         = "Ansible Automation Controller利用情報";
 $ary["ITABASEH-MNU-102030"]         = "プロトコル";
 $ary["ITABASEH-MNU-102040"]         = "Ansible-Pioneerにて機器ログインする際のプロトコルです。";
 $ary["ITABASEH-MNU-102050"]         = "ログインユーザID";
@@ -34,13 +35,15 @@ $ary["ITABASEH-MNU-102060"]         = "[最大長]30バイト";
 $ary["ITABASEH-MNU-102061"]         = "ログインパスワード";
 $ary["ITABASEH-MNU-102062"]         = "管理";
 $ary["ITABASEH-MNU-102063"]         = "●の場合、ログインパスワードは必須です。";
+$ary["ITABASEH-MNU-102064"]         = "●の場合、ログインパスワードの有効期限を無効にします。";
+$ary["ITABASEH-MNU-102065"]         = "●の場合、初回ログイン時にログインパスワードの再設定を行いません。";
 $ary["ITABASEH-MNU-102070"]         = "ログインパスワード";
 $ary["ITABASEH-MNU-102071"]         = "ログインパスワード管理を●とする場合、ログインパスワードの入力は必須です。";
 $ary["ITABASEH-MNU-102072"]         = "ログインパスワード管理を●としない場合、ログインパスワードの入力は禁止です。";
 $ary["ITABASEH-MNU-102073"]         = "認証方式がパスワード認証の場合、ログインパスワードの入力は必須です。";
 $ary["ITABASEH-MNU-102074"]         = "認証方式がパスワード認証の場合、ログインパスワードの管理は必須です。";
 $ary["ITABASEH-MNU-102075"]         = "認証方式の入力値が不正です。";
-$ary["ITABASEH-MNU-102080"]         = "[最大長]30バイト";
+$ary["ITABASEH-MNU-102080"]         = "[最大長]128バイト";
 $ary["ITABASEH-MNU-102085"]         = "Legacy/Role利用情報";
 $ary["ITABASEH-MNU-102088"]         = "認証方式";
 $ary["ITABASEH-MNU-102089"]         = "Ansibleから機器へ接続する際の認証方式を選択します。
@@ -57,6 +60,8 @@ $ary["ITABASEH-MNU-102089"]         = "Ansibleから機器へ接続する際の�
 尚、パスワード認証（winrm)以外の認証方式の場合、機器側に以下の設定が必要です。
 ログインユーザの sudo 権限を NOPASSWD付で /etc/sudoers に設定する必要があります。";
 $ary["ITABASEH-MNU-102090"]         = "OS種別";
+$ary["ITABASEH-MNU-102100"]         = "LANG";
+$ary["ITABASEH-MNU-102101"]         = "Pioneerの対話ファイルを実行する際の文字エンコード(LANG)を選択します。 空白の場合はutf-8扱いとなります。";
 $ary["ITABASEH-MNU-102110"]         = "EtherWakeOnLan";
 $ary["ITABASEH-MNU-102120"]         = "電源ON";
 $ary["ITABASEH-MNU-102130"]         = "電源ON";
@@ -71,7 +76,7 @@ $ary["ITABASEH-MNU-103030"]         = "[元データ]Cobblerコンソール/プ�
 $ary["ITABASEH-MNU-103040"]         = "Interface";
 $ary["ITABASEH-MNU-103050"]         = "[最大長]256バイト";
 $ary["ITABASEH-MNU-103051"]         = "接続タイプ";
-$ary["ITABASEH-MNU-103052"]         = "AnsibleTower認証情報の接続タイプを設定します。通常はmachineを選択します。ansible_connectionをloclaに設定する必要があるネットワーク機器の場合にNetworkを選択します。";
+$ary["ITABASEH-MNU-103052"]         = "Ansible Automation Controller認証情報の接続タイプを設定します。通常はmachineを選択します。ansible_connectionをloclaに設定する必要があるネットワーク機器の場合にNetworkを選択します。";
 $ary["ITABASEH-MNU-103060"]         = "MACアドレス";
 $ary["ITABASEH-MNU-103070"]         = "[最大長]17バイト";
 $ary["ITABASEH-MNU-103080"]         = "Netmask";
@@ -84,7 +89,7 @@ $ary["ITABASEH-MNU-104050"]         = "表示順序";
 $ary["ITABASEH-MNU-104060"]         = "表示順序の制御用";
 $ary["ITABASEH-MNU-104070"]         = "オペレーション一覧をメンテナンス(閲覧/登録/更新/廃止)できます。 ";
 $ary["ITABASEH-MNU-104080"]         = "No.";
-$ary["ITABASEH-MNU-104090"]         = "オペレーション一覧情報";
+$ary["ITABASEH-MNU-104090"]         = "オペレーション一覧";
 $ary["ITABASEH-MNU-104101"]         = "SCRAB利用情報";
 $ary["ITABASEH-MNU-104111"]         = "ポート番号";
 $ary["ITABASEH-MNU-104112"]         = "OS種別がLinux系の場合は、ssh接続する際のポート番号です。
@@ -157,8 +162,8 @@ $ary["ITABASEH-MNU-104621"]         = "ITAが設定していないインベン�
     ansible_connection: network_cli
     ansible_network_os: nxos";
 $ary["ITABASEH-MNU-104630"]         = "インスタンスグループ名";
-$ary["ITABASEH-MNU-104631"]         = "AnsibleTower/AWX のインベントリに設定するインスタンスグループを指定します。";
-$ary["ITABASEH-MNU-105010"]         = "オペレーション一覧情報";
+$ary["ITABASEH-MNU-104631"]         = "Ansible Automation Controllerのインベントリに設定するインスタンスグループを指定します。";
+$ary["ITABASEH-MNU-105010"]         = "オペレーション一覧";
 $ary["ITABASEH-MNU-105020"]         = "オペレーション名";
 $ary["ITABASEH-MNU-105030"]         = "[最大長]256バイト";
 $ary["ITABASEH-MNU-105040"]         = "実施予定日時";
@@ -172,8 +177,8 @@ $ary["ITABASEH-MNU-105090"]         = "表示順序の制御用";
 $ary["ITABASEH-MNU-106010"]         = "選択";
 $ary["ITABASEH-MNU-106020"]         = "OS種別をメンテナンス(閲覧/登録/更新/廃止)できます。 ";
 $ary["ITABASEH-MNU-106030"]         = "OS種別ID";
-$ary["ITABASEH-MNU-106040"]         = "OS種別マスタ情報";
-$ary["ITABASEH-MNU-106050"]         = "OS種別マスタ情報";
+$ary["ITABASEH-MNU-106040"]         = "Ansible(共通)OS種別マスタ";
+$ary["ITABASEH-MNU-106050"]         = "Ansible(共通)OS種別マスタ";
 $ary["ITABASEH-MNU-106060"]         = "OS種別名";
 $ary["ITABASEH-MNU-106070"]         = "バージョンまで含めることをお勧めします。\n(例)RHEL7.2";
 $ary["ITABASEH-MNU-106075"]         = "機器種別";
@@ -187,8 +192,8 @@ $ary["ITABASEH-MNU-107050"]         = "表示順序";
 $ary["ITABASEH-MNU-107060"]         = "表示順序の制御用";
 $ary["ITABASEH-MNU-107070"]         = "Movementとオーケストレータの関連付けを閲覧できます。";
 $ary["ITABASEH-MNU-107080"]         = "Movement ID";
-$ary["ITABASEH-MNU-107090"]         = "Movement";
-$ary["ITABASEH-MNU-108010"]         = "Movement";
+$ary["ITABASEH-MNU-107090"]         = "Movement一覧";
+$ary["ITABASEH-MNU-108010"]         = "Movement一覧";
 $ary["ITABASEH-MNU-108020"]         = "Movement名";
 $ary["ITABASEH-MNU-108030"]         = "[最大長]256バイト";
 $ary["ITABASEH-MNU-108040"]         = "オーケストレータ";
@@ -211,7 +216,7 @@ $ary["ITABASEH-MNU-108230"]         = "環境設定ファイル";
 $ary["ITABASEH-MNU-108240"]         = "HEATテンプレート実行後、実行されるスクリプトファイルをアップロードします。[最大サイズ]4GB";
 $ary["ITABASEH-MNU-108241"]         = "Tower利用情報";
 $ary["ITABASEH-MNU-108242"]         = "virtualenv";
-$ary["ITABASEH-MNU-108243"]         = "virtualenvで構築されているansible実行環境をディレクトリで表示しています。\n実行したいansible実行環境を選択します。\n未選択の場合はTowerインストール時にインストールされたansible実行環境を使用します。";
+$ary["ITABASEH-MNU-108243"]         = "virtualenvで構築されているansible実行環境をディレクトリで表示しています。\n実行したいansible実行環境を選択します。\n未選択の場合はAnsible Automation Controllerインストール時にインストールされたansible実行環境を使用します。";
 $ary["ITABASEH-MNU-108300"]         = "DSC利用情報";
 $ary["ITABASEH-MNU-108310"]         = "エラーリトライタイムアウト";
 $ary["ITABASEH-MNU-108320"]         = "Movementが指定時間（秒）を超えてエラーが継続した場合にステータスを異常とします。";
@@ -225,8 +230,8 @@ $ary["ITABASEH-MNU-109010"]         = "ansible-vaultで暗号化されたssh秘�
 $ary["ITABASEH-MNU-109011"]         = "ssh鍵認証情報";
 $ary["ITABASEH-MNU-109030"]         = "Symphonyクラスを閲覧できます。<br>「詳細」を押下するとSymphonyクラス編集メニューに遷移します。";
 $ary["ITABASEH-MNU-109040"]         = "SymphonyクラスID";
-$ary["ITABASEH-MNU-109050"]         = "Symphonyクラス情報";
-$ary["ITABASEH-MNU-109060"]         = "Symphonyクラス情報";
+$ary["ITABASEH-MNU-109050"]         = "Symphonyクラス一覧";
+$ary["ITABASEH-MNU-109060"]         = "Symphonyクラス一覧";
 $ary["ITABASEH-MNU-109070"]         = "Symphony名称";
 $ary["ITABASEH-MNU-109080"]         = "[最大長]256バイト";
 $ary["ITABASEH-MNU-109090"]         = "説明";
@@ -262,8 +267,8 @@ $ary["ITABASEH-MNU-201040"]         = "表示順序の制御用";
 $ary["ITABASEH-MNU-201050"]         = "選択";
 $ary["ITABASEH-MNU-201060"]         = "Symphony作業一覧(実行履歴)を閲覧できます。 <br>「詳細」を押下するとSymphony作業確認メニューに遷移します。";
 $ary["ITABASEH-MNU-201070"]         = "SymphonyインスタンスID";
-$ary["ITABASEH-MNU-201080"]         = "Symphonyインスタンス情報";
-$ary["ITABASEH-MNU-201090"]         = "Symphonyインスタンス情報";
+$ary["ITABASEH-MNU-201080"]         = "Symphony作業一覧";
+$ary["ITABASEH-MNU-201090"]         = "Symphony作業一覧";
 $ary["ITABASEH-MNU-201110"]         = "実行ユーザ";
 $ary["ITABASEH-MNU-201120"]         = "[元データ]ユーザ管理";
 $ary["ITABASEH-MNU-202010"]         = "詳細表示";
@@ -275,6 +280,7 @@ $ary["ITABASEH-MNU-202060"]         = "[元データ]オペレーション一覧
 $ary["ITABASEH-MNU-202070"]         = "オペレーション名";
 $ary["ITABASEH-MNU-202080"]         = "[最大長]256バイト";
 $ary["ITABASEH-MNU-202090"]         = "ステータス";
+$ary["ITABASEH-MNU-202100"]         = "保留ステータス";
 $ary["ITABASEH-MNU-203010"]         = "ステータスには以下の状態が存在します。\n
 ・未実行\n
 ・未実行(予約)\n
@@ -293,6 +299,13 @@ $ary["ITABASEH-MNU-203060"]         = "開始日時";
 $ary["ITABASEH-MNU-203070"]         = "[形式]YYYY/MM/DD HH:MM:SS";
 $ary["ITABASEH-MNU-203080"]         = "終了日時";
 $ary["ITABASEH-MNU-203090"]         = "[形式]YYYY/MM/DD HH:MM:SS";
+$ary["ITABASEH-MNU-203091"]         = "通知ログ";
+$ary["ITABASEH-MNU-203092"]         = "ログファイルを出力します。";
+$ary["ITABASEH-MNU-203093"]         = "保留ステータスには以下の状態が存在します。\n
+・一時停止中";
+$ary["ITABASEH-MNU-203094"]         = "一時停止中";
+$ary["ITABASEH-MNU-203095"]         = "未発令";
+$ary["ITABASEH-MNU-203096"]         = "発令済";
 $ary["ITABASEH-MNU-204010"]         = "表示順序";
 $ary["ITABASEH-MNU-204020"]         = "表示順序の制御用";
 $ary["ITABASEH-MNU-204030"]         = "選択";
@@ -345,7 +358,7 @@ $ary["ITABASEH-MNU-209007"]         = "Description";
 $ary["ITABASEH-MNU-209008"]         = "Symphony class no";
 $ary["ITABASEH-MNU-209100"]         = "Symphonyインスタンスに紐付くMovementインスタンスを閲覧出来ます。";
 $ary["ITABASEH-MNU-209101"]         = "Symphony instance id";
-$ary["ITABASEH-MNU-209102"]         = "Movement instance list";
+$ary["ITABASEH-MNU-209102"]         = "Movementインスタンス一覧";
 $ary["ITABASEH-MNU-209103"]         = "Movement class no";
 $ary["ITABASEH-MNU-209104"]         = "Orchestrator id";
 $ary["ITABASEH-MNU-209105"]         = "Pattern id";
@@ -370,8 +383,8 @@ $ary["ITABASEH-MNU-209123"]         = "Overwrite operation name";
 $ary["ITABASEH-MNU-209124"]         = "Overwrite operation id";
 $ary["ITABASEH-MNU-211000"]         = "代入値自動登録設定に紐付けるメニューをメンテナンス(閲覧/登録/更新/廃止)できます。";
 $ary["ITABASEH-MNU-211001"]         = "項番";
-$ary["ITABASEH-MNU-211002"]         = "Ansible紐付対象メニュー";
-$ary["ITABASEH-MNU-211003"]         = "Ansible紐付対象メニュー";
+$ary["ITABASEH-MNU-211002"]         = "紐付対象メニュー";
+$ary["ITABASEH-MNU-211003"]         = "紐付対象メニュー";
 $ary["ITABASEH-MNU-211004"]         = "メニューグループ";
 $ary["ITABASEH-MNU-211005"]         = "ID";
 $ary["ITABASEH-MNU-211006"]         = "登録・更新時は当該項目は更新対象ではない。(メニューIDを更新すること)";
@@ -474,23 +487,42 @@ $ary["ITABASEH-MNU-304060"]         = "状態監視周期(単位ミリ秒)";
 $ary["ITABASEH-MNU-304070"]         = "Conductor実行時の作業状況をリフレッシュする間隔です。\n環境毎にチューニングを要しますが、通常は3000ミリ秒程度が推奨値です。";
 $ary["ITABASEH-MNU-305030"]         = "Conductorクラスを閲覧できます。<br>「詳細」を押下するとConductorクラス編集メニューに遷移します。";
 $ary["ITABASEH-MNU-305040"]         = "ConductorクラスID";
-$ary["ITABASEH-MNU-305050"]         = "Conductorクラス情報";
-$ary["ITABASEH-MNU-305060"]         = "Conductorクラス情報";
+$ary["ITABASEH-MNU-305050"]         = "Conductorクラス一覧";
+$ary["ITABASEH-MNU-305060"]         = "Conductorクラス一覧";
 $ary["ITABASEH-MNU-305070"]         = "Conductor名称";
 $ary["ITABASEH-MNU-305080"]         = "[最大長]256バイト";
 $ary["ITABASEH-MNU-305090"]         = "説明";
+$ary["ITABASEH-MNU-305100"]         = "Editor情報";
+$ary["ITABASEH-MNU-305110"]         = "Node数";
+$ary["ITABASEH-MNU-305120"]         = "Terminal数";
+$ary["ITABASEH-MNU-305130"]         = "Edge数";
+$ary["ITABASEH-MNU-305140"]         = "高さ";
+$ary["ITABASEH-MNU-305150"]         = "種別";
+$ary["ITABASEH-MNU-305160"]         = "幅";
+$ary["ITABASEH-MNU-305170"]         = "横軸";
+$ary["ITABASEH-MNU-305180"]         = "縦軸";
+$ary["ITABASEH-MNU-305190"]         = "紐付Line";
+$ary["ITABASEH-MNU-305200"]         = "紐付Node";
+$ary["ITABASEH-MNU-305210"]         = "状態";
+$ary["ITABASEH-MNU-305220"]         = "Line id";
+$ary["ITABASEH-MNU-305230"]         = "内側接続Node";
+$ary["ITABASEH-MNU-305240"]         = "外側接続Node";
+$ary["ITABASEH-MNU-305250"]         = "内側接続Terminal";
+$ary["ITABASEH-MNU-305260"]         = "外側接続Terminal";
+$ary["ITABASEH-MNU-305270"]         = "終了種別";
+$ary["ITABASEH-MNU-305280"]         = "通知設定";
 $ary["ITABASEH-MNU-306010"]         = "Conductor作業一覧(実行履歴)を閲覧できます。 <br>「詳細」を押下するとConductor作業確認メニューに遷移します。";
 $ary["ITABASEH-MNU-306020"]         = "ConductorインスタンスID";
-$ary["ITABASEH-MNU-306030"]         = "Conductorインスタンス情報";
-$ary["ITABASEH-MNU-306040"]         = "Conductorインスタンス情報";
+$ary["ITABASEH-MNU-306030"]         = "Conductor作業一覧";
+$ary["ITABASEH-MNU-306040"]         = "Conductor作業一覧";
 $ary["ITABASEH-MNU-306050"]         = "Conductor名称";
 $ary["ITABASEH-MNU-306060"]         = "[元データ]Conductorクラス一覧";
 $ary["ITABASEH-MNU-306070"]         = "緊急停止発令フラグ";
 $ary["ITABASEH-MNU-306080"]         = "[元データ]Conductor作業確認";
 $ary["ITABASEH-MNU-307001"]         = "Conductorをスケジュールにしたがって定期的に実行させることができます。<br>対象のConductor, operationを選択し、「スケジュール設定」から詳細な設定を入力してください。";
 $ary["ITABASEH-MNU-307002"]         = "定期作業実行ID";
-$ary["ITABASEH-MNU-307003"]         = "定期作業実行情報";
-$ary["ITABASEH-MNU-307004"]         = "定期作業実行情報";
+$ary["ITABASEH-MNU-307003"]         = "Conductor定期作業実行";
+$ary["ITABASEH-MNU-307004"]         = "Conductor定期作業実行";
 $ary["ITABASEH-MNU-307005"]         = "作業一覧確認";
 $ary["ITABASEH-MNU-307006"]         = "ステータス";
 $ary["ITABASEH-MNU-307007"]         = "ステータスには以下の状態が存在します。\n
@@ -617,6 +649,12 @@ $ary["ITABASEH-MNU-309053"]         = "マウスホイール";
 $ary["ITABASEH-MNU-309054"]         = "画面の拡大・縮小";
 $ary["ITABASEH-MNU-309055"]         = "マウス右ドラッグ";
 $ary["ITABASEH-MNU-309056"]         = "画面の移動";
+$ary["ITABASEH-MNU-309057"]         = "マウス左クリック";
+$ary["ITABASEH-MNU-309058"]         = "Node選択・接続線削除";
+$ary["ITABASEH-MNU-309059"]         = "マウス左ドラッグ";
+$ary["ITABASEH-MNU-309060"]         = "Node移動・複数選択";
+$ary["ITABASEH-MNU-309061"]         = "Node選択";
+$ary["ITABASEH-MNU-309062"]         = "Node選択・作業状態確認";
 $ary["ITABASEH-MNU-310000"]         = "比較定義を閲覧できます。こちらで定義した情報を元に比較実行を行います。<br>以下が比較対象メニューとして利用できます。<br>・パラメータシート（ホスト/オペレーションあり）";
 $ary["ITABASEH-MNU-310001"]         = "比較定義";
 $ary["ITABASEH-MNU-310002"]         = "比較定義名";
@@ -664,6 +702,83 @@ $ary["ITABASEH-MNU-310221"]         = "指定した条件で比較対象とな�
 $ary["ITABASEH-MNU-310222"]         = "メイリオ";
 $ary["ITABASEH-MNU-310223"]         = "差分なし";
 $ary["ITABASEH-MNU-310224"]         = "ID変換失敗(";
+$ary["ITABASEH-MNU-310225"]         = "出力内容：";
+$ary["ITABASEH-MNU-310226"]         = "全件出力";
+$ary["ITABASEH-MNU-310227"]         = "差分のみ";
+$ary["ITABASEH-MNU-311000"]         = 'PHPのcURL 関数を使用して、通知処理を行います。<br>
+■Webhookを利用した通知の設定例<br>
+▼Teams / Slack　の例 <br>
+&nbsp -通知先(CURLOPT_URL) の入力例: <br>
+&nbsp&nbsp&nbsp&nbsp各サービスのWebhook URL を入力<br>
+&nbsp -ヘッダー(CURLOPT_HTTPHEADER)) の入力例: <br>
+&nbsp&nbsp&nbsp&nbsp[ "Content-Type: application/json" ]<br>
+&nbsp -メッセージ(CURLOPT_POSTFIELDS)) の入力例: <br>
+&nbsp&nbsp&nbsp&nbsp{"text": "通知名：__NOTICE_NAME__,  &lt;br&gt;Conductor名称: __CONDUCTOR_NAME__,  &lt;br&gt; ConductorインスタンスID:__CONDUCTOR_INSTANCE_ID__,&lt;br&gt; ステータス: __STATUS_NAME__, &lt;br&gt; 作業URL: __JUMP_URL__, &lt;br&gt; "}<br><br>
+
+※メッセージ(CURLOPT_POSTFIELDS)の入力形式、改行の表記方法については、各サービスのWebhookによるメッセージの送信についてご参照ください。<br>
+<br>
+■各設定項目について<br>
+<table>
+    <thead>
+        <tr><td>&nbsp</td><td>入力項目</td><td>:</td><td>説明</td></tr>
+    </thead>
+    <tbody>
+    <tr><td>&nbsp</td><td>通知先(CURLOPT_URL) </td><td>:</td><td>通知先のURLを入力してください。</td></tr>
+    <tr><td>&nbsp</td><td>ヘッダー(CURLOPT_HTTPHEADER) </td><td>:</td><td>ヘッダーを入力してください</td></tr>
+    <tr><td>&nbsp</td><td>メッセージ(CURLOPT_POSTFIELDS) </td><td>:</td><td>通知内容を入力してください</td></tr>
+    <tr><td>&nbsp</td><td>PROXY / URL(CURLOPT_PROXY) </td><td>:</td><td>PROXYの設定が必要な場合、URLを入力してください。</td></tr>
+    <tr><td>&nbsp</td><td>PROXY / PORT(CURLOPT_PROXYPORT) </td><td>:</td><td>PROXYの設定が必要な場合、PORTを入力してください。</td></tr>
+    <tr><td>&nbsp</td><td>作業確認URL(FQDN) </td><td>:</td><td>作業確認用URLの予約変数で使用する,FQDNを入力してください</td></tr>
+    <tr><td>&nbsp</td><td>その他 </td><td>:</td><td>JSON形式で入力してください。<br>（使用できるオプションについては、curl_setopt() に対応するもののみ使用可能です。<br>詳しくは、PHPのcURL 関数についてご参照ください。</td></tr>
+    </tbody>
+</table>
+<br>
+■メッセージ(CURLOPT_POSTFIELDS)にて以下の予約変数が利用可能です。　<br>
+<table>
+    <thead>
+        <tr><td>&nbsp</td><td>予約変数</td><td>:</td><td>項目名</td></tr>
+    </thead>
+    <tbody>
+        <tr><td>&nbsp</td><td>__CONDUCTOR_INSTANCE_ID__ </td><td>:</td><td>ConductorインスタンスID　</td></tr>
+        <tr><td>&nbsp</td><td>__CONDUCTOR_NAME__ </td><td>:</td><td>Conductorインスタンス名　</td></tr>
+        <tr><td>&nbsp</td><td>__OPERATION_ID__ </td><td>:</td><td>オペレーションID　</td></tr>
+        <tr><td>&nbsp</td><td>__OPERATION_NAME__ </td><td>:</td><td>オペレーション名　</td></tr>
+        <tr><td>&nbsp</td><td>__STATUS_ID__ </td><td>:</td><td>ステータスID　</td></tr>
+        <tr><td>&nbsp</td><td>__STATUS_NAME__ </td><td>:</td><td>ステータス名　</td></tr>
+        <tr><td>&nbsp</td><td>__EXECUTION_USER__ </td><td>:</td><td>実行ユーザー　</td></tr>
+        <tr><td>&nbsp</td><td>__TIME_BOOK__ </td><td>:</td><td>予約日時　</td></tr>
+        <tr><td>&nbsp</td><td>__TIME_START__ </td><td>:</td><td>開始日時　</td></tr>
+        <tr><td>&nbsp</td><td>__TIME_END__ </td><td>:</td><td>終了日時　</td></tr>
+        <tr><td>&nbsp</td><td>__JUMP_URL__ </td><td>:</td><td>作業確認URL　</td></tr>
+        <tr><td>&nbsp</td><td>__NOTICE_NAME__ </td><td>:</td><td>通知名称　</td></tr>
+    </tbody>
+</table>
+';
+$ary["ITABASEH-MNU-311001"]         = "Conductor通知先定義";
+$ary["ITABASEH-MNU-311002"]         = "通知名称";
+$ary["ITABASEH-MNU-311003"]         = "[最大長]128バイト";
+$ary["ITABASEH-MNU-311004"]         = "HTTPリクエストオプション";
+$ary["ITABASEH-MNU-311005"]         = "通知先(CURLOPT_URL)";
+$ary["ITABASEH-MNU-311006"]         = "通知先のURLです。";
+$ary["ITABASEH-MNU-311007"]         = "ヘッダー(CURLOPT_HTTPHEADER)";
+$ary["ITABASEH-MNU-311008"]         = "HTTP ヘッダフィールドをJSON形式で入力してください。";
+$ary["ITABASEH-MNU-311009"]         = "メッセージ(CURLOPT_POSTFIELDS)";
+$ary["ITABASEH-MNU-311010"]         = "通知先のサービスの仕様に沿って入力してください。";
+$ary["ITABASEH-MNU-311011"]         = "PROXY";
+$ary["ITABASEH-MNU-311012"]         = "URL(CURLOPT_PROXY)";
+$ary["ITABASEH-MNU-311013"]         = "PROXYの設定が必要な場合、URLを入力してください。";
+$ary["ITABASEH-MNU-311014"]         = "PORT(CURLOPT_PROXYPORT)";
+$ary["ITABASEH-MNU-311015"]         = "PROXYの設定が必要な場合、PORTを入力してください。";
+$ary["ITABASEH-MNU-311016"]         = "作業確認URL(FQDN)";
+$ary["ITABASEH-MNU-311017"]         = "作業確認用URLの予約変数で使用する,FQDNを入力してください。\n例:\nhttp://<FQDN>\nhttps://<FQDN>";
+$ary["ITABASEH-MNU-311018"]         = "その他";
+$ary["ITABASEH-MNU-311019"]         ='JSON形式で入力してください。\n使用できるオプションについては、curl_setopt() のオプションに対応するものは使用可能です。PHPのcURL 関数について参照してください。
+例：{"CURLOPT_CONNECTTIMEOUT": 10}';
+$ary["ITABASEH-MNU-311020"]         = "抑止期間";
+$ary["ITABASEH-MNU-311021"]         = "開始日時";
+$ary["ITABASEH-MNU-311022"]         = "Conductor作業実行時に、開始日時以降であれば、通知を抑止します。";
+$ary["ITABASEH-MNU-311023"]         = "終了日時";
+$ary["ITABASEH-MNU-311024"]         = "Conductor作業実行時に、終了日時以前であれば、通知を抑止します。";
 $ary["ITABASEH-MNU-900001"]         = "エクスポート";
 $ary["ITABASEH-MNU-900002"]         = "アップロード";
 $ary["ITABASEH-MNU-900003"]         = "インポート";
@@ -675,7 +790,7 @@ $ary["ITABASEH-MNU-900008"]         = "エクスポート・インポート管�
 $ary["ITABASEH-MNU-900009"]         = "メニューインポート処理を受け付けました。<br>実行No.：[<strong>{}</strong>]";
 $ary["ITABASEH-MNU-900010"]         = "下記の機能を提供しています。<br>・エクスポート/インポートデータの閲覧";
 $ary["ITABASEH-MNU-900011"]         = "下記の機能を提供しています。<br>・インポートデータのアップロード<br>&nbsp;&nbsp;&nbsp;&nbsp;インポートするデータを圧縮したkymファイルをアップロードしてください。<br><br>・メニューインポート<br>&nbsp;&nbsp;&nbsp;&nbsp;インポート可能なメニューが一覧表示されます。<br>&nbsp;&nbsp;&nbsp;&nbsp;インポートするメニューを選択し、インポートボタンをクリックしてください。<br>&nbsp;&nbsp;&nbsp;&nbsp;インポートするデータの状態はメニューインポート管理で確認できます。";
-$ary["ITABASEH-MNU-900012"]         = "下記の機能を提供しています。<br>&nbsp;&nbsp;&nbsp;&nbsp;・メニューエクスポート<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;データをエクスポートするメニューを選択し、エクスポートボタンをクリックしてください。<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;モード<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;・環境移行<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;指定メニューのすべてのデータをエクスポートします。インポート先のデータをすべて置き換えます。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;・時刻指定<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;指定時刻以降のデータのみエクスポートします。インポート先のデータとIDが被った場合はエクスポートしたデータが優先してインポートされます。<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;廃止情報<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;・廃止を含む<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;廃止したレコードを含めてエクスポートします。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;・廃止を含まない<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;廃止したレコードを除いてエクスポートします。";
+$ary["ITABASEH-MNU-900012"]         = "下記の機能を提供しています。<br>&nbsp;&nbsp;&nbsp;&nbsp;・メニューエクスポート<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;データをエクスポートするメニューを選択し、エクスポートボタンをクリックしてください。<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;モード<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;・環境移行<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;指定メニューのすべてのデータをエクスポートします。インポート先のデータをすべて置き換えます。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;・時刻指定<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;指定時刻以降のデータのみエクスポートします。インポート先のデータとIDが被った場合はエクスポートしたデータが優先してインポートされます。<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;廃止情報<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;・廃止を含む<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;廃止したレコードを含めてエクスポートします。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;・廃止を除く<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;廃止したレコードを除いてエクスポートします。";
 $ary["ITABASEH-MNU-900013"]         = "実行No.";
 $ary["ITABASEH-MNU-900014"]         = "ステータス";
 $ary["ITABASEH-MNU-900015"]         = "ファイル名";
@@ -698,6 +813,8 @@ $ary["ITABASEH-MNU-900031"]         = "モードには以下が存在します�
 $ary["ITABASEH-MNU-900032"]         = "廃止情報には以下が存在します。\n・廃止を含む\n・廃止を除く";
 $ary["ITABASEH-MNU-900033"]         = "指定時刻";
 $ary["ITABASEH-MNU-900034"]         = "モードが時刻指定の場合、指定時刻以降のレコードがエクスポート/インポートされます。";
+$ary["ITABASEH-MNU-900035"]         = "実行ユーザ";
+$ary["ITABASEH-MNU-900036"]         = "エクスポート処理またはインポート処理を実行したユーザが表示されます。";
 $ary["ITABASEH-MNU-900051"]         = "下記の機能を提供しています。<br>&nbsp;&nbsp;・Symphony/オペレーションエクスポート<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;エクスポートするSymphonyとオペレーションを選択し、エクスポートボタンをクリックしてください。";
 $ary["ITABASEH-MNU-900052"]         = "下記の機能を提供しています。<br>・Symphony/オペレーションのインポートデータのアップロード<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;インポートするデータを圧縮したkym2ファイルをアップロードしてください。<br><br>・Symphony/オペレーションインポート<br>&nbsp;&nbsp;&nbsp;&nbsp;インポート可能なSymphony/オペレーションが一覧表示されます。<br>&nbsp;&nbsp;&nbsp;&nbsp;インポートするSymphony/オペレーションを選択し、インポートボタンをクリックしてください。<br>&nbsp;&nbsp;&nbsp;&nbsp;インポートするデータの状態はSymphony/オペレーションエクスポート・インポート管理で確認できます。";
 $ary["ITABASEH-MNU-900053"]         = "すべてのオペレーション";
@@ -716,10 +833,12 @@ $ary["ITABASEH-MNU-900104"]         = "オペレーションID(個別指定)";
 $ary["ITABASEH-MNU-910001"]         = "バージョン情報";
 $ary["ITABASEH-MNU-910002"]         = "ドライバ";
 $ary["ITABASEH-MNU-910003"]         = "バージョン";
+$ary["ITABASEH-MNU-910004"]         = "Exastro IT Automation Version";
+$ary["ITABASEH-MNU-910005"]         = "インストール済ドライバ";
 $ary["ITABASEH-MNU-920001"]         = "Symphonyをスケジュールにしたがって定期的に実行させることができます。<br>対象のsymphony, operationを選択し、「スケジュール設定」から詳細な設定を入力してください。";
 $ary["ITABASEH-MNU-920002"]         = "定期作業実行ID";
-$ary["ITABASEH-MNU-920003"]         = "定期作業実行情報";
-$ary["ITABASEH-MNU-920004"]         = "定期作業実行情報";
+$ary["ITABASEH-MNU-920003"]         = "Symphony定期作業実行";
+$ary["ITABASEH-MNU-920004"]         = "Symphony定期作業実行";
 $ary["ITABASEH-MNU-920005"]         = "作業一覧確認";
 $ary["ITABASEH-MNU-920006"]         = "ステータス";
 $ary["ITABASEH-MNU-920007"]         = "ステータスには以下の状態が存在します。\n
@@ -752,4 +871,25 @@ $ary["ITABASEH-MNU-920025"]         = "[元データ]オペレーション一覧
 $ary["ITABASEH-MNU-920026"]         = "自動入力";
 $ary["ITABASEH-MNU-920027"]         = "実行ユーザ";
 $ary["ITABASEH-MNU-920028"]         = "Symphonyを実行するユーザ（登録/更新したユーザが自動的に入力されます）";
+$ary["ITABASEH-MNU-2100000329_1"]   = "下記の機能を提供しています。<br>・Excel一括エクスポート<br>&nbsp;&nbsp;&nbsp;&nbsp;データをエクスポートするメニューを選択し、エクスポートボタンをクリックしてください。<br>廃止情報<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;・全レコード<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;全てのレコードをエクスポートします。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;・廃止を除く<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;廃止したレコードを除いてエクスポートします。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;・廃止のみ<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;廃止したレコードのみエクスポートします。";
+$ary["ITABASEH-MNU-2100000329_2"]   = "Excel一括エクスポート";
+$ary["ITABASEH-MNU-2100000329_3"]   = "Excel一括エクスポート処理を受け付けました。<br>実行No.：[<strong>{}</strong>]";
+$ary["ITABASEH-MNU-2100000329_4"]   = "全レコード";
+$ary["ITABASEH-MNU-2100000329_5"]   = "廃止を除く";
+$ary["ITABASEH-MNU-2100000329_6"]   = "廃止のみ";
+$ary["ITABASEH-MNU-2100000330_1"]   = "インポート対象";
+$ary["ITABASEH-MNU-2100000330_2"]   = "メニューグループ名";
+$ary["ITABASEH-MNU-2100000330_3"]   = "メニュー名";
+$ary["ITABASEH-MNU-2100000330_4"]   = "メニューID";
+$ary["ITABASEH-MNU-2100000330_5"]   = "ファイル名";
+$ary["ITABASEH-MNU-2100000330_6"]   = "エラー内容";
+$ary["ITABASEH-MNU-2100000330_7"]   = "下記の機能を提供しています。<br>・インポートデータのアップロード<br>&nbsp;&nbsp;&nbsp;&nbsp;インポートするデータを圧縮したzipファイルをアップロードしてください。<br><br>・Excel一括インポート<br>&nbsp;&nbsp;&nbsp;&nbsp;インポート可能なメニューが一覧表示されます。<br>&nbsp;&nbsp;&nbsp;&nbsp;インポートするメニューを選択し、インポートボタンをクリックしてください。<br>&nbsp;&nbsp;&nbsp;&nbsp;インポートするデータの状態はExcel一括エクスポート・インポート管理で確認できます。";
+$ary["ITABASEH-MNU-2100000330_8"]   = "インポートを実行しますか？\n※MENU_LIST.txtに記載されている順にインポート作業を実行します。\n複数のメニューデータをインポートする場合は、データの整合性をご理解頂いた上で実行するようお願いいたします。";
+$ary["ITABASEH-MNU-2100000330_9"]   = "Excel一括インポート";
+$ary["ITABASEH-MNU-2100000330_10"]  = "Excel一括インポート処理を受け付けました。<br>実行No.：[<strong>{}</strong>]";
+$ary["ITABASEH-MNU-2100000331_1"]   = "下記の機能を提供しています。<br>・Excel一括エクスポート・インポートデータの閲覧";
+$ary["ITABASEH-MNU-2100000331_2"]   = "Excel一括エクスポート・インポート管理";
+$ary["ITABASEH-MNU-2100000331_3"]   = "廃止情報には以下が存在します。\n・全レコード\n・廃止を除く\n・廃止のみ";
+$ary["ITABASEH-MNU-2100000331_4"]   = "実行ユーザ";
+$ary["ITABASEH-MNU-2100000331_5"]   = "エクスポート処理またはインポート処理を実行したユーザが表示されます。";
 ?>

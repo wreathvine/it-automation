@@ -89,7 +89,8 @@ func_compare_version() {
 ############################################################
 func_start_service() {
     #Apacheを起動する
-    systemctl start httpd
+    systemctl start httpd >> "$LOG_FILE" 2>&1
+    systemctl start php-fpm >> "$LOG_FILE" 2>&1
 
     #ITAのサービス起動する
     cd /usr/lib/systemd/system
@@ -122,18 +123,6 @@ func_install_messasge() {
         MESSAGE="Terraform driver"
     fi
 
-    if [ MATERIAL_FLG = ${1} ]; then
-        MESSAGE="Material"
-    fi
-    
-    if [ MATERIAL2_FLG = ${1} ]; then
-        MESSAGE="Material2"
-    fi
-    
-    if [ MATERIAL4_FLG = ${1} ]; then
-        MESSAGE="Material4"
-    fi
-
     if [ CREATEPARAM_FLG = ${1} ]; then
         MESSAGE="Createparam"
     fi
@@ -148,6 +137,9 @@ func_install_messasge() {
 
     if [ HOSTGROUP_FLG = ${1} ]; then
         MESSAGE="Hostgroup"
+    fi
+    if [ CICD_FLG = ${1} ]; then
+        MESSAGE="CI/CD for IaC"
     fi
 
     echo "$MESSAGE"
@@ -174,13 +166,11 @@ BASE_FLG=0
 ANSIBLE_FLG=0
 COBBLER_FLG=0
 TERRAFORM_FLG=0
-MATERIAL_FLG=0
-MATERIAL2_FLG=0
-MATERIAL4_FLG=0
 CREATEPARAM_FLG=0
 CREATEPARAM2_FLG=0
 CREATEPARAM3_FLG=0
 HOSTGROUP_FLG=0
+CICD_FLG=0
 
 #インストール済みフラグ配列
 INSTALLED_FLG_LIST=(
@@ -188,13 +178,11 @@ INSTALLED_FLG_LIST=(
     ANSIBLE_FLG
     COBBLER_FLG
     TERRAFORM_FLG
-    MATERIAL_FLG
-    MATERIAL2_FLG
-    MATERIAL4_FLG
     CREATEPARAM_FLG
     CREATEPARAM2_FLG
     CREATEPARAM3_FLG
     HOSTGROUP_FLG
+    CICD_FLG
 )
 
 #リリースファイル設置作成関数用配列
@@ -204,11 +192,9 @@ RELEASE_PLASE=(
     ita_ansible-driver
     ita_cobbler-driver
     ita_terraform-driver
-    ita_material
-    ita_material2
-    ita_material4
     ita_createparam
     ita_hostgroup
+    ita_cicd
 )
 
 #ディレクトリ変数定義
@@ -221,6 +207,7 @@ VERSION_UP_DIR="$BASE_DIR/version_up"
 LOG_FILE="$LOG_DIR/ita_version_up.log"
 ANSWER_FILE="$BASE_DIR/ita_answers.txt"
 SOURCE_DIR="${BASE_DIR}/../ITA/ita-contents/ita-root"
+CONFS_DIR="${BASE_DIR}/../ITA/ita-confs"
 
 #log用ディレクトリ作成
 if [ ! -e "$LOG_DIR" ]; then
@@ -437,15 +424,6 @@ fi
 if test -e "${ITA_DIRECTORY}/ita-root/libs/release/ita_terraform-driver" ; then
     TERRAFORM_FLG=1
 fi
-if test -e "${ITA_DIRECTORY}/ita-root/libs/release/ita_material" ; then
-    MATERIAL_FLG=1
-fi
-if test -e "${ITA_DIRECTORY}/ita-root/libs/release/ita_material2" ; then
-    MATERIAL2_FLG=1
-fi
-if [ -e "${ITA_DIRECTORY}/ita-root/libs/release/ita_material" ] && [ -e "${ITA_DIRECTORY}/ita-root/libs/release/ita_terraform-driver" ] ; then
-    MATERIAL4_FLG=1
-fi
 if test -e "${ITA_DIRECTORY}/ita-root/libs/release/ita_createparam" ; then
     CREATEPARAM_FLG=1
 fi
@@ -458,12 +436,18 @@ fi
 if test -e "${ITA_DIRECTORY}/ita-root/libs/release/ita_hostgroup" ; then
     HOSTGROUP_FLG=1
 fi
+if test -e "${ITA_DIRECTORY}/ita-root/libs/release/ita_cicd" ; then
+    CICD_FLG=1
+fi
+
 
 ############################################################
 log 'INFO : Stopping Apache.'
 ############################################################
 #Apacheを停止する
-systemctl stop httpd
+systemctl stop httpd >> "$LOG_FILE" 2>&1
+systemctl stop php-fpm >> "$LOG_FILE" 2>&1
+
 
 ############################################################
 log 'INFO : Stopping ITA services.'
@@ -576,7 +560,7 @@ if [ "${INSTALL_MODE}" = "Versionup_All" ] ; then
                     #Check installation
                     for key in $PIP3_LIB_LIST; do
                         echo "----------Installation[$key]----------" >> "$LOG_FILE" 2>&1
-                        pip3 list --format=columns 2> "$LOG_FILE" | grep "$key" >> "$LOG_FILE" 2>&1
+                        pip3 list --format=columns 2>> "$LOG_FILE" | grep "$key" >> "$LOG_FILE" 2>&1
                         if [ $? != 0 ]; then
                             log "ERROR : Installation failed [$key]"
                             log "INFO : Abort version up."
@@ -653,6 +637,7 @@ log "INFO : Updating sources."
 ############################################################
 #ITAの資材を入れ替える
 cp -rp ${SOURCE_DIR} ${ITA_DIRECTORY}
+cp -rpn ${CONFS_DIR}/* ${ITA_DIRECTORY}/ita-root/confs/
 
 EXEC_VERSION=${NOW_VERSION}
 while read LIST_VERSION || [ -n "${LIST_VERSION}" ] ; do
@@ -692,7 +677,7 @@ while read LIST_VERSION || [ -n "${LIST_VERSION}" ] ; do
     #その他必要なスクリプトを実行する
     SHELL_FILE="${VERSION_UP_DIR}/${LIST_VERSION}/other_exec.sh"
     if test -e ${SHELL_FILE} ; then
-        sh ${SHELL_FILE} ${ITA_DIRECTORY} >> "$LOG_FILE" 2>&1
+        sh ${SHELL_FILE} ${ITA_DIRECTORY} ${NOW_VERSION} >> "$LOG_FILE" 2>&1
     fi
 
 done < ${VERSION_UP_LIST_FILE}

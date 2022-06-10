@@ -73,6 +73,7 @@
 
             $lcRequiredDisuseFlagColumnId = $objTable->getRequiredDisuseColumnID(); //"DISUSE_FLAG"
             $lcRequiredUpdateButtonColumnId = $objTable->getRequiredUpdateButtonColumnID(); //"UPDATE"
+            $lcDuplicateButtonColumnId = $objTable->getDupButtonColumnID(); //"DUPLICATE"
 
             //----出力されるタグの属性値
 
@@ -118,13 +119,15 @@
                 // ----1はメンテナンス権限あり
                 // 1はメンテナンス権限あり----
             }else if( $strPrivilege === "2" ){
-                // ----2は参照のみなので更新・廃止ボタンを表示しない
+                // ----2は参照のみなので更新・廃止・複製ボタンを表示しない
                 $aryObjColumn = $objTable->getColumns();
                 $objColumnRUB = $aryObjColumn[$lcRequiredUpdateButtonColumnId];
                 $objColumnRUB->getOutputType($strFormatterId)->setVisible(false);
                 $objColumnRDF = $aryObjColumn[$lcRequiredDisuseFlagColumnId];
                 $objColumnRDF->getOutputType($strFormatterId)->setVisible(false);
-                // 2は参照のみなので更新・廃止ボタンを表示しない----
+                $objColumnDPC = $aryObjColumn[$lcDuplicateButtonColumnId];
+                $objColumnDPC->getOutputType($strFormatterId)->setVisible(false);
+                // 2は参照のみなので更新・廃止・複製ボタンを表示しない----
             }else{
                 // ----0は権限がないので出力しない
                 $intErrorType = 1;
@@ -300,6 +303,34 @@
                             $arrayTempVariantData=array();
                             $chkobj = null;  // RBAC対応 RBACクラスオブジェクト初期化
                             while ( $row = $objQuery->resultFetch() ){
+                                // ----dispRestrictValue対応
+                                $aryDispRestrictValue = $objTable->getDispRestrictValue();
+                                if($aryDispRestrictValue != null){
+                                    $matchFlg = false;
+                                    foreach($aryDispRestrictValue as $columnName => $aryValue){
+                                        if(array_key_exists($columnName, $row)){
+                                            foreach($aryValue as $value){
+                                                //対象のカラムのデータと$aryValueに格納された値が一致した場合は処理を続行
+                                                if($value == "" || $value == null || $value == "null" || $value == "NULL"){
+                                                    if($row[$columnName] == "" || $row[$columnName] == null || $row[$columnName] == "null" || $row[$columnName] == "NULL"){
+                                                        $matchFlg = true;
+                                                    }
+                                                }else{
+                                                    if($row[$columnName] == $value){
+                                                        $matchFlg = true;
+                                                    }
+                                                }
+                                            }
+
+                                            //一致する値が無い場合は、処理をスキップ
+                                            if($matchFlg == false){
+                                                continue 2;
+                                            }
+                                        }
+                                    }
+                                }
+                                // dispRestrictValue対応----
+
                                 // ---- RBAC対応 
                                 // 判定対象レコードのACCESS_AUTHカラムでアクセス権を判定
                                 list($ret,$permission) = chkTargetRecodePermission($objTable->getAccessAuth(),$chkobj,$row);
@@ -590,7 +621,7 @@ EOD;
 
                 if($strOutputFileType == "SafeCSV"){
                     $strOutputStr .= 
-<<<EOD
+<<< EOD
             <form style="display:inline" name="reqToolDL" action="{$g['scheme_n_authority']}/webdbcore/editorBaker.zip">
                 <input type="submit" value="{$g['objMTS']->getSomeMessage("ITAWDCH-STD-346")}" >
             </form>
@@ -780,9 +811,6 @@ EOD;
         $strOutputStr = "";
         // ローカル変数宣言----
         
-        $strOutputStr .= 
-<<<EOD
-EOD;
         //
         return $strOutputStr;
         //
@@ -804,6 +832,8 @@ EOD;
         $checkFormatterId = $retArray[1];
         $objListFormatter = $retArray[2];
 
+        $htmlPrintTableAreaTailPriSome = "";
+        $htmlPrintTableAreaTailCommon = "";
         if($row_counter == 0){
             // ----0件の場合はTABLEではなくメッセージを返却するようハンドリング
             $htmlPrintTableAreaTailCommon = "<br>{$g['objMTS']->getSomeMessage("ITAWDCH-STD-349")}<br>";
@@ -812,13 +842,14 @@ EOD;
             }
             
             if(array_key_exists("privilege", $g)===true){
-                $htmlPrintTableAreaTailPriSome="";
                 if($g['privilege'] === "1"){
                     if(array_key_exists("tail_scene_rec_n0_prv1", $arySetting)===true){
                         $htmlPrintTableAreaTailPriSome=$arySetting['tail_scene_rec_n0_prv1'];
                     }
                     else{
-                        $htmlPrintTableAreaTailPriSome = "{$g['objMTS']->getSomeMessage("ITAWDCH-STD-350")}<br>";
+                        if($objTable->getNoRegisterFlg()===false){
+                            $htmlPrintTableAreaTailPriSome = "{$g['objMTS']->getSomeMessage("ITAWDCH-STD-350")}<br>";
+                        }   
                     }
                 }
                 else if($g['privilege'] === "2"){
@@ -833,13 +864,11 @@ EOD;
             // 0件の場合はTABLEではなくメッセージを返却するようハンドリング----
         }
         else{
-            $htmlPrintTableAreaTailCommon="";
             if(array_key_exists("tail_scene_rec_nx_common", $arySetting)===true){
                 $htmlPrintTableAreaTailCommon = $arySetting['tail_scene_rec_nx_common'];
             }
             //
             if(array_key_exists("privilege", $g)===true){
-                $htmlPrintTableAreaTailPriSome="";
                 if($g['privilege'] === "1"){
                     if(array_key_exists('tail_scene_rec_nx_prv1', $arySetting)===true){
                         $htmlPrintTableAreaTailPriSome=$arySetting['tail_scene_rec_nx_prv1'];
@@ -860,7 +889,7 @@ EOD;
         }
         //
         $strOutputStr = 
-<<<EOD
+<<< EOD
                 {$htmlPrintTableAreaTailCommon}
                 {$htmlPrintTableAreaTailPriSome}
 EOD;

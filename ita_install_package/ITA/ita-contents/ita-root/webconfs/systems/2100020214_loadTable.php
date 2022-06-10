@@ -408,7 +408,10 @@ Ansible（Pioneer）代入値自動登録設定
 
             $strFxName = "";
 
-            $strMenuIDNumeric = $rowData['MENU_ID'];
+            $strMenuIDNumeric = null;
+            if(is_array($rowData) && array_key_exists('MENU_ID', $rowData)){
+                $strMenuIDNumeric = $rowData['MENU_ID'];
+            }
 
             $strQuery = "SELECT "
                        ." TAB_1.COLUMN_LIST_ID  KEY_COLUMN "
@@ -473,6 +476,7 @@ Ansible（Pioneer）代入値自動登録設定
 
         $objVarBFmtReg = new SelectTabBFmt();
         $objVarBFmtReg->setFADNoOptionMessageText($strSetInnerText);
+        $objVarBFmtReg->setFunctionForGetSelectList($objFunction03);
 
         $objVarBFmtReg->setSelectWaitingText($strSetInnerText);
         $objOTForReg = new OutputType(new ReqTabHFmt(), $objVarBFmtReg);
@@ -811,7 +815,10 @@ Ansible（Pioneer）代入値自動登録設定
 
             $strFxName = "";
 
-            $strPatternIdNumeric = $rowData['PATTERN_ID'];
+            $strPatternIdNumeric = null;
+            if(is_array($rowData) && array_key_exists('PATTERN_ID', $rowData)){
+                $strPatternIdNumeric = $rowData['PATTERN_ID'];
+            }
 
             $strQuery = "SELECT "
                        ." TAB_1.VARS_LINK_ID       KEY_COLUMN "
@@ -885,6 +892,7 @@ Ansible（Pioneer）代入値自動登録設定
 
         // フォームの表示直後、トリガーカラムが選ばれていない場合のメッセージ
         $objVarBFmtReg->setSelectWaitingText($strSetInnerText);
+        $objVarBFmtReg->setFunctionForGetSelectList($objFunction03);
 
         // フォームの表示後、ユーザによりトリガーカラムが選ばれたが、選べる選択肢がなかった場合のメッセージ
         $objVarBFmtReg->setFADNoOptionMessageText($strSetInnerText);
@@ -1055,7 +1063,10 @@ Ansible（Pioneer）代入値自動登録設定
 
             $strFxName = "";
 
-            $strPatternIdNumeric = $rowData['PATTERN_ID'];
+            $strPatternIdNumeric = null;
+            if(is_array($rowData) && array_key_exists('PATTERN_ID', $rowData)){
+                $strPatternIdNumeric = $rowData['PATTERN_ID'];
+            }
 
             $strQuery = "SELECT "
                        ." TAB_1.VARS_LINK_ID       KEY_COLUMN "
@@ -1131,6 +1142,7 @@ Ansible（Pioneer）代入値自動登録設定
 
         // フォームの表示直後、トリガーカラムが選ばれていない場合のメッセージ
         $objVarBFmtReg->setSelectWaitingText($strSetInnerText);
+        $objVarBFmtReg->setFunctionForGetSelectList($objFunction03);
 
         // フォームの表示後、ユーザによりトリガーカラムが選ばれたが、選べる選択肢がなかった場合のメッセージ
         $objVarBFmtReg->setFADNoOptionMessageText($strSetInnerText);
@@ -1197,6 +1209,19 @@ Ansible（Pioneer）代入値自動登録設定
 
     //コンテンツのソースがヴューの場合、登録/更新の対象とする
     $c->setHiddenMainTableColumn(true);
+
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('NULL_DATA_HANDLING_FLG');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_VALID_INVALID_MASTER_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'FLAG_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'FLAG_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
 
     $table->addColumn($c);
 

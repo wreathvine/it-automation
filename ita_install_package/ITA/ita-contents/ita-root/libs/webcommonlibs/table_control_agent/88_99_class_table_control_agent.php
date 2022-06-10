@@ -65,6 +65,8 @@ class TableControlAgent {
 
 	protected $strJnlBtnColId;	//"WEB_BUTTON_JOURNAL"
 
+	protected $strDupBtnColId;	//"WEB_BUTTON_DUPLICATE"
+
 	//----参照
 	protected $objColGroup;  // as ColGroup ヘッダの表示構成をツリー形式で保持
 	protected $aryObjFormatter;  // as array of Formatter
@@ -93,8 +95,11 @@ class TableControlAgent {
 
 	protected $boolAccessAuth;    // ACCESS_AUTH Column flag indicator  true:yes false:no
 
-        // #28enomoto Add
-        protected $strAccessAuthColumnName; // ACCESS_AUTH Column Name
+    protected $strAccessAuthColumnName; // ACCESS_AUTH Column Name
+
+    protected $dispRestrictValue;
+
+	protected $noRegisterFlg;
 
 	public function __construct($strDBMainTableId, $strRIColumnId, $strRIColumnLabel="", $strDBJournalTableId=null, $arrayVariant=array()){
 		global $g;
@@ -121,6 +126,8 @@ class TableControlAgent {
 
 		$this->strRIColumnLabel = $strRIColumnLabel;
 
+		$this->noRegisterFlg = false;
+
 		$arrayVariant['TT_SYS_00_ROW_IDENTIFY_LABEL'] = $strRIColumnLabel;
 
 		$strJnlSeqNoColId = isset($arrayVariant['TT_SYS_01_JNL_SEQ_ID'])?$arrayVariant['TT_SYS_01_JNL_SEQ_ID']:"JOURNAL_SEQ_NO";
@@ -132,6 +139,7 @@ class TableControlAgent {
 		$strUpdateColId = isset($arrayVariant['TT_SYS_NDB_UPDATE_ID'])?$arrayVariant['TT_SYS_NDB_UPDATE_ID']:"UPDATE";
 
 		$strJnlColId = isset($arrayVariant['TT_SYS_07_JOURNAL_ID'])?$arrayVariant['TT_SYS_07_JOURNAL_ID']:"WEB_BUTTON_JOURNAL";
+		$strDupColId = isset($arrayVariant['TT_SYS_08_DUPLICATE_ID'])?$arrayVariant['TT_SYS_08_DUPLICATE_ID']:"WEB_BUTTON_DUPLICATE";
 
 		//----Prepare系・必須カラム名の設定
 		$this->setRowIdentifyColumnID($strRIColumnId);
@@ -143,6 +151,7 @@ class TableControlAgent {
 		$this->setRequiredRowEditByFileColumnID($strRowEditByFileColId);
 		$this->setRequiredUpdateButtonColumnID($strUpdateColId);
 		$this->setJnlButtonColumnID($strJnlColId);
+		$this->setDupButtonColumnID($strDupColId);
 		//Prepare系・必須カラム名の設定----
 
 		$strNoteColId = isset($arrayVariant['TT_SYS_04_NOTE_ID'])?$arrayVariant['TT_SYS_04_NOTE_ID']:"NOTE";
@@ -264,6 +273,13 @@ class TableControlAgent {
 	}
 	public function setShareTableAlias($strAlias){
 		$this->shareTableAlias = $strAlias;
+	}
+
+	public function getNoRegisterFlg(){
+		return $this->noRegisterFlg;
+	}
+	public function setNoRegisterFlg($boolRegisterFlg){
+		$this->noRegisterFlg = $boolRegisterFlg;
 	}
 
 	//----main(UTN)テーブル関係
@@ -679,7 +695,7 @@ class TableControlAgent {
 		return $this->strPrintingTableId;
 	}
 
-	public function getPrintFormat($strFormatterId, $strIdOfTableTag=null, $strNumberForRI=null){
+	public function getPrintFormat($strFormatterId, $strIdOfTableTag=null, $strNumberForRI=null, $historyCsvFlg=null){
 		global $g;
 		$retStrVal = "";
 		$intControlDebugLevel01 = 250;
@@ -702,7 +718,11 @@ class TableControlAgent {
 			$this->setPrintingTableID($strNowPrintingId);
 			//瞬間存在値なのでセット----
 
-			$retStrVal = $this->aryObjFormatter[$strFormatterId]->format($strIdOfTableTag);
+			if($strFormatterId == "csv" && $historyCsvFlg == 1){
+				$retStrVal = $this->aryObjFormatter[$strFormatterId]->format($strIdOfTableTag, $historyCsvFlg);
+			}else{
+				$retStrVal = $this->aryObjFormatter[$strFormatterId]->format($strIdOfTableTag);
+			}
 
 			//----瞬間存在値なのでクリア
 			$this->setPrintingTableID(null);
@@ -712,6 +732,42 @@ class TableControlAgent {
 		dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
 		return $retStrVal;
 	}
+	public function getPrintFormatBulkExcel($strFormatterId, $strIdOfTableTag=null, $strNumberForRI=null, $taskId=null, $fileName=null, $menuId=null){
+        global $g;
+
+        $retStrVal = "";
+        $intControlDebugLevel01 = 250;
+        $strFxName = __FUNCTION__;
+        $result = false;
+
+        dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-3",array(__FILE__,$strFxName)),$intControlDebugLevel01);
+
+        if(array_key_exists($strFormatterId,$this->aryObjFormatter)===true){
+            $strNowPrintingId="";
+            if( $strNumberForRI != null ){
+                $this->aryObjFormatter[$strFormatterId]->setNumberForRI($strNumberForRI);
+            }
+
+            if( $strIdOfTableTag === null ){
+                $strNowPrintingId = $this->aryObjFormatter[$strFormatterId]->getPrintTableID();
+            }else{
+                $strNowPrintingId = $strIdOfTableTag;
+            }
+
+            //----瞬間存在値なのでセット
+            $this->setPrintingTableID($strNowPrintingId);
+
+            //瞬間存在値なのでセット----
+            $result = $this->aryObjFormatter[$strFormatterId]->formatBulkExcel($taskId, $fileName, $menuId);
+
+            //----瞬間存在値なのでクリア
+            $this->setPrintingTableID(null);
+            //瞬間存在値なのでクリア----
+        }
+
+        dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
+        return $result;
+    }
 
 	public function setGeneObject($dlcKey, $dlcObject, $boolKeyUnset=false){
 		$retBool = true;
@@ -770,7 +826,7 @@ class TableControlAgent {
 	}
 	//----シノニム
 	public function setRIColumnID($strColIdText){
-		return $this->setRowIdentifyColumnID($strColIdText);
+		$this->strRowIdentifyColumnId = $strColIdText;
 	}
 	//シノニム----
 
@@ -810,12 +866,20 @@ class TableControlAgent {
 		return $this->strJnlBtnColId;
 	}
 
+	public function getDupButtonColumnID(){
+		return $this->strDupBtnColId;
+	}
+
 	public function setRequiredUpdateButtonColumnID($strColIdText){
 		$this->strNDBUpdateBtnColId = $strColIdText;
 	}
 
 	public function setJnlButtonColumnID($strColIdText){
 		$this->strJnlBtnColId = $strColIdText;
+	}
+
+	public function setDupButtonColumnID($strColIdText){
+		$this->strDupBtnColId = $strColIdText;
 	}
 
 	public function getRequiredDisuseColumnID(){
@@ -865,6 +929,7 @@ class TableControlAgent {
 		$strRowEditByFileColLabel = isset($arrayVariant['TT_SYS_NDB_ROW_EDIT_BY_FILE_LABEL'])?$arrayVariant['TT_SYS_NDB_ROW_EDIT_BY_FILE_LABEL']:$g['objMTS']->getSomeMessage("ITAWDCH-STD-18007");
 		$strUpdateColLabel = isset($arrayVariant['TT_SYS_NDB_UPDATE_LABEL'])?$arrayVariant['TT_SYS_NDB_UPDATE_LABEL']:$g['objMTS']->getSomeMessage("ITAWDCH-STD-18008");
 		$strJournalColLabel = $g['objMTS']->getSomeMessage("ITAWDCH-STD-19032");
+		$strDuplicateColLabel = $g['objMTS']->getSomeMessage("ITAWDCH-STD-19033");
 		//
 		$boolDefaultColumnsSet = isset($arrayVariant['DEFAULT_COLUMNS_SET'])?$arrayVariant['DEFAULT_COLUMNS_SET']:true;
 		//
@@ -881,6 +946,8 @@ class TableControlAgent {
 			$this->addColumn($c);
 			//
 			$c = new JournalBtnColumn($this->getJnlButtonColumnID(), $strJournalColLabel);
+            $this->addColumn($c);
+			$c = new DuplicateBtnColumn($this->getDupButtonColumnID(), $strDuplicateColLabel);
             $this->addColumn($c);
 			$c = new UpdBtnColumn($this->getRequiredUpdateButtonColumnID(), $strUpdateColLabel, $this->getRequiredDisuseColumnID());
 			$this->addColumn($c);
@@ -989,6 +1056,7 @@ class TableControlAgent {
                                                                               $pkeyColumnName,
                                                                               $pkeyID);
                             $objQuery = $g['objDBCA']->sqlPrepare($sql);
+                            $error_msg1 = "[%s:%s]:DB Access Error. (SQL: %s)";
                             if($objQuery->getStatus()===false){
                                 $message = sprintf($error_msg1,basename(__FILE__),__LINE__,$sql);
                                 $message .= "\n" . $objQuery->getLastError();
@@ -1309,7 +1377,7 @@ class TableControlAgent {
         catch (Exception $e){
             $tmpErrMsgBody = $e->getMessage();
             dev_log($tmpErrMsgBody, $intControlDebugLevel01);
-            web_log($g['objMTS']->getSomeMessage("ITAWDCH-ERR-5001",array($tmpErrMsgBody,$intErrorStatus)));
+            web_log($g['objMTS']->getSomeMessage("ITAWDCH-ERR-5001",array($tmpErrMsgBody,$this->getSelfInfoForLog())));
             webRequestForceQuitFromEveryWhere(500,90410103);
             exit();
         }
@@ -1330,11 +1398,15 @@ class TableControlAgent {
 	}
 
 	public function readAllFromFileOnce($miFilePath, &$strBody){
-		$bool = file_exists($miFilePath);
+		#1845 
+		$bool = is_file($miFilePath);
 		if( $bool === true ){
-			$filepointer = fopen($miFilePath ,"rb");
-			$strBody = fread($filepointer, filesize($miFilePath));
-			fclose($filepointer);
+			$filesize = filesize($miFilePath);
+			if( $filesize != 0 ){
+				$filepointer = fopen($miFilePath ,"rb");
+				$strBody = fread($filepointer, filesize($miFilePath));
+				fclose($filepointer);
+			}
 		}
 		return $bool;
 	}
@@ -1345,6 +1417,15 @@ class TableControlAgent {
 		return getMainTableColumnStatus($mode, $this);
 	}
 	//デバッグ用----
+
+	//----特定の値のみを表示させる
+	public function setDispRestrictValue($arrayValue = array()){
+		$this->dispRestrictValue = $arrayValue;
+	}
+	public function getDispRestrictValue(){
+		return $this->dispRestrictValue;
+	}
+	//----特定の値のみを表示させる
 
 }
 

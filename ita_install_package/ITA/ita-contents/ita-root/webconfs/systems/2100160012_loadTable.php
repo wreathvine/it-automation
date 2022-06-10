@@ -1,5 +1,5 @@
 <?php
-//   Copyright 2019 NEC Corporation
+//   Copyright 2021 NEC Corporation
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -38,12 +38,23 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     $table->setAccessAuth(true);    // データごとのRBAC設定
 
-
-    // 他メニュー連携ID
-    $c = new TextColumn('LINK_ID', $g['objMTS']->getSomeMessage("ITACREPAR-MNU-105001"));
-    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-105002"));//エクセル・ヘッダでの説明
+    // メニュー
+    $c = new IDColumn('MENU_ID', $g['objMTS']->getSomeMessage("ITACREPAR-MNU-105045"),'A_MENU_LIST','MENU_ID','MENU_NAME','');
+    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-105046"));//エクセル・ヘッダでの説明
     $c->getOutputType('update_table')->setVisible(false);
     $c->getOutputType('register_table')->setVisible(false);
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('MENU_ID');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'A_MENU_LIST_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'MENU_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'MENU_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     // 表示順序
@@ -100,6 +111,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-105018"));//エクセル・ヘッダでの説明
     $c->getOutputType('update_table')->setVisible(false);
     $c->getOutputType('register_table')->setVisible(false);
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('INPUT_METHOD_ID');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'F_INPUT_METHOD_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'INPUT_METHOD_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'INPUT_METHOD_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     // SENSITIVE設定
@@ -107,13 +130,37 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-105020"));//エクセル・ヘッダでの説明
     $c->getOutputType('update_table')->setVisible(false);
     $c->getOutputType('register_table')->setVisible(false);
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('SENSITIVE_FLAG');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_SENSITIVE_FLAG_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'VARS_SENSITIVE',
+        'TTT_GET_TARGET_COLUMN_ID'=>'VARS_SENSITIVE_SELECT',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
-    // マスターカラム
-    $c = new IDColumn('MASTER_COL_FLAG', $g['objMTS']->getSomeMessage("ITACREPAR-MNU-105021"),'D_FLAG_LIST_01','FLAG_ID','FLAG_NAME','');
+    //既存メニューフラグ
+    $c = new IDColumn('ORIGINAL_MENU_FLAG', $g['objMTS']->getSomeMessage("ITACREPAR-MNU-105021"),'D_FLAG_LIST_01','FLAG_ID','FLAG_NAME','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-105022"));//エクセル・ヘッダでの説明
     $c->getOutputType('update_table')->setVisible(false);
     $c->getOutputType('register_table')->setVisible(false);
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('ORIGINAL_MENU_FLAG');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'D_FLAG_LIST_01_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'FLAG_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'FLAG_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
 

@@ -65,6 +65,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setEvent('register_table', 'onchange', 'Mix2_1_contrast_menu_reg');
     $c->setHiddenMainTableColumn(true);
     $c->setRequired(true);
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('CONTRAST_LIST_ID');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'D_CONTRAST_LIST_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'CONTRAST_LIST_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'PULLDOWN',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     //'表示項目名'
@@ -189,9 +201,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
         $strFxName = "";
 
-        $strMenuIDNumeric = $rowData['CONTRAST_LIST_ID'];
-
-        $strMenuIDNumeric = $rowData['CONTRAST_LIST_ID'];
+        $strMenuIDNumeric = null;
+        if(is_array($rowData) && array_key_exists('CONTRAST_LIST_ID', $rowData)){
+            $strMenuIDNumeric = $rowData['CONTRAST_LIST_ID'];
+        }
 
         $strQuery = "SELECT *"
                    ."FROM "
@@ -305,6 +318,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     $objVarBFmtReg = new SelectTabBFmt();
     $objVarBFmtReg->setFADNoOptionMessageText($strSetInnerText);
+    $objVarBFmtReg->setFunctionForGetSelectList($objFunction03);
 
     $objVarBFmtReg->setSelectWaitingText($strSetInnerText);
     $objOTForReg = new OutputType(new ReqTabHFmt(), $objVarBFmtReg);
@@ -467,7 +481,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
         $strFxName = "";
 
-        $strMenuIDNumeric = $rowData['CONTRAST_LIST_ID'];
+        $strMenuIDNumeric = null;
+        if(is_array($rowData) && array_key_exists('CONTRAST_LIST_ID', $rowData)){
+            $strMenuIDNumeric = $rowData['CONTRAST_LIST_ID'];
+        }
 
         $strQuery = "SELECT *"
                    ."FROM "
@@ -579,6 +596,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     $objVarBFmtReg = new SelectTabBFmt();
     $objVarBFmtReg->setFADNoOptionMessageText($strSetInnerText);
+    $objVarBFmtReg->setFunctionForGetSelectList($objFunction03);
 
     $objVarBFmtReg->setSelectWaitingText($strSetInnerText);
     $objOTForReg = new OutputType(new ReqTabHFmt(), $objVarBFmtReg);

@@ -78,7 +78,7 @@ func_set_total_cnt() {
     fi
 
     if [ "$ANSIBLE_FLG" -eq 1 ]; then
-        PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+5))
+        PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+6))
     fi
 
     if [ "$COBBLER_FLG" -eq 1 ]; then
@@ -86,18 +86,6 @@ func_set_total_cnt() {
     fi
 
     if [ "$TERRAFORM_FLG" -eq 1 ]; then
-        PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
-    fi
-
-    if [ "$MATERIAL_FLG" -eq 1 ]; then
-        PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
-    fi
-    
-    if [ "$MATERIAL2_FLG" -eq 1 ]; then
-        PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
-    fi
-    
-    if [ "$MATERIAL4_FLG" -eq 1 ]; then
         PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
     fi
 
@@ -115,6 +103,10 @@ func_set_total_cnt() {
 
     if [ "$HOSTGROUP_FLG" -eq 1 ]; then
         PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
+    fi
+
+    if [ "$CICD_FLG" -eq 1 ]; then
+        PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+4))
     fi
 
     echo $PROCCESS_TOTAL_CNT
@@ -142,18 +134,6 @@ func_install_messasge() {
         MESSAGE="Terraform driver"
     fi
 
-    if [ MATERIAL_FLG = ${1} ]; then
-        MESSAGE="Material"
-    fi
-    
-    if [ MATERIAL2_FLG = ${1} ]; then
-        MESSAGE="Material2"
-    fi
-    
-    if [ MATERIAL4_FLG = ${1} ]; then
-        MESSAGE="Material4"
-    fi
-    
     if [ CREATEPARAM_FLG = ${1} ]; then
         MESSAGE="Createparam"
     fi
@@ -168,6 +148,10 @@ func_install_messasge() {
 
     if [ HOSTGROUP_FLG = ${1} ]; then
         MESSAGE="Hostgroup"
+    fi
+
+    if [ CICD_FLG = ${1} ]; then
+        MESSAGE="CI/CD for IaC"
     fi
 
     echo "$MESSAGE"
@@ -352,13 +336,11 @@ CREATE_TABLES=(
     ANSIBLE_FLG
     COBBLER_FLG
     TERRAFORM_FLG
-    MATERIAL_FLG
-    MATERIAL2_FLG
-    MATERIAL4_FLG
     CREATEPARAM_FLG
     CREATEPARAM2_FLG
     CREATEPARAM3_FLG
     HOSTGROUP_FLG
+    CICD_FLG
 )
 
 #リリースファイル設置作成関数用配列
@@ -367,11 +349,9 @@ RELEASE_PLASE=(
     ita_ansible-driver
     ita_cobbler-driver
     ita_terraform-driver
-    ita_material
-    ita_material2
-    ita_material4
     ita_createparam
     ita_hostgroup
+    ita_cicd
 )
 
 #コンフィグファイル設置確認作成関数用配列
@@ -379,6 +359,7 @@ RELEASE_PLASE=(
 CONFIG_PLACE=(
     ANSIBLE_FLG
     COBBLER_FLG
+    CICD_FLG
 )
 
 #サービスの登録作成関数用配列
@@ -388,12 +369,10 @@ SERVICES_SET=(
     ANSIBLE_FLG
     COBBLER_FLG
     TERRAFORM_FLG
-    MATERIAL_FLG
-    MATERIAL2_FLG
-    MATERIAL4_FLG
     CREATEPARAM_FLG
     CREATEPARAM2_FLG
     HOSTGROUP_FLG
+    CICD_FLG
 )
 
 #クーロンタブ設定関数用配列
@@ -415,13 +394,11 @@ BASE_FLG=0
 ANSIBLE_FLG=0
 COBBLER_FLG=0
 TERRAFORM_FLG=0
-MATERIAL_FLG=0
-MATERIAL2_FLG=0
-MATERIAL4_FLG=0
 CREATEPARAM_FLG=0
 CREATEPARAM2_FLG=0
 CREATEPARAM3_FLG=0
 HOSTGROUP_FLG=0
+CICD_FLG=0
 
 declare -A REPLACE_CHAR;
 REPLACE_CHAR=(
@@ -433,7 +410,7 @@ REPLACE_CHAR=(
 
 DRIVER_CNT=0
 ANSWER_DRIVER_CNT=0
-ARR_DRIVER_CHK=('ita_base' 'ansible_driver' 'cobbler_driver' 'terraform_driver' 'material' 'createparam' 'hostgroup')
+ARR_DRIVER_CHK=('ita_base' 'ansible_driver' 'cobbler_driver' 'terraform_driver' 'createparam' 'hostgroup' 'cicd_for_iac')
 
 CERTIFICATE_FILE=''
 PRIVATE_KEY_FILE=''
@@ -488,11 +465,6 @@ while read LINE; do
             if [ "$val" = 'yes' ]; then
                 TERRAFORM_FLG=1
             fi
-        elif [ "$key" = 'material' ]; then
-            func_answer_format_check
-            if [ "$val" = 'yes' ]; then
-                MATERIAL_FLG=1
-            fi
         elif [ "$key" = 'createparam' ]; then
             func_answer_format_check
             if [ "$val" = 'yes' ]; then
@@ -502,6 +474,11 @@ while read LINE; do
             func_answer_format_check
             if [ "$val" = 'yes' ]; then
                 HOSTGROUP_FLG=1
+            fi
+        elif [ "$key" = 'cicd_for_iac' ]; then
+            func_answer_format_check
+            if [ "$val" = 'yes' ]; then
+                CICD_FLG=1
             fi
         fi
     fi
@@ -543,14 +520,14 @@ fi
 if [ $TERRAFORM_FLG -eq 1 ]; then
     log "INFO : Installation target : terraform_driver"
 fi
-if [ $MATERIAL_FLG -eq 1 ]; then
-    log "INFO : Installation target : material"
-fi
 if [ $CREATEPARAM_FLG -eq 1 ]; then
     log "INFO : Installation target : create_param"
 fi
 if [ $HOSTGROUP_FLG -eq 1 ]; then
     log "INFO : Installation target : hostgroup"
+fi
+if [ $CICD_FLG -eq 1 ]; then
+    log "INFO : Installation target : CI/CD for IaC"
 fi
 
 
@@ -574,33 +551,6 @@ if [ "$TERRAFORM_FLG" -eq 1 ]; then
         log 'WARNING : Terraform driver has already been installed.'
         TERRAFORM_FLG=0
     fi
-fi
-
-if [ "$MATERIAL_FLG" -eq 1 ]; then
-    if test -e "$ITA_DIRECTORY"/ita-root/libs/release/ita_material ; then
-        log 'WARNING : Material has already been installed.'
-        MATERIAL_FLG=0
-    fi
-fi
-
-if test -e "$ITA_DIRECTORY"/ita-root/libs/release/ita_material2 ; then
-    MATERIAL2_FLG=0
-elif [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_ansible-driver" ] && [ "$MATERIAL_FLG" -eq 1 ] ; then
-    MATERIAL2_FLG=1
-elif [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_material" ] && [ "$ANSIBLE_FLG" -eq 1 ] ; then
-    MATERIAL2_FLG=1
-elif [ "$ANSIBLE_FLG" -eq 1 ] && [ "$MATERIAL_FLG" -eq 1 ] ; then
-    MATERIAL2_FLG=1
-fi
-
-if test -e "$ITA_DIRECTORY"/ita-root/libs/release/ita_material4 ; then
-    MATERIAL4_FLG=0
-elif [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_terraform-driver" ] && [ "$MATERIAL_FLG" -eq 1 ] ; then
-    MATERIAL4_FLG=1
-elif [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_material" ] && [ "$TERRAFORM_FLG" -eq 1 ] ; then
-    MATERIAL4_FLG=1
-elif [ "$TERRAFORM_FLG" -eq 1 ] && [ "$MATERIAL_FLG" -eq 1 ] ; then
-    MATERIAL4_FLG=1
 fi
 
 if [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_createparam" ] &&  [ -e "$ITA_DIRECTORY/ita-root/libs/release/ita_ansible-driver" ] ; then
@@ -634,6 +584,13 @@ if [ "$HOSTGROUP_FLG" -eq 1 ]; then
     if test -e "$ITA_DIRECTORY"/ita-root/libs/release/ita_hostgroup ; then
         log 'WARNING : Hostgroup has already been installed.'
         HOSTGROUP_FLG=0
+    fi
+fi
+
+if [ "$CICD_FLG" -eq 1 ]; then
+    if test -e "$ITA_DIRECTORY"/ita-root/libs/release/ita_cicd ; then
+        log 'WARNING : CI/CD for IaC has already been installed.'
+        CICD_FLG=0
     fi
 fi
 
@@ -1019,64 +976,87 @@ if test -e "$ITA_DIRECTORY"/ita-root/libs/release/ita_base ; then
     fi
 fi
 
-if [ "$DRIVER_CNT" -ne 0 ]; then
 
-    ###################################################
-    #データリレイストレージ作成
-    ###################################################
-    for VAL in ${CREATE_DATARELAYSTORAGE[@]}; do
-        func_create_datarelaystorage $VAL
+###################################################
+#データリレイストレージ作成
+###################################################
+for VAL in ${CREATE_DATARELAYSTORAGE[@]}; do
+    func_create_datarelaystorage $VAL
+done
+
+###################################################
+#テーブル作成
+###################################################
+if ! test -e "$BIN_DIR/create-tables-and-views.sh" ; then
+    log "WARNING : create-tables-and-views.sh does not be found."
+else
+    for VAL in ${CREATE_TABLES[@]}; do
+        func_create_tables $VAL
     done
 
-    ###################################################
-    #テーブル作成
-    ###################################################
-    if ! test -e "$BIN_DIR/create-tables-and-views.sh" ; then
-        log "WARNING : create-tables-and-views.sh does not be found."
-    else
-        for VAL in ${CREATE_TABLES[@]}; do
-            func_create_tables $VAL
-        done
-    
-    fi
-
-    ###################################################
-    #リリースファイル設置
-    ###################################################
-    for VAL in ${RELEASE_PLASE[@]}; do
-        func_release_place $VAL
-    done
-
-    ###################################################
-    #コンフィグファイル設置確認
-    ###################################################
-    for VAL in ${CONFIG_PLACE[@]}; do
-        func_config_place $VAL
-    done
-    
-    ###################################################
-    #サービス登録
-    ###################################################
-    if [ ! -e "$BIN_DIR/register-services_RHEL.sh" ]; then
-        log 'WARNING : register-services_RHEL.sh does not be found.'
-    else
-        for VAL in ${SERVICES_SET[@]}; do
-            func_services_set $VAL
-        done
-    
-    fi
-    ###################################################
-    #クーロンタブ設定
-    ###################################################
-    if ! test -e "$BIN_DIR/register-crontab.sh" ; then
-        log "WARNING : register-crontab.sh does not be found."
-    else
-        for VAL in ${CRONTAB_SET[@]}; do
-            func_crontab_set $VAL
-        done
-    fi
 fi
 
+###################################################
+#Ansible-driver用awxユーザ、sshキー作成
+log "INFO : `printf %02d $PROCCESS_CNT`/$PROCCESS_TOTAL_CNT Create awx user and ssh key for Ansible driver."
+###################################################
+if [ "$ANSIBLE_FLG" -eq 1 ]; then
+
+    #check awx user
+    cat /etc/group | grep ^awx: >> "$LOG_FILE" 2>&1
+    if [ $? -ne 0 ]; then
+        #create awx user
+        useradd awx >> "$LOG_FILE" 2>&1
+    fi
+
+    #create ssh key
+    if test -e /home/awx/.ssh/rsa_awx_key ; then
+        rm -f /home/awx/.ssh/rsa_awx_key*
+    fi
+    su - awx -c 'ssh-keygen -t rsa -b 4096 -C "" -f ~/.ssh/rsa_awx_key -N ""' >> "$LOG_FILE" 2>&1
+    su - awx -c 'cat ~/.ssh/rsa_awx_key.pub >> ~/.ssh/authorized_keys' >> "$LOG_FILE" 2>&1
+    chmod 600 /home/awx/.ssh/authorized_keys >> "$LOG_FILE" 2>&1
+    cat /home/awx/.ssh/rsa_awx_key | base64 | tr '[A-Za-z]' '[N-ZA-Mn-za-m]' > "$ITA_DIRECTORY"/ita-root/uploadfiles/2100040702/ANS_GIT_SSH_KEY_FILE/0000000001/rsa_awx_key
+    cat /home/awx/.ssh/rsa_awx_key | base64 | tr '[A-Za-z]' '[N-ZA-Mn-za-m]' > "$ITA_DIRECTORY"/ita-root/uploadfiles/2100040702/ANS_GIT_SSH_KEY_FILE/0000000001/old/0000000001/rsa_awx_key
+
+    PROCCESS_CNT=$((PROCCESS_CNT+1))
+fi
+
+###################################################
+#リリースファイル設置
+###################################################
+for VAL in ${RELEASE_PLASE[@]}; do
+    func_release_place $VAL
+done
+
+###################################################
+#コンフィグファイル設置確認
+###################################################
+for VAL in ${CONFIG_PLACE[@]}; do
+    func_config_place $VAL
+done
+
+###################################################
+#サービス登録
+###################################################
+if [ ! -e "$BIN_DIR/register-services_RHEL.sh" ]; then
+    log 'WARNING : register-services_RHEL.sh does not be found.'
+else
+    for VAL in ${SERVICES_SET[@]}; do
+        func_services_set $VAL
+    done
+
+fi
+###################################################
+#クーロンタブ設定
+###################################################
+if ! test -e "$BIN_DIR/register-crontab.sh" ; then
+    log "WARNING : register-crontab.sh does not be found."
+else
+    for VAL in ${CRONTAB_SET[@]}; do
+        func_crontab_set $VAL
+    done
+fi
 
 
 if [ "$BASE_FLG" -eq 1 ]; then
@@ -1101,10 +1081,19 @@ if [ "$BASE_FLG" -eq 1 ]; then
     ################################################################################################
     log "INFO : `printf %02d $PROCCESS_CNT`/$PROCCESS_TOTAL_CNT Restart Apache(httpd) service."
     ################################################################################################
+    systemctl daemon-reload 2>&1 >> "$LOG_FILE"
     systemctl restart httpd 2>> "$LOG_FILE" | tee -a "$LOG_FILE"
     systemctl status httpd 2>&1 >> "$LOG_FILE"
     if [ $? -ne 0 ]; then
         log "WARNING : Failed to restart Apache(httpd) service."
+    fi
+
+    if [ ${LINUX_OS} = 'RHEL8' -o ${LINUX_OS} = 'CentOS8' ]; then
+        systemctl restart php-fpm 2>> "$LOG_FILE" | tee -a "$LOG_FILE"
+        systemctl status php-fpm 2>&1 >> "$LOG_FILE"
+        if [ $? -ne 0 ]; then
+            log "WARNING : Failed to restart php-fpm service."
+        fi
     fi
 fi
 

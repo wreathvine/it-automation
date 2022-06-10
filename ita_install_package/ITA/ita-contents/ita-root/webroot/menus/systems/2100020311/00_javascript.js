@@ -393,6 +393,58 @@ callback.prototype = {
             window.alert(getSomeMessage("ITAWDCC90101"));
         }
         showForDeveloper(result);
+    },
+    Mix1_1_duplicate : function( result ){
+        var strMixOuterFrameName = 'Mix2_Nakami';
+        var strMixInnerFramePrefix = 'Mix2_';
+  
+        var ary_result = getArrayBySafeSeparator(result);
+        checkTypicalFlagInHADACResult(ary_result);
+  
+        var resultContentTag = ary_result[2];
+  
+        var objAlertArea=$('#'+strMixOuterFrameName+' .alert_area').get()[0];
+  
+        if( ary_result[0] == "000" ){
+  
+            var objRegiterArea=$('#'+strMixOuterFrameName+' .table_area').get()[0];
+  
+            switch( ary_result[1] ){
+                case "100":
+                    window.alert(resultContentTag);
+                    objRegiterArea.innerHTML = "";
+                    Filter1Tbl_search_async();
+                    break;
+                case "201":
+                    // エラーなく登録完了
+                default:                
+                    objRegiterArea.innerHTML="";
+                    $(objRegiterArea).html(resultContentTag);
+  
+                    objAlertArea.style.display = "none";
+                    
+                    adjustTableAuto (strMixInnerFramePrefix+'1',
+                                    "sDefault",
+                                    "fakeContainer_Register2",
+                                    webStdTableHeight,
+                                    webStdTableWidth );
+                    linkDateInputHelper(strMixOuterFrameName);
+            }
+        }else if( ary_result[0] == "002" ){
+            window.alert(getSomeMessage("ITAWDCC90102"));
+            objAlertArea.innerHTML = resultContentTag;
+            objAlertArea.style.display = "block";
+            setInputButtonDisable(strMixOuterFrameName,'disableAfterPush',false);
+        }else if( ary_result[0] == "003" ){
+            var objRegiterArea=$('#'+strMixOuterFrameName+' .table_area').get()[0];
+            objRegiterArea.innerHTML="";
+            objAlertArea.innerHTML = resultContentTag;
+            objAlertArea.style.display = "block";
+        }else{
+            window.alert(getSomeMessage("ITAWDCC90101"));
+        }
+  
+        showForDeveloper(result);
     }
     //---- ここからカスタマイズした場合の[callback]メソッド配置域
     ,
@@ -517,7 +569,15 @@ callback.prototype = {
 
         var ary_result = getArrayBySafeSeparator(result);
 
-        checkTypicalFlagInHADACResult(ary_result);
+        if( !(ary_result instanceof Array) ){
+            //----配列ではなかった
+            //配列ではなかった----
+        }else{
+            if( ary_result[0]=='redirectOrderForHADACClient' ){
+                redirectTo(ary_result[1],ary_result[2],ary_result,3);
+                return;
+            }
+        }
 
         if( ary_result[0] == "000" ){
             var ary_element = getArrayBySafeSeparator(ary_result[2]);
@@ -599,8 +659,16 @@ callback.prototype = {
 
         var ary_result = getArrayBySafeSeparator(result);
 
-        checkTypicalFlagInHADACResult(ary_result);
-
+        if( !(ary_result instanceof Array) ){
+            //----配列ではなかった
+            //配列ではなかった----
+        }else{
+            if( ary_result[0]=='redirectOrderForHADACClient' ){
+                redirectTo(ary_result[1],ary_result[2],ary_result,3);
+                return;
+            }
+        }
+        
         if( ary_result[0] == "000" ){
             var ary_element = getArrayBySafeSeparator(ary_result[2]);
             
@@ -900,7 +968,7 @@ function Filter1Tbl_search_control( exec_flag_var, value1 ){
                 // 自動開始制御タグがない場合は、システムエラー扱い、とする。
                 // システムエラーが発生しました。
                 alert( getSomeMessage("ITAWDCC20205") );
-                exit;
+                exec_flag_ret = false;
             }else{
                 if( objFCSL.value == 'on' ){
                     // 自動開始制御タグが存在し、オートフィルタ開始の抑制が働いている可能性がある

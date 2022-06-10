@@ -447,6 +447,10 @@ callback.prototype = {
     //----Conductor系メソッド
     //----Conductor再描画用-----//
     printconductorClass : function( result ){
+
+        var ary_result = getArrayBySafeSeparator(result);
+        checkTypicalFlagInHADACResult(ary_result);
+
         conductorUseList.conductorData = result;
         if ( conductorGetMode === 'starting') {
           initEditor('view');
@@ -486,6 +490,10 @@ callback.prototype = {
     },
     //----Conductor登録----//
     conductorExecute : function( result ){
+            
+      var ary_result = getArrayBySafeSeparator(result);
+      checkTypicalFlagInHADACResult(ary_result);
+
       var logType = '',
           message = '',
           trigger = '';
@@ -521,7 +529,22 @@ callback.prototype = {
       conductorFooterButtonDisabled( false );
       // イベントトリガー
       $( window ).trigger( trigger );
+    },
+    
+    // ---- Notice ----- //
+    printNoticeList : function( result ) {
+      conductorUseList.noticeList = JSON.parse( result );
+      if ( conductorGetMode === 'starting') {
+        proxy.printNoticeStatusList();
+      }
+    },
+    printNoticeStatusList : function( result ) {
+      conductorUseList.noticeStatusList = JSON.parse( result );
+      if ( conductorGetMode === 'starting') {
+        proxy.printOperationList();
+      }
     }
+    // Notice ----
 
 }
 
@@ -677,7 +700,7 @@ function Filter1Tbl_search_control( exec_flag_var, value1 ){
                 // 自動開始制御タグがない場合は、システムエラー扱い、とする。
                 // システムエラーが発生しました。
                 alert( getSomeMessage("ITAWDCC20205") );
-                exit;
+                exec_flag_ret = false;
             }else{
                 if( objFCSL.value == 'on' ){
                     // 自動開始制御タグが存在し、オートフィルタ開始の抑制が働いている可能性がある
@@ -843,7 +866,7 @@ function Filter2Tbl_search_control( exec_flag_var, value1 ){
                 // 自動開始制御タグがない場合は、システムエラー扱い、とする。
                 // システムエラーが発生しました。
                 alert( getSomeMessage("ITAWDCC20205") );
-                exit;
+                exec_flag_ret = false;
             }else{
                 if( objFCSL.value == 'on' ){
                     // 自動開始制御タグが存在し、オートフィルタ開始の抑制が働いている可能性がある
@@ -896,7 +919,8 @@ function Filter2Tbl_print_async( intPrintMode ){
 
 //---- ここからカスタマイズした場合の一般メソッド配置域
 function symphonyLoadForExecute(conductor_class_id){
-    proxy.printconductorClass( conductor_class_id )
+    proxy.printNoticeList( conductor_class_id );
+    proxy.printconductorClass( conductor_class_id );
 }
 
 function operationLoadForExecute(operation_no){
@@ -974,6 +998,7 @@ $(function(){
     setDatetimepicker('bookdatetime');
 });
 
+
 // ここまでカスタマイズした場合の一般メソッド配置域----
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -987,7 +1012,7 @@ const editor = new itaEditorFunctions();
 // DOM読み込み完了
 $( function(){
     // リスト取得開始
-    proxy.printOperationList();
+    proxy.printNoticeList();
     // タブ切り替え
     editor.tabMenu();
     // 画面縦リサイズ

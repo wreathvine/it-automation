@@ -190,11 +190,6 @@ callback.prototype = {
             window.alert(getSomeMessage("ITAWDCC90101"));
         }
         showForDeveloper(result);
-        var table = document.getElementById("Mix1_1");
-        table.rows[0].cells[6].style.display = 'none';
-        for(var i=2;table.rows[i];i++) {
-          table.rows[i].cells[6].style.display = 'none';
-        }
     },
 
     Filter2Tbl_add_selectbox : function( result ){
@@ -610,7 +605,7 @@ function Filter1Tbl_search_control( exec_flag_var, value1 ){
                 // 自動開始制御タグがない場合は、システムエラー扱い、とする。
                 // システムエラーが発生しました。
                 alert( getSomeMessage("ITAWDCC20205") );
-                exit;
+                exec_flag_ret = false;
             }else{
                 if( objFCSL.value == 'on' ){
                     // 自動開始制御タグが存在し、オートフィルタ開始の抑制が働いている可能性がある
@@ -775,7 +770,7 @@ function Filter2Tbl_search_control( exec_flag_var, value1 ){
                 // 自動開始制御タグがない場合は、システムエラー扱い、とする。
                 // システムエラーが発生しました。
                 alert( getSomeMessage("ITAWDCC20205") );
-                exit;
+                exec_flag_ret = false;
             }else{
                 if( objFCSL.value == 'on' ){
                     // 自動開始制御タグが存在し、オートフィルタ開始の抑制が働いている可能性がある

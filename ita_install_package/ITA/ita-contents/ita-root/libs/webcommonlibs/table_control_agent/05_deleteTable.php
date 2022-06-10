@@ -32,6 +32,7 @@
         //----$ordMode=2[CSV]からの廃止/復活
         //----$ordMode=3[JSON]からの廃止/復活
         //----$ordMode=4[ブラウザからの新規登録(SQLトランザクション無し)
+        $g['ModeType'] = $ordMode;
 
         //----返し値:$varRet
         //----処理結果次第で書き換えるグローバル変数：$g['error_flag']
@@ -375,10 +376,12 @@
                                 $type = "update_table";
                                 break;
                             }
-                            // リクエスト元とカラムの出力先が適合しない場合は、ID変換失敗のチェックはしない。
-                            // 二重チェックを防止
-                            if( ! $objFocusCol->getOutputType($type)->isVisible()) {
-                                continue;
+                            if( $colKey != "UPD_UPDATE_TIMESTAMP" ) {
+                                // リクエスト元とカラムの出力先が適合しない場合は、ID変換失敗のチェックはしない。
+                                // 二重チェックを防止
+                                if( ! $objFocusCol->getOutputType($type)->isVisible()) {
+                                    continue;
+                                }
                             }
                             if( $objFocusCol->isDBColumn()===true && $objFocusCol->getDeleteOffBeforeCheck()!==false ){
                                 //----廃止前・個別チェック
@@ -555,7 +558,7 @@
                     //----登録前の処理
                     foreach($arrayObjColumn as $objColumn){
                         $arrayTmp = $objColumn->beforeTableIUDAction($exeDeleteData, $reqDeleteData, $aryVariant);
-                        if($arrayTmp[0]===false){
+                        if(is_array($arrayTmp) && array_key_exists(0, $arrayTmp) && $arrayTmp[0]===false){
                             $intErrorType = $arrayTmp[1];
                             $error_str = $arrayTmp[3];
                             $strErrorBuf = $arrayTmp[4];
@@ -618,7 +621,6 @@
                             $error_str = $arrayTmp[3];
                             $strErrorBuf = $arrayTmp[4];
                             throw new Exception( '00002500-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
-                            break;
                         }
                     }
                     
@@ -677,11 +679,13 @@
                             $error_str = $arrayTmp[3];
                             $strErrorBuf = $arrayTmp[4];
                             throw new Exception( '00002900-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
-                            break;
                         }
                     }
                     
                     foreach($arrayObjColumn as $objColumn){
+                        // loadtableでafterTrzStartActionにfunctionを登録しても、Excel/Rest経由の登録・更新の場合、条件にマッチしないので
+                        // afterTrzStartActionで登録したfunctionが呼ばれません。03_registerTable.php 04_updateTable.phpを参照
+                        // beforeTableIUDActionを使用して下さい。
                         $arrayTmp = $objColumn->afterTableIUDAction($exeDeleteData, $reqDeleteData, $aryVariant);
                         if($arrayTmp[0]===false){
                             $intErrorType = $arrayTmp[1];

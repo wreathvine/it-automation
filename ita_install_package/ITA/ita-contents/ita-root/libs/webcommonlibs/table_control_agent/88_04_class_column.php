@@ -323,6 +323,7 @@ class ColumnGroup {
 	//NEW[14]
 	public function setColNoRef($strFormatterId, $inNumber=0){
 		//----再帰関数
+		global $g;
 		//ColumnGroup::calcSpanLength、から呼ばれる
 		$intRet = $inNumber;
 		try{
@@ -1018,7 +1019,14 @@ class Column extends ColumnGroup {
 				// SQLに埋め込むアクセス権のカラム名生成
         			$addStrQuery = sprintf("%s.%s",$strWpTblSelfAlias,$AccessAuthColum);
 			}
-			$retStrQuery  = "SELECT DISTINCT {$strWpTblSelfAlias}.{$strWpColId} {$dbQM}KEY_COLUMN{$dbQM} ";
+			// ----dispRestrictValue対応
+			$aryDispRestrictValue = $objTable->getDispRestrictValue();
+			if($aryDispRestrictValue != null){
+				$retStrQuery  = "SELECT DISTINCT {$strWpTblSelfAlias}.{$strWpColId} {$dbQM}KEY_COLUMN{$dbQM} , {$strWpTblSelfAlias}.* ";
+			}else{
+				$retStrQuery  = "SELECT DISTINCT {$strWpTblSelfAlias}.{$strWpColId} {$dbQM}KEY_COLUMN{$dbQM} ";
+			}
+			// dispRestrictValue対応----
 			if($addStrQuery != "") {
 				// アクセス権のカラム名をSELECT文に埋め込む
 				$retStrQuery  .= ",".$addStrQuery." ";
@@ -1570,6 +1578,22 @@ class Column extends ColumnGroup {
 		$aryErrMsgBody = array();
 		$strErrMsg = "";
 		$strErrorBuf = "";
+
+		$strColId = $this->getID();
+		$strColMark = $strColId;
+
+		if( $this->getColumnIDHidden() === true ){
+			$strColMark = $this->getIDSOP();
+		}
+	
+		if( array_key_exists("del_password_flag_".$strColMark, $reqOrgData) === true && $reqOrgData['del_password_flag_'.$strColMark] == "on" ){
+			//----パスワード削除オーダーがあった場合
+			 $boolActionFlag = true;
+			 $aryVariant['edit_target_row'][$strColId] = "";
+			 $exeQueryData[$strColId] = "";			
+			//パスワード削除オーダーがあった場合----
+		}
+
 		//$retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
 		if( is_null($this->aryFunctionsForEvent)===true ){
 			$retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
@@ -1780,11 +1804,21 @@ class Column extends ColumnGroup {
 			return $this->aryObjOutputType[$strFormatterId]->getBodyTag($aryRawRecord,$aryVariant);
 		}
 	}
+
+	function getOutputBodyDuplicate($strFormatterId, $aryRawRecord, $option){
+		//----各Formatterクラスから呼ばれる
+		if( isset($this->aryObjOutputType[$strFormatterId]) === true && $this->aryObjOutputType[$strFormatterId]->isVisible() === true ){
+			$aryVariant = array();
+			return $this->aryObjOutputType[$strFormatterId]->getBodyTagDuplicate($aryRawRecord, $aryVariant, $option);
+		}
+	}
+
 	//NEW[96]
 	function setDefaultValue($strFormatterId, $value){
 		//inputタグ系のデフォルト値を設定する
 		$this->getOutputType($strFormatterId)->setDefaultInputValue($value);
 	}
+
 	//NEW[97]
 	function setEvent($type, $eventName, $jsFunctionName, $jsFunctionArgs=array()){
 		$this->getOutputType($type)->setJsEvent($eventName, $jsFunctionName, $jsFunctionArgs);
@@ -2212,8 +2246,6 @@ class IDColumn extends Column {
 		$strErrMsg = "";
 		$retArrayForBind = array();
 
-		$objTable = $this->getTable();
-
 		$mainTableBody = $objTable->getDBMainTableBody();
 		$strThisIdColumnId = $this->getID();
 		$strDUColumnOfMainTable = $objTable->getRequiredDisuseColumnID();
@@ -2224,6 +2256,8 @@ class IDColumn extends Column {
 		$refMasterTableBody = $this->getMasterTableBodyForFilter();
 		$refMasterDUColumn = $this->getRequiredDisuseColumnID();
 		$aryEtcetera = $this->getEtceteraParameter();
+
+		$strFxName = __CLASS__."::".__FUNCTION__;
 
 		// RBAC対応 ----
 		try {
@@ -2244,6 +2278,14 @@ class IDColumn extends Column {
 
 			$addStrQuery = "";
 
+			// ----dispRestrictValue対応
+			$dispRestrictValueFlg = false;
+			$aryDispRestrictValue = $objTable->getDispRestrictValue();
+			if($aryDispRestrictValue != null){
+				$dispRestrictValueFlg = true;
+			}
+			// dispRestrictValue対応----
+
 			$retStrQuery = genSQLforGetMasValsInMainTbl($mainTableBody
 								, $strThisIdColumnId
 								, $strDUColumnOfMainTable
@@ -2254,7 +2296,8 @@ class IDColumn extends Column {
                                                                 , $AccessAuthColumUse
                                                                 , $AccessAuthColumnNames
 								, $aryEtcetera,$strWhereAddBody
-								,"KEY_COLUMN","DISP_COLUMN");
+								,"KEY_COLUMN","DISP_COLUMN"
+								, $dispRestrictValueFlg);
 		}catch (Exception $e){
 			web_log($e->getMessage());
 			$intErrorType = 500;
@@ -2341,7 +2384,7 @@ class IDColumn extends Column {
 
 		//----参照先マスタテーブル
 		$strWpColKeyIdOfMaster  = "{$dbQM}{$this->getKeyColumnIDOfMaster()}{$dbQM}";
-		$strWpColDispIdOfMaster = "{$dbQM}{$this->getDispColumnIDOfMaster()}{$dbQM}";
+		$strWpColDispIdOfMaster = "CONVERT({$this->getDispColumnIDOfMaster()} USING utf8)";
 		$strWpColDisuseFlagIdOfMaster = "{$dbQM}{$this->getRequiredDisuseColumnID()}{$dbQM}";
 		//参照先マスタテーブル----
 
@@ -2764,11 +2807,6 @@ class IDColumn extends Column {
 				//マスターの全行のうち、メインテーブルで利用されている行のみに絞って、鍵カラムと表示カラム行、を取得する----
                                 // RBAC対応 ----
 
-				if(is_array($this->arrayMasterSetFromMainTable)===true && 0 < count($this->arrayMasterSetFromMainTable)){
-					//----正常に配列を取得できた
-					//正常に配列を取得できた----
-				}else{
-				}
 				//フィルターテーブル用のデフォルト・データセットを作成----
 			}
 		}
@@ -2781,6 +2819,7 @@ class IDColumn extends Column {
 	}
 	//NEW[38]
 	function getMasterTableArrayFromJournalTable(){
+		global $g;
 		//(1)IDColumn、がTableにAddされていない場合は「null」を返す。
 		//(2)setMasterTableArrayFromMainTable、で、null、をセットしたとしても、通常は、配列を返す。
 		if($this->arrayMasterSetFromJournalTable === null){
@@ -2811,12 +2850,6 @@ class IDColumn extends Column {
 				//マスターの全行のうち、メインテーブルで利用されている行のみに絞って、鍵カラムと表示カラム行、を取得する----
                                 // RBAC対応 ----
 
-				if(is_array($this->arrayMasterSetFromJournalTable)===true && 0 < count($this->arrayMasterSetFromJournalTable)){
-					//----正常に配列を取得できた
-					//正常に配列を取得できた----
-				}else{
-					//$this->arrayMasterSetFromJournalTable = null;
-				}
 				//フィルターテーブル用のデフォルト・データセットを作成----
 			}
 		}
@@ -3358,11 +3391,7 @@ class EditStatusControlIDColumn extends IDColumn {
                     dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-5",array($strFxName,__FILE__,__LINE__)),$intControlDebugLevel01);
                     foreach($exeQueryData as $key=>$value){
                         if( in_array($key, $remainColKeys) === true ){
-                            if( is_array($value) === true ){
-                                dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-5",array($strFxName,__FILE__,__LINE__)),$intControlDebugLevel01);
-                            }else{
-                                dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-5",array($strFxName,__FILE__,__LINE__)),$intControlDebugLevel01);
-                            }
+                            dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-5",array($strFxName,__FILE__,__LINE__)),$intControlDebugLevel01);
                         }else{
                             dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-5",array($strFxName,__FILE__,__LINE__)),$intControlDebugLevel01);
                             if($arrayObjColumn[$key]->compareRow($exeQueryData, $reqOrgData, $aryVariant)===true){
@@ -4689,7 +4718,7 @@ class PasswordColumn extends TextColumn {
 		$this->setOutputType("json", $outputType);
 
 		if( array_key_exists("updateRequireExcept", $aryEtcetera) === true ){
-			$this->updateRequireExcept = $updateRequireExcept['updateRequireExcept'];
+			$this->updateRequireExcept = $aryEtcetera['updateRequireExcept'];
 		}
 		$this->setEncodeFunctionName("md5");
 		$this->setSelectTagCallerShow(false);
@@ -4830,7 +4859,7 @@ class MaskColumn extends TextColumn {
         $this->setOutputType("json", $outputType);
 
         if( array_key_exists("updateRequireExcept", $aryEtcetera) === true ){
-            $this->updateRequireExcept = $updateRequireExcept['updateRequireExcept'];
+            $this->updateRequireExcept = $aryEtcetera['updateRequireExcept'];
         }
         $this->setSelectTagCallerShow(false);
 
@@ -4867,6 +4896,12 @@ class MultiTextColumn extends TextColumn {
 		$aryErrMsgBody = array();
 		$strErrMsg = "";
 		$strErrorBuf = "";
+
+                $arrayTmp = parent::beforeTableIUDAction($exeQueryData, $reqOrgData, $aryVariant);
+                if($arrayTmp[0]===false){
+                    return $arrayTmp;
+                }
+
 		if( $this->getParaGpaphMode()===1 ){
 			//----CrLfがあったらLfへ統一するモード
 			$modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
@@ -5215,6 +5250,8 @@ class JournalSeqNoColumn extends NumColumn {
 	//----ここから継承メソッドの上書き処理
 
 	function __construct($strColId="JOURNAL_SEQ_NO", $strColExplain="", $strSequenceId=null){
+		global $g;
+
 		if( $strColExplain == "" ){
 			$strColExplain = $g['objMTS']->getSomeMessage("ITAWDCH-STD-11301");
 		}
@@ -5968,9 +6005,7 @@ class DateColumn extends Column {
 					if($flag===true){
 						$retStrQuery .= " AND ";
 					}
-					//----期間の終わりは約1日足す
-					$retStrQuery .= "{$strSelfAliasStrConColId} < ".$this->getFilterConvertValue(":{$this->getID()}__1")."+1-(1/86400) ";
-					//期間の終わりは約1日足す----
+					$retStrQuery .= "{$strSelfAliasStrConColId} <= ".$this->getFilterConvertValue(":{$this->getID()}__1");
 				}
 			}
 		}
@@ -6833,8 +6868,14 @@ class AutoUpdateUserColumn extends TextColumn {
 
 		$strBodyFrom  = "{$strWpTableId} {$strWpTblSelfAlias} LEFT JOIN {$strTableJoin} {$strTblJoinAlias} ";
 		$strBodyFrom .= "ON ( {$strWpTblSelfAlias}.{$strWpColId} = {$strTblJoinAlias}.{$strJoinColKey} ) ";
-
-		$retStrQuery  = "SELECT DISTINCT {$strTblJoinAlias}.{$strShowColKey} {$dbQM}KEY_COLUMN{$dbQM} ";
+		// ----dispRestrictValue対応
+		$aryDispRestrictValue = $objTable->getDispRestrictValue();
+		if($aryDispRestrictValue != null){
+			$retStrQuery  = "SELECT DISTINCT {$strTblJoinAlias}.{$strShowColKey} {$dbQM}KEY_COLUMN{$dbQM}, {$strWpTblSelfAlias}.* ";
+		}else{
+			$retStrQuery  = "SELECT DISTINCT {$strTblJoinAlias}.{$strShowColKey} {$dbQM}KEY_COLUMN{$dbQM} ";
+		}
+		// dispRestrictValue対応----
 		$retStrQuery .= $addStrQuery;  // RBAC対応
 		$retStrQuery .= "FROM {$strBodyFrom} ";
 		$retStrQuery .= "WHERE {$strWpTblSelfAlias}.{$strWpColId} IS NOT NULL ";
@@ -7616,7 +7657,6 @@ class IDRelaySearchColumn extends WhereQueryColumn {
 		$boolExecute = true;
 
 		$objMainColumn = $this->objIDColumn;
-		$objTable = $this->getTable();
 
 		$mainTableBody = $objTable->getDBMainTableBody();
 
@@ -8335,8 +8375,18 @@ class SensitiveSingleTextColumn extends passwordColumn {
 				//更新の場合
 				if( $modeValue=="DTUP_singleRecUpdate" ){
 					if(!empty($aryVariant['edit_target_row'])){
-						$beforeSensitiveFlagValue = $aryVariant['edit_target_row'][$sensitiveFlagColumn];
-						$afterSensitiveFlagValue = $reqOrgData[$sensitiveFlagColumn];
+                        if(array_key_exists($sensitiveFlagColumn, $aryVariant['edit_target_row'])){
+	    					$beforeSensitiveFlagValue = $aryVariant['edit_target_row'][$sensitiveFlagColumn];
+                        }
+                        else{
+    						$beforeSensitiveFlagValue = 1;
+                        }
+                        if(array_key_exists($sensitiveFlagColumn, $reqOrgData)){
+    						$afterSensitiveFlagValue = $reqOrgData[$sensitiveFlagColumn];
+                        }
+                        else{
+    						$afterSensitiveFlagValue = 1;
+                        }
 						//sensitiveFlagが2(ON)から2(ON)の以外の場合に、具体値を必須項目にする
 						if(!($beforeSensitiveFlagValue == 2 && $afterSensitiveFlagValue == 2)){
 							$this->setUpdateRequireExcept(false);
@@ -8385,7 +8435,7 @@ class SensitiveSingleTextColumn extends passwordColumn {
 							}
 
 							//SENSITIVE_FLAGがON(2)の場合のみエンコードした値を入れる
-							if($exeQueryData[$sensitiveFlagColumn] == 2){
+							if(array_key_exists($sensitiveFlagColumn, $exeQueryData) && $exeQueryData[$sensitiveFlagColumn] == 2){
 								$exeQueryData[$objColumn->getID()] = $strEncodedValue;
 							}
 
@@ -8439,8 +8489,18 @@ class SensitiveMultiTextColumn extends SensitiveSingleTextColumn {
 				//更新の場合
 				if( $modeValue=="DTUP_singleRecUpdate" ){
 					if(!empty($aryVariant['edit_target_row'])){
-						$beforeSensitiveFlagValue = $aryVariant['edit_target_row'][$sensitiveFlagColumn];
-						$afterSensitiveFlagValue = $reqOrgData[$sensitiveFlagColumn];
+                        if(array_key_exists($sensitiveFlagColumn, $aryVariant['edit_target_row'])){
+    						$beforeSensitiveFlagValue = $aryVariant['edit_target_row'][$sensitiveFlagColumn];
+                        }
+                        else{
+    						$beforeSensitiveFlagValue = 1;
+                        }
+                        if(array_key_exists($sensitiveFlagColumn, $reqOrgData)){
+    						$afterSensitiveFlagValue = $reqOrgData[$sensitiveFlagColumn];
+                        }
+                        else{
+    						$afterSensitiveFlagValue = 1;
+                        }
 						//sensitiveFlagが2(ON)から2(ON)の以外の場合に、具体値を必須項目にする
 						if(!($beforeSensitiveFlagValue == 2 && $afterSensitiveFlagValue == 2)){
 							$this->setUpdateRequireExcept(false);
@@ -8491,8 +8551,18 @@ class SensitiveMultiTextColumn extends SensitiveSingleTextColumn {
 					//更新の場合
 					if( $modeValue=="DTUP_singleRecUpdate" ){
 						if(!empty($aryVariant['edit_target_row'])){
-							$beforeSensitiveFlagValue = $aryVariant['edit_target_row'][$sensitiveFlagColumn];
-							$afterSensitiveFlagValue = $reqOrgData[$sensitiveFlagColumn];
+                            if(array_key_exists($sensitiveFlagColumn, $aryVariant['edit_target_row'])){
+    							$beforeSensitiveFlagValue = $aryVariant['edit_target_row'][$sensitiveFlagColumn];
+                            }
+                            else{
+        						$beforeSensitiveFlagValue = 1;
+                            }
+                            if(array_key_exists($sensitiveFlagColumn, $reqOrgData)){
+	    						$afterSensitiveFlagValue = $reqOrgData[$sensitiveFlagColumn];
+                            }
+                            else{
+        						$afterSensitiveFlagValue = 1;
+                            }
 							//sensitiveFlagが2(ON)から2(ON)の以外の場合のみ実行
 							if(!($beforeSensitiveFlagValue == 2 && $afterSensitiveFlagValue == 2)){
 								list($varValue,$tmpBoolKeyExist)=isSetInArrayNestThenAssign($reqOrgData,array($this->getID()),null);
@@ -8520,7 +8590,7 @@ class SensitiveMultiTextColumn extends SensitiveSingleTextColumn {
 							}
 
 							//SENSITIVE_FLAGがON(2)の場合のみエンコードした値を入れる
-							if($exeQueryData[$sensitiveFlagColumn] == 2){
+							if(array_key_exists($sensitiveFlagColumn, $exeQueryData) && $exeQueryData[$sensitiveFlagColumn] == 2){
 								$exeQueryData[$objColumn->getID()] = $strEncodedValue;
 							}
 
@@ -8692,7 +8762,7 @@ class RowEditByFileColumn extends Column{
 	//登録時に、主キー値が指定されていた場合----
 
 	//NEW[11]
-	function editExecute(&$inputArray, $dlcOrderMode, &$aryVariant=array()){
+	function editExecute(&$inputArray, $dlcOrderMode, &$aryVariant=array(), $strApiFlg=false){
 		global $g;
 		$arrayRetResult = array();
 
@@ -8754,6 +8824,29 @@ class RowEditByFileColumn extends Column{
 						$boolExeCountinue = false;
 						$this->arrayCounter['error']['ct']++;
 					}
+				}
+				
+				$errFlg = false;
+				foreach($inputArray as $key2 => $value2){
+					if(array_key_exists($key2,$arrayObjColumn) && array_key_exists("uploadfiles_".$arrayObjColumn[$key2]->getIDSOP(),$inputArray)){
+						if($inputArray["uploadfiles_".$arrayObjColumn[$key2]->getIDSOP()] == "ファイル値なし"){
+							$errFlg = true;
+							$errMsg = $arrayObjColumn[$key2]->getColLabel(true);
+							$errMsg = $errMsg . ':' .$g['objMTS']->getSomeMessage('ITABASEH-ERR-900079');
+						}elseif($inputArray["uploadfiles_".$arrayObjColumn[$key2]->getIDSOP()] == "ファイル名なし"){
+							$errFlg = true;
+							$errMsg = $arrayObjColumn[$key2]->getColLabel(true);
+							$errMsg = $errMsg . ':' .$g['objMTS']->getSomeMessage('ITABASEH-ERR-900080');
+						}
+					}
+				}
+				if($errFlg === true){
+					$arrayTempRet[0] = "002";
+					$arrayTempRet[1] = "000";
+					$arrayTempRet[2] = $errMsg;
+					$retRetMsgBody = $arrayTempRet[2];
+					$boolExeCountinue = false;
+					$this->arrayCounter['error']['ct']++;
 				}
 
 				if($boolExeCountinue === true){
@@ -8821,66 +8914,100 @@ class RowEditByFileColumn extends Column{
 				//----更新が入力されていた場合
 				$boolUniqueCheckSkip = false; //ユニークチェックをスキップするか？(原則：スキップしない)
 				$boolRequiredColumnCheckSkip = false; //必須カラムの送信チェックをスキップするか？(原則：スキップしない)
-
-				$strNumberForRI = $inputArray[$this->objTable->getRIColumnID()];
-				$mode = 3;  //実行モード
-
-				//----ここではRIColumnも削除される
+				if($strApiFlg === true){
+				  $boolRequiredColumnCheckSkip = true;
+				}
+				
+				$errFlg = false;
 				foreach($inputArray as $key2 => $value2){
-                    if(!array_key_exists($key2, $arrayObjColumn)){
-                        continue;
-                    }
-
-					if(("FileUploadColumn" !=  get_class($arrayObjColumn[$key2]) && false === $arrayObjColumn[$key2]->isAllowSendFromFile()) ||
-					   ("FileUploadColumn" === get_class($arrayObjColumn[$key2]) && 3 != $dlcOrderMode && false === $arrayObjColumn[$key2]->isAllowSendFromFile()) ||
-					   ("FileUploadColumn" === get_class($arrayObjColumn[$key2]) && 3 == $dlcOrderMode && false === $arrayObjColumn[$key2]->isAllowUploadColmnSendRestApi())
-					  ){
-						unset($inputArray[$key2]);
+					if(array_key_exists($key2,$arrayObjColumn) && array_key_exists("uploadfiles_".$arrayObjColumn[$key2]->getIDSOP(),$inputArray)){
+						if($inputArray["uploadfiles_".$arrayObjColumn[$key2]->getIDSOP()] == "ファイル値なし"){
+							$errFlg = true;
+							$errMsg = $arrayObjColumn[$key2]->getColLabel(true);
+							$errMsg = $errMsg . ':' .$g['objMTS']->getSomeMessage('ITABASEH-ERR-900079');
+						}elseif($inputArray["uploadfiles_".$arrayObjColumn[$key2]->getIDSOP()] == "ファイル名なし"){
+							$errFlg = true;
+							$errMsg = $arrayObjColumn[$key2]->getColLabel(true);
+							$errMsg = $errMsg . ':' .$g['objMTS']->getSomeMessage('ITABASEH-ERR-900080');
+						}
 					}
 				}
-				//ここではRIColumnも削除される----
+				if($errFlg === true){
+					$arrayTempRet[0] = "002";
+					$arrayTempRet[1] = "000";
+					$arrayTempRet[2] = $errMsg;
+					$retRetMsgBody = $arrayTempRet[2];
+					$boolExeCountinue = false;
+					$this->arrayCounter['error']['ct']++;
+				}
 
-				$aryVariant['action_sub_order'] = array('name'=>$strActionSubClassName
-														,'uniqueCheckSkip'=>$boolUniqueCheckSkip
-														,'requiredColumnCheckSkip'=>$boolRequiredColumnCheckSkip
-														);
-				$arrayTempRet = updateTableMain($mode, $strNumberForRI, $inputArray, null, $dlcOrderMode, $aryVariant);
-				$retRetMsgBody = $arrayTempRet[2];
+				if(array_key_exists($this->objTable->getRIColumnID(), $inputArray)){
+					$strNumberForRI = $inputArray[$this->objTable->getRIColumnID()];
+				}
+				else{
+					$strNumberForRI = NULL;
+				}
 
-                if( isset($arrayTempRet[99]) ){
-                    $tmparrayTempRet = $arrayTempRet[99];
-                    unset($arrayTempRet[99]);
-                }
+				$mode = 3;  //実行モード
 
-				//----switch
-				switch($arrayTempRet[0]){
-					case "000":
-						switch($arrayTempRet[1]){
-							case "200":
-								//----更新が成功した
-								$this->arrayCounter['update']['ct']++;
-								$boolValue = true;
-								$retRetMsgBody = "";
-								break;
-								//更新が成功した----
-							default:
-								$retRetMsgBody = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-18004",$arrayTempRet[1]);
-								$this->arrayCounter['error']['ct']++;
-								break;
+        if($boolExeCountinue === true){
+					//----ここではRIColumnも削除される
+					foreach($inputArray as $key2 => $value2){
+	                    if(!array_key_exists($key2, $arrayObjColumn)){
+	                        continue;
+	                    }
+
+						if(("FileUploadColumn" !=  get_class($arrayObjColumn[$key2]) && false === $arrayObjColumn[$key2]->isAllowSendFromFile()) ||
+						   ("FileUploadColumn" === get_class($arrayObjColumn[$key2]) && 3 != $dlcOrderMode && false === $arrayObjColumn[$key2]->isAllowSendFromFile()) ||
+						   ("FileUploadColumn" === get_class($arrayObjColumn[$key2]) && 3 == $dlcOrderMode && false === $arrayObjColumn[$key2]->isAllowUploadColmnSendRestApi())
+						  ){
+							unset($inputArray[$key2]);
 						}
-						break;
-					case "001"://権限欠如エラー(mode=3の場合除く)
-					case "002"://バリデーションエラー
-					case "003"://権限欠如エラー・追い越し更新・削除済
-					case "101"://行特定ミス
-					case "201"://追越更新
-					case "212"://廃止済レコードへの更新
-						$this->arrayCounter['error']['ct']++;
-						break;
-					default:
-						$retRetMsgBody = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-18005",$retRetMsgBody);
-						$this->arrayCounter['error']['ct']++;
-						break;
+					}
+					//ここではRIColumnも削除される----
+			    
+					$aryVariant['action_sub_order'] = array('name'=>$strActionSubClassName
+															,'uniqueCheckSkip'=>$boolUniqueCheckSkip
+															,'requiredColumnCheckSkip'=>$boolRequiredColumnCheckSkip
+															);
+					$arrayTempRet = updateTableMain($mode, $strNumberForRI, $inputArray, null, $dlcOrderMode, $aryVariant);
+					$retRetMsgBody = $arrayTempRet[2];
+
+	                if( isset($arrayTempRet[99]) ){
+	                    $tmparrayTempRet = $arrayTempRet[99];
+	                    unset($arrayTempRet[99]);
+	                }
+
+					//----switch
+					switch($arrayTempRet[0]){
+						case "000":
+							switch($arrayTempRet[1]){
+								case "200":
+									//----更新が成功した
+									$this->arrayCounter['update']['ct']++;
+									$boolValue = true;
+									$retRetMsgBody = "";
+									break;
+									//更新が成功した----
+								default:
+									$retRetMsgBody = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-18004",$arrayTempRet[1]);
+									$this->arrayCounter['error']['ct']++;
+									break;
+							}
+							break;
+						case "001"://権限欠如エラー(mode=3の場合除く)
+						case "002"://バリデーションエラー
+						case "003"://権限欠如エラー・追い越し更新・削除済
+						case "101"://行特定ミス
+						case "201"://追越更新
+						case "212"://廃止済レコードへの更新
+							$this->arrayCounter['error']['ct']++;
+							break;
+						default:
+							$retRetMsgBody = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-18005",$retRetMsgBody);
+							$this->arrayCounter['error']['ct']++;
+							break;
+					}
 				}
 				//switch----
 
@@ -9079,7 +9206,7 @@ class RowEditByFileColumnForReview extends RowEditByFileColumn{
 	}
 	//FixColumnイベント系----
 
-	function editExecute(&$inputArray, $dlcOrderMode, &$aryVariant=array()){
+	function editExecute(&$inputArray, $dlcOrderMode, &$aryVariant=array(), $strApiFlg=false){
 		global $g;
 		$arrayRetResult = array();
 
@@ -9652,6 +9779,9 @@ class FileUploadColumn extends Column{
 		//ファイル保存処理を実行するかどうかの判定(3.9までの調整用)----
 
 		if( $boolExecute === true ){
+            if(!array_key_exists($strColId, $exeQueryData) && array_key_exists("tmp_file_".$strColMark, $reqOrgData)){
+                unset($reqOrgData['tmp_file_'.$strColMark]);
+            }
 			$tmpFile = array_key_exists("tmp_file_".$strColMark, $reqOrgData)?$reqOrgData['tmp_file_'.$strColMark]:"";
 			$orgFile = "";
 			$tempFileOfOrgFileName = $this->getLAPathToPreUploadSave()."/fn_".$tmpFile;
@@ -9660,43 +9790,56 @@ class FileUploadColumn extends Column{
 			$editTgtRow = $aryVariant['edit_target_row'];
 			$oldFile = array_key_exists($strColId, $editTgtRow)?$editTgtRow[$strColId]:"";
 
-			if( array_key_exists("del_flag_".$strColMark, $reqOrgData) === true && $reqOrgData['del_flag_'.$strColMark] == "on" && $oldFile != "" ){
-				//----ファイル削除オーダーがあった場合
-				$boolActionFlag = true;
-				$properFileName = "";
-				//ファイル削除オーダーがあった場合----
-			}
-			else if($tmpFile != "" && $orgFile != ""){
-				//----処理オーダー（事前アップロード）があった場合
-				if( $orgFile == $exeQueryData[$strColId] ){
-					$boolActionFlag = true;
-					$properFileName = $this->makeFileName($orgFile, $exeQueryData, $reqOrgData);
-				}
-				else{
-					$boolRet = false;
-					$intErrorType = 2;
-					$strErrMsg = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-20004",$this->getColLabel(true));
-				}
-				//処理オーダー（事前アップロード）があった場合----
-			}
-			else{
-				if( array_key_exists($strColId, $exeQueryData) === true && array_key_exists($strColId, $editTgtRow) === true )
-				{
-					if( $exeQueryData[$strColId] == $editTgtRow[$strColId] ){
-						//----すでにテーブルにある値と同じ場合
-						//すでにテーブルにある値と同じ場合----
-					}
-					else{
-						//----(ファイル事前ULなしで、不正なクエリが送信された場合）
-						$boolRet = false;
-						$intErrorType = 2;
-						$strErrMsg = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-20005",$this->getColLabel(true));
-						//(ファイル事前ULなしで、不正なクエリが送信された場合）----
-					}
-				}
-				$boolActionFlag = false;
-				//処理オーダーがなかった場合----
-			}
+            $modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
+
+            //---複製ボタン押下時 
+            if( $modeValue=="DTUP_singleRecRegister" ){
+			    if( array_key_exists("del_flag_".$strColMark, $reqOrgData) === true && $reqOrgData['del_flag_'.$strColMark] == "on" ){
+                    //----ファイル削除オーダーがあった場合
+                    $boolActionFlag = true;
+                    $properFileName = "";
+                    //ファイル削除オーダーがあった場合----
+                }	
+            }
+            else{
+			    if( array_key_exists("del_flag_".$strColMark, $reqOrgData) === true && $reqOrgData['del_flag_'.$strColMark] == "on" && $oldFile != "" ){
+				    //----ファイル削除オーダーがあった場合
+				    $boolActionFlag = true;
+				    $properFileName = "";
+				    //ファイル削除オーダーがあった場合----
+			    }
+			    else if($tmpFile != "" && $orgFile != ""){
+				    //----処理オーダー（事前アップロード）があった場合
+				    if( $orgFile == $exeQueryData[$strColId] ){
+                        $boolActionFlag = true;
+                        $properFileName = $this->makeFileName($orgFile, $exeQueryData, $reqOrgData);
+                    }
+				    else{
+				    	$boolRet = false;
+				    	$intErrorType = 2;
+				    	$strErrMsg = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-20004",$this->getColLabel(true));
+				    }
+				    //処理オーダー（事前アップロード）があった場合----
+			    }
+			    else{
+				    if( array_key_exists($strColId, $exeQueryData) === true && array_key_exists($strColId, $editTgtRow) === true )
+				    {
+					    if( $exeQueryData[$strColId] == $editTgtRow[$strColId] ){
+					    	//----すでにテーブルにある値と同じ場合
+					    	//すでにテーブルにある値と同じ場合----
+					    }
+					    else{
+						    //----(ファイル事前ULなしで、不正なクエリが送信された場合）
+						    $boolRet = false;
+						    $intErrorType = 2;
+						    $strErrMsg = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-20005",$this->getColLabel(true));
+						    //(ファイル事前ULなしで、不正なクエリが送信された場合）----
+				    	}
+			    	}
+				    $boolActionFlag = false;
+				    //処理オーダーがなかった場合----
+			    }
+            }
 
 			if( $boolActionFlag === true ){
 				$exeQueryData[$strColId] = $properFileName;
@@ -9912,9 +10055,7 @@ class FileUploadColumn extends Column{
 			$strSysErrMsgBody = "";
 			$boolRet = false;
 			// ----一般訪問ユーザに見せてよいメッセージを作成
-			switch($intErrorType){
-				default : $strErrMsg = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-3001");break;
-			}
+			$strErrMsg = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-3001");
 			// 一般訪問ユーザに見せてよいメッセージを作成----
 			if( 0 < $g['dev_log_developer'] ){
 				//----ロードテーブルカスタマイザー向け追加メッセージを作成
@@ -10206,9 +10347,7 @@ class FileUploadColumn extends Column{
 			$boolFlagBody = false;
 			$tmpErrMsgBody = $e->getMessage();
 			// ----一般訪問ユーザに見せてよいメッセージを作成
-			switch($intErrorCode){
-				default : $strErrMsgBody = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-3001");break;
-			}
+			$strErrMsgBody = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-3001");
 			// 一般訪問ユーザに見せてよいメッセージを作成----
 			if( 0 < $g['dev_log_developer'] ){
 				//----ロードテーブルカスタマイザー向け追加メッセージを作成
@@ -10627,6 +10766,48 @@ class JournalBtnColumn extends Column {
     }
     //AddColumnイベント系----
     //ここまで継承メソッドの上書き処理----
+}
+
+class DuplicateBtnColumn extends Column {
+
+    protected $strCheckDisuseColumnId;
+    //----ここから継承メソッドの上書き処理
+    function __construct($strColId, $strColLabel){
+        parent::__construct($strColId, $strColLabel);
+        $this->setDBColumn(false);
+        $this->setHeader(true);
+        $outputType = new OutputType(new TabHFmt(), new DupButtonTabBFmt());
+        $this->setOutputType("print_table", $outputType);
+        $outputType = new OutputType(new TabHFmt(), new StaticTextTabBFmt(""));
+        $outputType->setVisible(false);
+        $this->setOutputType("print_journal_table", $outputType);
+        $this->getOutputType("filter_table")->setVisible(false);
+        $this->getOutputType("update_table")->setVisible(false);
+        $this->getOutputType("register_table")->setVisible(false);
+        $this->getOutputType("delete_table")->setVisible(false);
+        $this->getOutputType("excel")->setVisible(false);
+        $this->getOutputType("csv")->setVisible(false);
+        $this->getOutputType("json")->setVisible(false);
+    }
+    //----AddColumnイベント系
+    function initTable($objTable, $colNo=null){
+        parent::initTable($objTable, $colNo);
+        $this->setEvent("print_table", "onclick", "duplicate_async", array(3, ":".$this->objTable->getRIColumnID()));
+    }
+    //AddColumnイベント系----
+    //ここまで継承メソッドの上書き処理----
+
+	//----ここから新規メソッドの定義宣言処理
+	//NEW[1]
+	function setCheckDisuseColumnID($strColname){
+		$this->strCheckDisuseColumnId = $strColname;
+	}
+	//NEW[2]
+	function getCheckDisuseColumnID(){
+		return $this->strCheckDisuseColumnId;
+	}
+
+	//ここまで新規メソッドの定義宣言処理----
 }
 
 class EditStatusControlBtnColumn extends Column {

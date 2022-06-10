@@ -223,14 +223,6 @@
         // 並列実行数
         $lv_num_of_parallel_exec  = $lv_ans_if_info['ANSIBLE_NUM_PARALLEL_EXEC'];
 
-        // トレースメッセージ
-        if ( $log_level === 'DEBUG' ){
-            // 処理対象レコード検出(EXECUTION_No.:Legacy:16,Legacy:17)
-            $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-51004",implode(",", $tgt_execution_no_array));
-            require ($root_dir_path . $log_output_php );
-        }
-        
-        
         ////////////////////////////////////////////////////////////////////////////////
         // 処理実行順に対象作業インスタンスを実行
         ////////////////////////////////////////////////////////////////////////////////
@@ -440,7 +432,7 @@
             $log_file_postfix = ".log";
             $logfile = $log_output_dir .'/' . $log_file_prefix . date("Ymd",$tmpVarTimeStamp) . $log_file_postfix;
 
-            $cmd = sprintf("%s %s%s %s %010s %s-%010s &",
+            $cmd = sprintf("%s %s%s %s %010s %s-%010s > /dev/null &",
                             $php_command,
                             $root_dir_path,
                             "/backyards/ansible_driver/ky_ansible_execute-child-workflow.php",
@@ -489,9 +481,6 @@
         ////////////////////////////////////////////////////////////////
         require ($root_dir_path . "/libs/backyardlibs/ansible_driver/ky_ansible_common_setenv.php");
 
-        // usleep time (ms)
-        $sleep_time = 5;
-
         try {
             // psコマンドでky_ansible_execute-child-workflow.phpの起動リストを作成
             // psコマンドがマレに起動プロセスリストを取りこぼすことがあるので3回分を作成
@@ -499,12 +488,12 @@
             $strBuildCommand     = "ps -efw|grep ky_ansible_execute-child-workflow.php|grep -v grep";
             exec($strBuildCommand,$ps_array1,$ret);
 
-            usleep($sleep_time);
+            usleep(50000);   // sleep 50ms
 
             $strBuildCommand     = "ps -efw|grep ky_ansible_execute-child-workflow.php|grep -v grep";
             exec($strBuildCommand,$ps_array2,$ret);
 
-            usleep($sleep_time);
+            usleep(100000);  // sleep 100ms
 
             $strBuildCommand     = "ps -efw|grep ky_ansible_execute-child-workflow.php|grep -v grep";
             exec($strBuildCommand,$ps_array3,$ret);

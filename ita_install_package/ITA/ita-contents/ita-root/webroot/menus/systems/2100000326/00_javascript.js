@@ -341,12 +341,6 @@ $canvasVisibleArea.on( mousewheelevent, function( e ){
             delta = e.originalEvent.deltaY ? - ( e.originalEvent.deltaY ) : e.originalEvent.wheelDelta ? e.originalEvent.wheelDelta : - ( e.originalEvent.detail );
 
       if ( e.shiftKey ) {
-        // 横スクロール
-        if ( delta < 0 ){
-          //
-        } else {
-          //
-        }
 
       } else {
         // 縦スクロール
@@ -760,8 +754,8 @@ function setMenuGroupPosition() {
     }
     
   });
-
-}
+  return true;
+} 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -788,8 +782,7 @@ function getEntityPosition( $target ) {
 //   リレーション接続
 // 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-const relationOutArray = new Object(),
-      relationInArray = new Object();
+let relationOutArray, relationInArray;
 function connectEntityItem( entityOut, entityIn ) {
 
     const $entityOut = $('#' + entityOut ),
@@ -805,7 +798,9 @@ function connectEntityItem( entityOut, entityIn ) {
     if ( !$entityOut.length || !$entityIn.length ) return false;
     
     $entityOut.addClass('connect connect-out');
-    $entityIn.addClass('connect connect-in');
+    if ( entityOut !== entityIn ) {
+      $entityIn.addClass('connect connect-in');
+    }
     
     const $svg = newSVG(),
           p1 = getEntityPosition( $entityOut ),
@@ -845,6 +840,10 @@ const resetArtBoard = function(){
     ).done( function(){
         // リレーション
         const relationLength = relationList.length;
+        // リレーション情報初期化
+        relationOutArray = new Array();
+        relationInArray = new Array();
+        // リレーション作成
         for ( let i = 0; i < relationLength; i++ ) {
           const relationLength = relationList[i][0].length;
           for ( let j = 0; j < relationLength; j++ ) {

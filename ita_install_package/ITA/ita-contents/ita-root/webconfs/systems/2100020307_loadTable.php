@@ -289,7 +289,10 @@ Ansible（Legacy Role）作業パターン詳細
 
         $strFxName = "";
 
-        $strPackageIdNumeric = $rowData['ROLE_PACKAGE_ID'];
+        $strPackageIdNumeric = null;
+        if(is_array($rowData) && array_key_exists('ROLE_PACKAGE_ID', $rowData)){
+            $strPackageIdNumeric = $rowData['ROLE_PACKAGE_ID'];
+        }
 
         $strQuery = "SELECT "
                    ." TAB_1.ROLE_ID            KEY_COLUMN "
@@ -352,6 +355,7 @@ Ansible（Legacy Role）作業パターン詳細
     $objVarBFmtReg = new SelectTabBFmt();
     $objVarBFmtReg->setSelectWaitingText($strSetInnerText);
     $objVarBFmtReg->setFADNoOptionMessageText($strSetInnerText);
+    $objVarBFmtReg->setFunctionForGetSelectList($objFunction03);
     $objOTForReg = new OutputType(new ReqTabHFmt(), $objVarBFmtReg);
     $objOTForReg->setFunctionForGetFADSelectList($objFunction02);
 
@@ -375,6 +379,19 @@ Ansible（Legacy Role）作業パターン詳細
 
     // データベース更新前のファンクション登録
     $c->setFunctionForEvent('beforeTableIUDAction',$tmpObjFunction);
+
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('ROLE_ID');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'D_ANSIBLE_LRL_ROLE_LIST_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'ROLE_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'ROLE_NAME_PULLDOWN',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
 
     $table->addColumn($c);
 

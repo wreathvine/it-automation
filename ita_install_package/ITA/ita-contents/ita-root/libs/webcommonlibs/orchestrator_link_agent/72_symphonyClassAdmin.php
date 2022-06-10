@@ -289,7 +289,7 @@ function printOneOfSymphonyClasses($fxVarsIntSymphonyClassId, $fxVarsIntMode){
                 //作業パターンが存在している----
             }
             if( $strPatternName == "" ){
-                $strPatternName = $objMTS->getSomeMessage("ITABASEH-ERR-5720205",$row['MOVEMENT_CLASS_NO']);
+                $strPatternName = $objMTS->getSomeMessage("ITABASEH-ERR-5720205",$row['PATTERN_ID']);
             }
             $aryListSource[] = htmlspecialchars($strPatternName);
 
@@ -893,6 +893,25 @@ function symphonyClassUpdateExecute($fxVarsIntSymphonyClassId, $fxVarsAryReceptD
         
         //MOV数が増えた場合は、増えた分、レコードを追加する----
         
+        // ----代入値自動登録設定のbackyard処理の処理済みフラグをOFFにする
+        $sql = "UPDATE A_PROC_LOADED_LIST "
+               ."SET LOADED_FLG = :LOADED_FLG, LAST_UPDATE_TIMESTAMP = :LAST_UPDATE_TIMESTAMP "
+               ."WHERE ROW_ID IN (2100020002,2100020004,2100020006,2100080002)";
+
+        $objDBCA->setQueryTime();
+        $aryForBind = array('LOADED_FLG' => "0", 'LAST_UPDATE_TIMESTAMP' => $objDBCA->getQueryTime());
+
+        // SQL実行
+        $retArray = singleSQLCoreExecute($objDBCA, $sql, $aryForBind, "");
+        if( $retArray[0] !== true ){
+            // エラーフラグをON
+            // 例外処理へ
+            $strErrStepIdInFx="00002201";
+            //
+            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+        }
+        // 代入値自動登録設定のbackyard処理の処理済みフラグをOFFにする----
+
         // ----トランザクション終了
         $boolResult = $objDBCA->transactionCommit();
         if ( $boolResult === false ){
@@ -1192,7 +1211,7 @@ function symphonyClassRegisterExecute($fxVarsIntSymphonyClassId ,$fxVarsAryRecep
         if( isset($aryExecuteData['ACCESS_AUTH'] ) ){
             $register_tgt_row['ACCESS_AUTH']       = $aryExecuteData['ACCESS_AUTH'];
         }else{
-            $register_tgt_row['ACCESS_AUTH']="1,2,3,4";
+            $register_tgt_row['ACCESS_AUTH']="";
         }
 
         $arrayConfigForIUD = $aryConfigForSymClassIUD;

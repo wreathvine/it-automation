@@ -27,7 +27,7 @@
     //----webroot(03,04)
 
     //----webroot(03,04,07)
-    function dumpDataFromTable($aryToArea, $objTable, $aryVariant=array(), &$arySetting=array()){
+    function dumpDataFromTable($aryToArea, $objTable, $aryVariant=array(), &$arySetting=array(), $strApiFlg=false){
         global $g;
         // ----ローカル変数宣言
         $intControlDebugLevel01=250;
@@ -52,6 +52,7 @@
         $boolKeyExists = null;
 
         $strOutputFileType = null;
+        $strOutputDataType = null;
 
         $objFunction01ForOverride = null;
         $objFunction02ForOverride = null;
@@ -130,6 +131,21 @@
                     break;
             }
             //出力するファイル形式を判別する----
+
+            //----データタイプを判別する
+            // latest / history のみの想定
+            // history は $strOutputFileType が csv or excel の場合のみ独自処理が存在
+            // 値が存在しない場合は latest とする
+            list($strOutputDataType,$boolKeyExists) = isSetInArrayNestThenAssign($_POST,array('datatype'),"latest");
+            switch ($strOutputDataType) {
+                case 'history':
+                    break;
+                default:
+                    // 規定値以外は latest とする
+                    $strOutputDataType = "latest";
+                    break;
+            }
+            //データタイプを判別する----
 
             if( is_array($aryVariant) !== true || is_array($arySetting) !== true ){
                 //----引数の型が不正
@@ -299,7 +315,7 @@
 
                     //----バリデーションチェックは、かならず、あいまいモードにする前に行うこと(IDColumnの問題があるので）
                     if( $objFunction01ForOverride === null ){
-                        $tmpAryRet = DTiSFilterCheckValid($objTable, $strFormatterId, $filterData, $aryVariant, $arySetting);
+                        $tmpAryRet = DTiSFilterCheckValid($objTable, $strFormatterId, $filterData, $aryVariant, $arySetting, $strApiFlg);
                     }
                     else{
                         $tmpAryRet = $objFunction01ForOverride($objTable, $strFormatterId, $filterData, $aryVariant);
@@ -357,9 +373,30 @@
 
                 $arrayFileterBody = $objTable->getFilterArray($boolBinaryDistinctOnDTiS);
 
-                // ----generateSelectSql2呼び出し[Where句に各カラムの名前が記述され、値の部分が置換される前のSQLが作成される]
-                $sql = generateSelectSql2(2, $objTable, $boolBinaryDistinctOnDTiS);
-                // generateSelectSql2呼び出し[Where句に各カラムの名前が記述され、値の部分が置換される前のSQLが作成される]----
+                if($strOutputDataType === "latest"){
+                    // ----generateSelectSql2呼び出し[Where句に各カラムの名前が記述され、値の部分が置換される前のSQLが作成される]
+                    $sql = generateSelectSql2(2, $objTable, $boolBinaryDistinctOnDTiS);
+                    // generateSelectSql2呼び出し[Where句に各カラムの名前が記述され、値の部分が置換される前のSQLが作成される]----
+                }
+                else if($strOutputDataType === "history"){
+                    $sqllatest = generateSelectSql2(2, $objTable, $boolBinaryDistinctOnDTiS);
+                    // ----generateJournalSelectSQL呼び出し[Where句に各カラムの名前が記述され、値の部分が置換される前の履歴取得SQLが作成される]
+
+                    // 履歴通番を表示
+                    $JnlSeqNoColumn = $arrayObjColumn[$objTable->getRequiredJnlSeqNoColumnID()]; //"JOURNAL_SEQ_NO"
+                    $JnlSeqNoColumn->getOutputType("excel")->setVisible(true);
+                    $JnlSeqNoColumn->getOutputType("csv")->setVisible(true);
+                    $JnlSeqNoColumn->setDbColumn(true);
+
+                    // 変更日時を表示
+                    $JnlRegTimeColumn = $arrayObjColumn[$objTable->getRequiredJnlRegTimeColumnID()]; //"JOURNAL_REG_DATETIME"
+                    $JnlRegTimeColumn->getOutputType("excel")->setVisible(true);
+                    $JnlRegTimeColumn->getOutputType("csv")->setVisible(true);
+                    $JnlRegTimeColumn->setDbColumn(true);
+                    
+                    $sql = generateJournalSelectSQL(2,$objTable, $boolBinaryDistinctOnDTiS);
+                    // generateJournalSelectSQL呼び出し[Where句に各カラムの名前が記述され、値の部分が置換される前の履歴取得SQLが作成される]----
+                }
 
                 //通常モード----
             }
@@ -420,6 +457,29 @@
                 $varRetBody = $aryTempResult[0];
                 $aryUploadFile = $aryTempResult[1];
 
+                $aryColumns = $objTable->getColumns();
+                $FileUploadColumnCount = 0;
+
+                if(is_array($aryUploadFile) && array_key_exists(1,$aryUploadFile)){
+
+                    $aryUploadFileKeys = array_keys($aryUploadFile[1]);
+                    foreach($aryColumns as $strColumnId=>$objColumn){
+                    
+                        if(get_class($objColumn)==="FileUploadColumn"){
+                            $FileEncryptFunctionName = $objColumn->getFileEncryptFunctionName();
+                        
+                            if($FileEncryptFunctionName==="ky_file_encrypt"){
+                            
+                                for($i=1;$i<=count($aryUploadFile);$i++){
+                                    $aryUploadFile[$i][$aryUploadFileKeys[$FileUploadColumnCount]] = "";
+                                }
+                                
+                            }
+                            $FileUploadColumnCount++;
+                        }
+                    }
+                }
+
                 //JSON(ストリーム)向けの出力----
             }
             else if( $strOutputFileType == "csv" ){
@@ -447,15 +507,30 @@
                 if( $objCsvFormatter->getGeneValue("csvFieldRowHide",$refRetKeyExists) !== false ){
                     $objCsvFormatter->setGeneValue("csvFieldRowAdd",true);
                     $objCsvFormatter->setGeneValue("csvRecordShowAdd",false);
-                    $strCsvHeaderStream .= $objTable->getPrintFormat($strFormatterId);
+                    
+                    if($strOutputDataType === "history"){
+                        $strCsvHeaderStream .= $objTable->getPrintFormat($strFormatterId, null, null, 1);
+                    }else{
+                        $strCsvHeaderStream .= $objTable->getPrintFormat($strFormatterId);
+                    } 
                 }
                 $strCSVOutputFileType = $objCsvFormatter->getGeneValue("outputFileType",$refRetKeyExists);
                 if( $strCSVOutputFileType == "SafeCSV" ){
-                    $strDLFilename = $objCsvFormatter->makeLocalFileName(".scsv",$intUnixTime);
+                    if($strOutputDataType === "latest"){
+                        $strDLFilename = $objCsvFormatter->makeLocalFileName(".scsv",$intUnixTime);
+                    }
+                    else if($strOutputDataType === "history"){
+                        $strDLFilename = $objCsvFormatter->makeLocalFileNameHistory(".scsv",$intUnixTime);
+                    }
                 }
                 else{
                     $strCSVOutputFileType = "NormalCSV";
-                    $strDLFilename = $objCsvFormatter->makeLocalFileName(".csv",$intUnixTime);
+                    if($strOutputDataType === "latest"){
+                        $strDLFilename = $objCsvFormatter->makeLocalFileName(".csv",$intUnixTime);
+                    }
+                    else if($strOutputDataType === "history"){
+                        $strDLFilename = $objCsvFormatter->makeLocalFileNameHistory(".csv",$intUnixTime);
+                    }
                 }
                 if( $strDLFilename === null ){
                     $intErrorType = 501;
@@ -485,14 +560,26 @@
                     throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
                 }
 
-                $tmpAryRet = $objCsvFormatter->writeToFile($sql,
-                                                           $arrayFileterBody,
-                                                           $objTable,
-                                                           $objFunction03ForOverride,
-                                                           $strFormatterId,
-                                                           $filterData,
-                                                           $aryVariant,
-                                                           $arySetting);
+                if($strOutputDataType === "latest"){
+                    $tmpAryRet = $objCsvFormatter->writeToFile($sql,
+                                                               $arrayFileterBody,
+                                                               $objTable,
+                                                               $objFunction03ForOverride,
+                                                               $strFormatterId,
+                                                               $filterData,
+                                                               $aryVariant,
+                                                               $arySetting);
+                } else if($strOutputDataType === "history"){
+                    $tmpAryRet = $objCsvFormatter->writeToFileHistory($sql,
+                                                               $arrayFileterBody,
+                                                               $objTable,
+                                                               $objFunction03ForOverride,
+                                                               $strFormatterId,
+                                                               $filterData,
+                                                               $aryVariant,
+                                                               $arySetting,
+                                                               $sqllatest);
+                }
 
                 if( $tmpAryRet[1] !== null ){
                     $intErrorType = $tmpAryRet[1];
@@ -564,7 +651,7 @@
                     // テンポラリファイルを削除する----
 
                     // アクセスログへ記録
-                    web_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-460",array($ACRCM_id, $strOutputFileType, $strCSVOutputFileType, $strDLFilename)));
+                    web_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-460",array($ACRCM_id, $strOutputFileType, $strOutputDataType, $strCSVOutputFileType, $strDLFilename)));
                 }
                 else{
                     $intErrorType = 501;
@@ -618,11 +705,11 @@
                     $objExcelFormatter->cashModeAdjust();
 
                     // ----XLSXファイル名の設定
-                    if( $strPrintTypeMode != "forDeveloper" ){
+                    if($strOutputDataType === "latest"){
                         $strDLFilename = $objExcelFormatter->makeLocalFileName(".xlsx",$intUnixTime);
                     }
-                    else{
-                        $strDLFilename = $objExcelFormatter->makeLocalFileName(".xlsx",$intUnixTime);
+                    else if($strOutputDataType === "history"){
+                        $strDLFilename = $objExcelFormatter->makeLocalFileNameHistory(".xlsx",$intUnixTime);
                     }
                     if( $strDLFilename === null ){
                         $intErrorType = 501;
@@ -661,7 +748,12 @@
 
                         dev_log("add.before:memory_get_peak_usage(TRUE):".memory_get_peak_usage(TRUE),$intControlDebugLevel02);
                         $objExcelFormatter->workBookCreate();
-                        $objExcelFormatter->editHelpWorkSheetAdd();
+                        if($strOutputDataType === "latest"){
+                            $objExcelFormatter->editHelpWorkSheetAdd();
+                        }
+                        else if($strOutputDataType === "history"){
+                            $objExcelFormatter->editHelpWorkSheetAddHistory();
+                        }
                         $objExcelFormatter->editWorkSheetHeaderCreate();
                         dev_log("sql.before:memory_get_peak_usage(TRUE):".memory_get_peak_usage(TRUE),$intControlDebugLevel02);
 
@@ -674,7 +766,8 @@
                             unset($tmpObjFunction03ForOverride);
                         }
 
-                        $tmpAryRet = $objExcelFormatter->selectResultFetch($sql,
+                        if($strOutputDataType === "latest"){
+                            $tmpAryRet = $objExcelFormatter->selectResultFetch($sql,
                                                                            $arrayFileterBody,
                                                                            $objTable,
                                                                            $intXlsLimit,
@@ -683,6 +776,20 @@
                                                                            $filterData,
                                                                            $aryVariant,
                                                                            $arySetting);
+                        } else if($strOutputDataType === "history"){
+                            $tmpAryRet = $objExcelFormatter->selectResultFetchHistory($sql,
+                                                                           $arrayFileterBody,
+                                                                           $objTable,
+                                                                           $intXlsLimit,
+                                                                           $objFunction03ForOverride,
+                                                                           $strFormatterId,
+                                                                           $filterData,
+                                                                           $aryVariant,
+                                                                           $arySetting,
+                                                                           $sqllatest);
+                        }
+                        
+
 
                         if( $tmpAryRet[1] !== null ){
                             $intErrorType = $tmpAryRet[1];
@@ -719,10 +826,21 @@
                             }
                             //通常モード----
                         }
-                        $objExcelFormatter->editWorkSheetRecordAdd();
-                        $objExcelFormatter->editWorkSheetTailerFix();
-                        // エクセル出力,全件ダウンロードの場合
-                        $objExcelFormatter->ValidationDataWorkSheetAdd(); // カラム列範囲ヴァリデーション
+
+                        if($strOutputDataType === "latest"){
+                            $objExcelFormatter->editWorkSheetRecordAdd();
+                            $objExcelFormatter->editWorkSheetTailerFix();
+                            // エクセル出力,全件ダウンロードの場合
+                            $objExcelFormatter->ValidationDataWorkSheetAdd(); // カラム列範囲ヴァリデーション
+                        }
+                        else if($strOutputDataType === "history"){
+                            $objExcelFormatter->editWorkSheetRecordAdd();
+                            $objExcelFormatter->editWorkSheetTailerFixHistory();
+                            // エクセル出力,全件ダウンロードの場合
+                            $objExcelFormatter->ValidationDataWorkSheetAdd(); // カラム列範囲ヴァリデーション
+                            $objExcelFormatter->editWorkSheetHistoryNonusedData();
+                        }
+
                         dev_log("add.after:memory_get_peak_usage(TRUE):".memory_get_peak_usage(TRUE),$intControlDebugLevel02);
                     }
                     else{
@@ -782,7 +900,7 @@
 
                     if( $strToAreaType == "toStd" ){
                         // ----MIMEタイプの設定
-                        printHeaderForProvideFileStream($strDLFilename,"",null,array("ContentExcelType"=>"EXCEL2007"));
+                        printHeaderForProvideFileStream($strDLFilename,"",null);
                         // MIMEタイプの設定----
                     }
 
@@ -796,8 +914,8 @@
 
                     if( $strToAreaType == "toStd" ){
                         // アクセスログへ記録
-                        //"SUCCESS, DUMP TO FILE. [MENU:[｛｝] PRINTMODE:[｛｝] PRINTTYPE:[｛｝] FILENAME[｛｝]]. ";
-                        web_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-461",array($ACRCM_id, $strOutputFileType, $strPrintTypeMode, $strDLFilename)));
+                        //"SUCCESS, DUMP TO FILE. [MENU:[｛｝] PRINTMODE:[｛｝] DATATYPE:[｛｝]  PRINTTYPE:[｛｝] FILENAME[｛｝]]. ";
+                        web_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-461",array($ACRCM_id, $strOutputFileType, $strOutputDataType, $strPrintTypeMode, $strDLFilename)));
                     }
                     else{
                         $varRetBody = $strTmpFilename;
@@ -880,7 +998,11 @@ EOD;
 
         dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
 
-        return array($varRetBody,$intErrorType,$aryErrMsgBody,$strErrMsg, $aryUploadFile);
+        if(isset($num_rows)){
+          return array($varRetBody,$intErrorType,$aryErrMsgBody,$strErrMsg, $aryUploadFile,$num_rows);
+        }else{
+          return array($varRetBody,$intErrorType,$aryErrMsgBody,$strErrMsg, $aryUploadFile);
+        }
     }
     
     //webroot(03,04,07)----

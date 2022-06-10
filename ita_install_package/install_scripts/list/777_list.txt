@@ -13,6 +13,11 @@
 /ita-root/temp/data_import/import
 /ita-root/temp/data_import/upload
 /ita-root/temp/data_import/uploadfiles
+/ita-root/temp/bulk_excel
+/ita-root/temp/bulk_excel/export
+/ita-root/temp/bulk_excel/import
+/ita-root/temp/bulk_excel/import/import
+/ita-root/temp/bulk_excel/import/upload
 /ita-root/temp/event_mail
 /ita-root/temp/file_up_column
 /ita-root/temp/ky_mail_queues
@@ -26,6 +31,7 @@
 /ita-root/temp/terraform_download_temp
 /ita-root/temp/terraform_module_temp
 /ita-root/temp/update_by_file_error
+/ita-root/temp/ansible_driver_temp
 /ita-root/uploadfiles
 /ita-root/webroot/uploadfiles
 /ita-root/webroot/uploadfiles/2100000204
@@ -33,8 +39,6 @@
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100000002
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100000003
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100000004
-/ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011501
-/ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011502
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011601
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011610
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011611
@@ -48,11 +52,10 @@
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100080001
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100090001
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100100001
+/ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100120001
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100000002/old
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100000003/old
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100000004/old
-/ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011501/old
-/ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011502/old
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011601/old
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011610/old
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011611/old
@@ -66,11 +69,10 @@
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100080001/old
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100090001/old
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100100001/old
+/ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100120001/old
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100000002/old/-000000002
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100000003/old/-000000003
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100000004/old/-000000004
-/ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011501/old/-000150001
-/ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011502/old/-000150002
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011601/old/-000160001
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011610/old/-000160010
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100011611/old/-000160011
@@ -84,3 +86,9 @@
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100080001/old/-000080001
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100090001/old/-000000005
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100100001/old/-000000006
+/ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100120001/old/-000160015
+/ita-root/uploadfiles/2100040702
+/ita-root/uploadfiles/2100040702/ANS_GIT_SSH_KEY_FILE
+/ita-root/uploadfiles/2100040702/ANS_GIT_SSH_KEY_FILE/0000000001
+/ita-root/uploadfiles/2100040702/ANS_GIT_SSH_KEY_FILE/0000000001/old
+/ita-root/uploadfiles/2100040702/ANS_GIT_SSH_KEY_FILE/0000000001/old/0000000001

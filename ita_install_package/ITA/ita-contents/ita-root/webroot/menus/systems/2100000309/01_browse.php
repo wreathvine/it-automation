@@ -32,10 +32,6 @@
         // browse系共通ロジックパーツ01
         require_once ( $root_dir_path . "/libs/webcommonlibs/web_parts_for_browse_01.php");
         
-        // メンテナンス可能メニューを参照のみ可能の権限ユーザが見てないか判定するパーツ
-        // (この処理は非テンプレートのコンテンツのみに必要)
-        require_once ( $root_dir_path . "/libs/webcommonlibs/web_parts_for_maintenance.php");
-
         //アクセス権を判定
         if( array_key_exists( "symphony_instance_id", $_GET ) === true ){
             // クエリからsymphony_instance_idを取得
@@ -107,7 +103,7 @@
     require_once($g['root_dir_path'] . "/webconfs/systems/2100000310_loadTable.php");
     $objTable1 = loadTable($symphony_instance_dir,$aryTmpVariant1,$aryTmpSetting1);
     
-    $tmpRetArray = getFilterCommandArea($objTable1,$aryTmpVariant1,$aryTmpSetting1,"filter_table","Filter1Tbl","FilterConditionTableFormatter");
+    $tmpRetArray = getFilterCommandArea($objTable1,$aryTmpVariant1,$aryTmpSetting1,"filter_table","Filter1Tbl");
     $strHtmlFilter1Commnad = $tmpRetArray[1];
     //シンフォニー用----
     
@@ -120,6 +116,7 @@
     $timeStamp_itabase_symphony_class_info_access_js=filemtime("$root_dir_path/webroot/common/javascripts/itabase_symphony_class_info_access.js");
 
 print <<< EOD
+    <script>const gLoginUserID = {$g['login_id']};</script>
     <script type="text/javascript" src="{$scheme_n_authority}/default/menu/02_access.php?client=all&no={$g['page_dir']}"></script>
     <script type="text/javascript" src="{$scheme_n_authority}/default/menu/02_access.php?stub=all&no={$g['page_dir']}"></script>
     <script type="text/javascript" src="{$scheme_n_authority}/menus/systems/{$g['page_dir']}/00_javascript.js?{$timeStamp_00_javascript_js}"></script>

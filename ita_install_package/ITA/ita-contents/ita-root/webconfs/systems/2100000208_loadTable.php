@@ -76,10 +76,22 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setHiddenMainTableColumn(true);
     $c->setRequired(false);
     $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1070502"));
-    $objVldt = new TextValidator(0, 256, false, '/^(|[-_+=\.a-zA-Z0-9]+@[-a-zA-Z0-9\.]+)$/', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1070503"));
+    $objVldt = new TextValidator(0, 256, false, '/^([a-zA-Z0-9_+-]+(\.[a-zA-Z0-9_+-]+)*@([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.)+[a-zA-Z]{2,})?$/', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1070503"));
     $objVldt->setRegexp("/^[^\r\n]*$/s","DTiS_filterDefault");
     $c->setValidator($objVldt);
 
+    $table->addColumn($c);
+
+    // パスワード無期限設定
+    $c = new IDColumn('PW_EXPIRATION',$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1070504"),'D_FLAG_LIST_01','FLAG_ID','FLAG_NAME','');
+    $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-102064"));//エクセル・ヘッダでの説明
+    $c->setHiddenMainTableColumn(true);
+    $table->addColumn($c);
+
+    // 初回パスワード再設定無効
+    $c = new IDColumn('DEACTIVATE_PW_CHANGE',$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1070505"),'D_FLAG_LIST_01','FLAG_ID','FLAG_NAME','');
+    $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-102065"));//エクセル・ヘッダでの説明
+    $c->setHiddenMainTableColumn(true);
     $table->addColumn($c);
 
     // ロール情報
@@ -191,6 +203,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $strWebUIText = $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1071203");
     $c->getOutputType('register_table')->setVisible(false);
     $c->getOutputType('update_table')->setVisible(false);
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('PROVIDER_ID');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'A_PROVIDER_LIST_JNL',
+	    'TTT_SEARCH_KEY_COLUMN_ID'=>'PROVIDER_ID',
+	    'TTT_GET_TARGET_COLUMN_ID'=>'PROVIDER_NAME',
+	    'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+	    'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+	    'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+	    )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     // PROVIDER_USER_ID
@@ -201,6 +225,51 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->getOutputType('register_table')->setVisible(false);
     $c->getOutputType('update_table')->setVisible(false);
     $table->addColumn($c);
+
+    // 登録/更新/廃止/復活があった場合、データベースを更新した事をマークする。
+    $tmpObjFunction = function($objColumn, $strEventKey, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
+        $boolRet = true;
+        $intErrorType = null;
+        $aryErrMsgBody = array();
+        $strErrMsg = "";
+        $strErrorBuf = "";
+        $strFxName = "";
+
+        global $g;
+
+        $modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
+        if( $modeValue=="DTUP_singleRecRegister" || $modeValue=="DTUP_singleRecUpdate" || $modeValue=="DTUP_singleRecDelete" ){
+
+            if( $modeValue=="DTUP_singleRecUpdate" ){
+                if( $reqOrgData["PASSWORD"] != "" && $aryVariant['edit_target_row']['AUTH_TYPE'] == "local" ){
+                    $username = $reqOrgData["USERNAME"];
+
+                    $sql = "UPDATE A_ACCOUNT_LIST SET PW_LAST_UPDATE_TIME = NULL WHERE USERNAME = '$username'";
+                    $objDBCA = $g["objDBCA"];
+                    $objQuery = $objDBCA->sqlPrepare($sql);
+                    $r = $objQuery->sqlExecute();
+                }
+            }
+
+            $strQuery = "UPDATE A_PROC_LOADED_LIST "
+                       ."SET LOADED_FLG='0' ,LAST_UPDATE_TIMESTAMP = NOW(6) "
+                       ."WHERE ROW_ID IN (2100020002,2100020004,2100020006,2100080002) ";
+
+            $aryForBind = array();
+
+            $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
+
+            if( $aryRetBody[0] !== true ){
+                $boolRet = false;
+                $strErrMsg = $aryRetBody[2];
+                $intErrorType = 500;
+            }
+        }
+        $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
+        return $retArray;
+    };
+    $tmpAryColumn = $table->getColumns();
+    $tmpAryColumn['USER_ID']->setFunctionForEvent('beforeTableIUDAction',$tmpObjFunction);
 
     $table->fixColumn();
     

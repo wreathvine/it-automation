@@ -57,7 +57,7 @@ $log_file_prefix = basename( __FILE__, '.php' ) . "_";
 ////////////////////////////////
 // $log_levelを取得           //
 ////////////////////////////////
-$log_level =  //getenv('LOG_LEVEL'); // 'DEBUG';
+$log_level =  getenv('LOG_LEVEL'); // 'DEBUG';
 
 ////////////////////////////////
 // PHPエラー時のログ出力先設定//
@@ -245,6 +245,7 @@ $arrayHideMenuColumnList = array(
 $arrayTargetClassList = array(
     "TextColumn",
     "IDColumn",
+    "LinkIDColumn",
     "NumColumn",
     "MaskColumn",
     "MultiTextColumn",
@@ -262,6 +263,19 @@ $arrayTargetIDColumnClassList = array(
     "MaskColumn",
     "MultiTextColumn",
     "HostInsideLinkTextColumn",
+);
+
+////////////////////////////////
+// 代入値自動登録設定の項目表示対象のクラス(IDColumnの紐付先/参照項目・パラメータ参照による場合)
+////////////////////////////////
+$arrayTargetIDColumnClassReferenceList = array(
+    "TextColumn",
+    "NumColumn",
+    "MaskColumn",
+    "MultiTextColumn",
+    "PasswordColumn",
+    "HostInsideLinkTextColumn",
+    "FileUploadColumn",
 );
 
 ////////////////////////////////
@@ -607,20 +621,29 @@ try{
                 continue;
             }
             // IDColumnの場合、紐づけ先のColumn Class取得 
-            if($list[5] == 'IDColumn') {
-                $clomn_class = getColumnClass($list[2],$list[4]);
-                if($clomn_class === false) {
+            if($list[5] == 'IDColumn' || $list[5] == 'LinkIDColumn') {
+                $column_class = getColumnClass($list[2],$list[4]);
+                if($column_class === false) {
                     continue;
                 }
                 // 対象クラス確認
-                if(!in_array($clomn_class, $arrayTargetIDColumnClassList)){
-                    //カラム名に_CLONE_が含まれている場合、チェックをスキップ
-                    if(!strpos($list[0],'_CLONE_')){
+                if(!strpos($list[0],'_CLONE_')){
+                    //通常のカラムの場合
+                    if(!in_array($column_class, $arrayTargetIDColumnClassList)){
                         continue;
+                    }
+                }else{
+                    //カラム名に_CLONE_が含まれている（参照項目・パラメータ参照用のカラムである）場合
+                    if(!in_array($column_class, $arrayTargetIDColumnClassReferenceList)){
+                        continue;
+                    }
+                    //ファイルアップロードカラムを参照の場合、TextColumnとして登録する。
+                    if($column_class == "FileUploadColumn"){
+                        $column_class = "TextColumn";
                     }
                 }
             } else {
-                $clomn_class = $list[5];
+                $column_class = $list[5];
             }
 
             // カラム情報登録
@@ -629,7 +652,7 @@ try{
                                             'REF_TABLE_NAME'        =>$list[2],
                                             'REF_PKEY_NAME'         =>$list[3],
                                             'REF_COL_NAME'          =>$list[4],
-                                            'COL_CLASS'             =>$clomn_class,
+                                            'COL_CLASS'             =>$column_class,
                                             'ACCESS_AUTH'           =>$access_auth,
                                            );
         }
@@ -2054,6 +2077,11 @@ function getColumnClass($ref_table,$ref_column) {
         return false;
     }
 
+    //$ref_tableが「D_MENU_LIST」、$ref_columnが「MENU_PULLDOWN」の場合は、例外として強制的に"TextColumn"を返す。（loadTable側にこのカラムの記載がないく、クラス情報を取得できないため。）
+    if($ref_table == "D_MENU_LIST" && $ref_column == "MENU_PULLDOWN"){
+        return "TextColumn";
+    }
+
     foreach($table_array as $table) {
         $cmd = sprintf("grep -lR %s %s",$ref_column,$table);
         $column_array = array();
@@ -2122,7 +2150,7 @@ function getColumnClass($ref_table,$ref_column) {
 
             foreach($aryValue['ALL_COLUMNS'] as $no=>$list){
                 if(($list[0] == $ref_column) &&
-                   ($list[5] != 'IDColumn')) {
+                   ($list[5] != 'IDColumn' && $list[5] != 'LinkIDColumn')) {
                     $ret_class = $list[5];
                     return $ret_class;
                 }

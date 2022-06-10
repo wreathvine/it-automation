@@ -387,6 +387,58 @@ callback.prototype = {
         }
         showForDeveloper(result);
     },
+    Mix1_1_duplicate : function( result ){
+        var strMixOuterFrameName = 'Mix2_Nakami';
+        var strMixInnerFramePrefix = 'Mix2_';
+  
+        var ary_result = getArrayBySafeSeparator(result);
+        checkTypicalFlagInHADACResult(ary_result);
+  
+        var resultContentTag = ary_result[2];
+  
+        var objAlertArea=$('#'+strMixOuterFrameName+' .alert_area').get()[0];
+  
+        if( ary_result[0] == "000" ){
+  
+            var objRegiterArea=$('#'+strMixOuterFrameName+' .table_area').get()[0];
+  
+            switch( ary_result[1] ){
+                case "100":
+                    window.alert(resultContentTag);
+                    objRegiterArea.innerHTML = "";
+                    Filter1Tbl_search_async();
+                    break;
+                case "201":
+                    // エラーなく登録完了
+                default:                
+                    objRegiterArea.innerHTML="";
+                    $(objRegiterArea).html(resultContentTag);
+  
+                    objAlertArea.style.display = "none";
+                    
+                    adjustTableAuto (strMixInnerFramePrefix+'1',
+                                    "sDefault",
+                                    "fakeContainer_Register2",
+                                    webStdTableHeight,
+                                    webStdTableWidth );
+                    linkDateInputHelper(strMixOuterFrameName);
+            }
+        }else if( ary_result[0] == "002" ){
+            window.alert(getSomeMessage("ITAWDCC90102"));
+            objAlertArea.innerHTML = resultContentTag;
+            objAlertArea.style.display = "block";
+            setInputButtonDisable(strMixOuterFrameName,'disableAfterPush',false);
+        }else if( ary_result[0] == "003" ){
+            var objRegiterArea=$('#'+strMixOuterFrameName+' .table_area').get()[0];
+            objRegiterArea.innerHTML="";
+            objAlertArea.innerHTML = resultContentTag;
+            objAlertArea.style.display = "block";
+        }else{
+            window.alert(getSomeMessage("ITAWDCC90101"));
+        }
+  
+        showForDeveloper(result);
+    },
     //---- ここからカスタマイズした場合の[callback]メソッド配置域
     //----メニュー
     Mix1_1_menu_upd : function( result ){
@@ -619,6 +671,54 @@ callback.prototype = {
     },
     //変数名----
 
+    //セッション切れの際に二重でセッション切れメッセージが出力されるのを避けるため、Mix2_1_vars_regから派生
+    //----Value変数 登録
+    Mix2_1_vars_reg2 : function( result ){
+        var tableTagAreaWrap = 'Mix2_Nakami';
+        var strTableTagPrintId = 'Mix2_1';
+        var containerClassName = 'fakeContainer_Register2';
+
+        var intMaxWidth = 650;
+
+        var htmlSetExcute = true;
+        var errMsgBody = '';
+
+        var ary_result = getArrayBySafeSeparator(result);
+
+        if( !(ary_result instanceof Array) ){
+            //----配列ではなかった
+            //配列ではなかった----
+        }else{
+            if( ary_result[0]=='redirectOrderForHADACClient' ){
+                return;
+            }
+        }
+
+        if( ary_result[0] == "000" ){
+            var ary_element = getArrayBySafeSeparator(ary_result[2]);
+            
+            var ary_result01 = getArrayBySafeSeparator(ary_element[0]);
+            
+            var resultSetTargetSeq = ary_result01[0];
+            var resultContentTag = ary_result01[1];
+            
+            var objHtmlSetArea = $('#'+tableTagAreaWrap+' .'+resultSetTargetSeq).get()[0];
+            $(objHtmlSetArea).html(resultContentTag);
+            addPullDownBox(tableTagAreaWrap, strTableTagPrintId, intMaxWidth, resultSetTargetSeq, containerClassName);
+
+            if( ary_result01[2] == "NORMAL_VAR_1"){
+                textPrintToBoxes('2','Mix2_1_10');
+            }
+            else{
+                textPrintToBoxes('1','Mix2_1_10');
+            }
+        }else{
+            window.alert(getSomeMessage("ITAWDCC90101"));
+        }
+        showForDeveloper(result);
+    },
+    //変数名----
+
     //----Key変数 更新
     Mix1_1_key_vars_upd : function( result ){
         var tableTagAreaWrap = 'Mix1_Nakami';
@@ -697,6 +797,53 @@ callback.prototype = {
     },
     //カラム 変数名----
 
+    //セッション切れの際に二重でセッション切れメッセージが出力されるのを避けるため、Mix2_1_key_vars_regから派生
+    //----Key変数 登録
+    Mix2_1_key_vars_reg2 : function( result ){
+        var tableTagAreaWrap = 'Mix2_Nakami';
+        var strTableTagPrintId = 'Mix2_1';
+        var containerClassName = 'fakeContainer_Register2';
+
+        var intMaxWidth = 650;
+
+        var htmlSetExcute = true;
+        var errMsgBody = '';
+
+        var ary_result = getArrayBySafeSeparator(result);
+
+        if( !(ary_result instanceof Array) ){
+            //----配列ではなかった
+            //配列ではなかった----
+        }else{
+            if( ary_result[0]=='redirectOrderForHADACClient' ){
+                return;
+            }
+        }
+
+        if( ary_result[0] == "000" ){
+            var ary_element = getArrayBySafeSeparator(ary_result[2]);
+            
+            var ary_result01 = getArrayBySafeSeparator(ary_element[0]);
+            
+            var resultSetTargetSeq = ary_result01[0];
+            var resultContentTag = ary_result01[1];
+            
+            var objHtmlSetArea = $('#'+tableTagAreaWrap+' .'+resultSetTargetSeq).get()[0];
+            $(objHtmlSetArea).html(resultContentTag);
+            addPullDownBox(tableTagAreaWrap, strTableTagPrintId, intMaxWidth, resultSetTargetSeq, containerClassName);
+
+            if( ary_result01[2] == "NORMAL_VAR_1"){
+                textPrintToBoxes('2','Mix2_1_7');
+            }
+            else{
+                textPrintToBoxes('1','Mix2_1_7');
+            }
+        }else{
+            window.alert(getSomeMessage("ITAWDCC90101"));
+        }
+        showForDeveloper(result);
+    },
+    //カラム 変数名----
 
     //----メンバー変数名
     Mix1_1_val_chlVar_upd : function( result ){
@@ -1009,7 +1156,7 @@ function Filter1Tbl_search_control( exec_flag_var, value1 ){
                 // 自動開始制御タグがない場合は、システムエラー扱い、とする。
                 // システムエラーが発生しました。
                 alert( getSomeMessage("ITAWDCC20205") );
-                exit;
+                exec_flag_ret = false;
             }else{
                 if( objFCSL.value == 'on' ){
                     // 自動開始制御タグが存在し、オートフィルタ開始の抑制が働いている可能性がある
@@ -1337,9 +1484,9 @@ function Mix1_1_pattern_upd(){
 }
 function Mix2_1_pattern_reg(){
     // すべての後選択関連カラムを消す
-    proxy.Mix2_1_key_vars_reg('');
+    proxy.Mix2_1_key_vars_reg2('');
     textPrintToBoxes('10','Mix2_1_7');
-    proxy.Mix2_1_vars_reg('');
+    proxy.Mix2_1_vars_reg2('');
     textPrintToBoxes('10','Mix2_1_10');
 
     var rangeId = 'Mix2_1';

@@ -31,6 +31,7 @@ Ansible(Legacy)作業パターン
     // ANSIBLEインターフェース情報の実行エンジンを取得
     $root_dir_path = $g['root_dir_path'];
     require_once ($root_dir_path . "/libs/backyardlibs/common/common_db_access.php");
+    require_once ($root_dir_path . "/libs/backyardlibs/ansible_driver/ky_ansible_common_setenv.php");
     $dbobj = new CommonDBAccessCoreClass($g['db_model_ch'],$g['objDBCA'],$g['objMTS'],$g['login_id']);
 
     $sqlBody   = "select ANSIBLE_EXEC_MODE from B_ANSIBLE_IF_INFO where DISUSE_FLAG='0'";
@@ -43,7 +44,7 @@ Ansible(Legacy)作業パターン
     } else {
         if($objQuery->effectedRowCount() == 0) {
             $message = sprintf("Recode not found. (Table:B_ANSIBLE_IF_INFO");
-            web_log(basename(__FILE__),__LINE__,$message);
+            web_log('[FILE]' .basename(__FILE__) .'[LINE]' .__LINE__ .$message);
         } else {
             $row = $objQuery->resultFetch();
             // ANSIBLE_EXEC_MODE=2 ansible tower
@@ -154,6 +155,18 @@ Ansible(Legacy)作業パターン
         $c = new IDColumn('ANS_WINRM_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-207043"),'D_FLAG_LIST_01','FLAG_ID','FLAG_NAME','');
         $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-207046"));//エクセル・ヘッダでの説明
         $c->setHiddenMainTableColumn(true);//コンテンツのソースがヴューの場合、登録/更新の対象とする際に、trueとすること。setDBColumn(true)であることも必要。
+        $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+        $objOT->setFirstSearchValueOwnerColumnID('ANS_WINRM_ID');
+        $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'D_FLAG_LIST_01_JNL',
+            'TTT_SEARCH_KEY_COLUMN_ID'=>'FLAG_ID',
+            'TTT_GET_TARGET_COLUMN_ID'=>'FLAG_NAME',
+            'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+            'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+            'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+            )
+        );
+        $objOT->setTraceQuery($aryTraceQuery);
+        $c->setOutputType('print_journal_table',$objOT);
         $cg->addColumn($c);
 
         /* 親Playbookのヘッダーセクション */
@@ -176,20 +189,89 @@ Ansible(Legacy)作業パターン
 
     $table->addColumn($cg);
 
+    // ANSIBLEインターフェース情報の実行エンジンがAnsible Engineの場合に利Ansible Engine用情報を表示
+    if($ansible_exec_mode == DF_EXEC_MODE_ANSIBLE) {
+
+        // Ansible Engine利用情報
+        $cg = new ColumnGroup( $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000040") );
+
+            /* Ansible virtualenv path*/
+            $objVldt = new SingleTextValidator(0,512,false);
+            $c = new TextColumn('ANS_ENGINE_VIRTUALENV_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000027"));
+            $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000028"));
+            $c->setHiddenMainTableColumn(true);
+            $c->setValidator($objVldt);
+            $c->setRequired(false);
+
+        $cg->addColumn($c);
+        $table->addColumn($cg);
+    }
+
     // ANSIBLEインターフェース情報の実行エンジンがTowerの場合にTower利用情報を表示
-    if($ansible_exec_mode == 2) {
+    if($ansible_exec_mode == DF_EXEC_MODE_TOWER) {
 
         // Tower利用情報
         $cg = new ColumnGroup( $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000013") );
 
-        // virtualenv
-        $c = new IDColumn('ANS_VIRTUALENV_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000014"),'B_ANS_TWR_VIRTUALENV','VIRTUALENV_NAME','VIRTUALENV_NAME','');
-        $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000015"));
-        $c->setHiddenMainTableColumn(true);
-        $cg->addColumn($c);
+            // virtualenv
+            $c = new IDColumn('ANS_VIRTUALENV_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000029"),'B_ANS_TWR_VIRTUALENV','VIRTUALENV_NAME','VIRTUALENV_NAME','');
+            $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000030"));
+            $c->setHiddenMainTableColumn(true);
+
+            $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+            $objOT->setFirstSearchValueOwnerColumnID('ANS_VIRTUALENV_NAME');
+            $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_ANS_TWR_VIRTUALENV_JNL',
+                'TTT_SEARCH_KEY_COLUMN_ID'=>'VIRTUALENV_NAME',
+                'TTT_GET_TARGET_COLUMN_ID'=>'VIRTUALENV_NAME',
+                'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+                'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+                'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+                )
+            );
+            $objOT->setTraceQuery($aryTraceQuery);
+            $c->setOutputType('print_journal_table',$objOT);
+            $cg->addColumn($c);
 
         $table->addColumn($cg);
     }
+
+    // ANSIBLEインターフェース情報の実行エンジンがansible automation controllerの場合にansible automation controller利用情報を表示
+    if($ansible_exec_mode == DF_EXEC_MODE_AAC) {
+
+        // ansible automation controller利用情報
+        $cg = new ColumnGroup( $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000035") );
+
+            // 実行環境
+            $c = new IDColumn('ANS_EXECUTION_ENVIRONMENT_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000036"),'B_ANS_TWR_EXECUTION_ENVIRONMENT','EXECUTION_ENVIRONMENT_NAME','EXECUTION_ENVIRONMENT_NAME','');
+            $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000037")); //エクセル・ヘッダでの説明
+            $c->setHiddenMainTableColumn(true); //コンテンツのソースがヴューの場合、登録/更新の対象とする際に、trueとすること。setDBColumn(true)であることも必要。
+            $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+            $objOT->setFirstSearchValueOwnerColumnID('ANS_EXECUTION_ENVIRONMENT_NAME');
+            $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_ANS_TWR_EXECUTION_ENVIRONMENT_JNL',
+                    'TTT_SEARCH_KEY_COLUMN_ID'=>'EXECUTION_ENVIRONMENT_NAME',
+                    'TTT_GET_TARGET_COLUMN_ID'=>'EXECUTION_ENVIRONMENT_NAME',
+                    'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+                    'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+                    'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+                    )
+            );
+            $objOT->setTraceQuery($aryTraceQuery);
+            $c->setOutputType('print_journal_table',$objOT);
+            $cg->addColumn($c);
+
+        $table->addColumn($cg);
+    }
+
+    $c = new FileUploadColumn('ANS_ANSIBLE_CONFIG_FILE',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000038"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000039"));//エクセル・ヘッダでの説明
+    $c->setFileHideMode(true);
+    $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
+    $c->setAllowSendFromFile(false);            //エクセル/CSVからのアップロードを禁止する。
+    $c->setRequired(false);                     //登録/更新時には、入力任意
+    $c->setHiddenMainTableColumn(true);         //コンテンツのソースがViewなので、true設定
+    $c->setNRPathAnyToBranchPerFUC('/uploadfiles/2100000305/ANS_ANSIBLE_CONFIG_FILE');
+    $table->addColumn($c);
+
     // Movement詳細へのリンクボタン
     $strLabelText = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1207314");
     $c = new LinkButtonColumn('ethWakeOrder',$strLabelText, $strLabelText, 'dummy');
@@ -260,6 +342,8 @@ Ansible(Legacy)作業パターン
 
             $table->getFormatter('print_table')->setGeneValue("linkExcelHidden",true);
             $table->getFormatter('print_table')->setGeneValue("linkCSVFormShow",false);
+
+            $tmpAryColumn['ethWakeOrder']->getOutputType('print_table')->setVisible(false);
         }
     }
     unset($tmpAryColumn);

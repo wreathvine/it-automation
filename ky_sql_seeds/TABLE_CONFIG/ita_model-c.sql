@@ -57,6 +57,8 @@ ANSIBLE_STORAGE_PATH_ANS        %VARCHR%(256)                     ,
 SYMPHONY_STORAGE_PATH_ANS       %VARCHR%(256)                     ,
 CONDUCTOR_STORAGE_PATH_ANS      %VARCHR%(256)                     ,
 ANSIBLE_EXEC_OPTIONS            %VARCHR%(512)                     , -- ansible-playbook実行時のオプションパラメータ
+ANSIBLE_PROXY_ADDRESS           %VARCHR%(128)                     ,
+ANSIBLE_PROXY_PORT              %INT%                             ,
 -- ansible独自情報
 ANSIBLE_EXEC_USER               %VARCHR%(64)                      , -- ansible-playbook実行ユーザー
 ANSIBLE_ACCESS_KEY_ID           %VARCHR%(64)                      , 
@@ -70,6 +72,11 @@ NULL_DATA_HANDLING_FLG          %INT%                             , -- Null値�
 ANSIBLE_NUM_PARALLEL_EXEC       %INT%                             , -- 並列実行数
 ANSIBLE_REFRESH_INTERVAL        %INT%                             , 
 ANSIBLE_TAILLOG_LINES           %INT%                             , 
+-- Git連携先情報
+ANS_GIT_HOSTNAME                %VARCHR%(128)                     , -- バックヤードサーバー「Ansible_Driver」 接続ホスト名
+ANS_GIT_USER                    %VARCHR%(128)                     , -- バックヤードサーバー「Ansible_Driver」 Gitリポジトリ アクセス ユーザー
+ANS_GIT_SSH_KEY_FILE            %VARCHR%(256)                     , -- バックヤードサーバー「Ansible_Driver」 Gitリポジトリ アクセス 公開鍵
+ANS_GIT_SSH_KEY_FILE_PASSPHRASE text                              , -- バックヤードサーバー「Ansible_Driver」 Gitリポジトリ アクセス 公開鍵 パスフレーズ
 --
 DISP_SEQ                        %INT%                             , -- 表示順序
 ACCESS_AUTH                     TEXT                              ,
@@ -104,6 +111,8 @@ ANSIBLE_STORAGE_PATH_ANS        %VARCHR%(256)                     ,
 SYMPHONY_STORAGE_PATH_ANS       %VARCHR%(256)                     ,
 CONDUCTOR_STORAGE_PATH_ANS      %VARCHR%(256)                     ,
 ANSIBLE_EXEC_OPTIONS            %VARCHR%(512)                     , -- ansible-playbook実行時のオプションパラメータ
+ANSIBLE_PROXY_ADDRESS           %VARCHR%(128)                     ,
+ANSIBLE_PROXY_PORT              %INT%                             ,
 -- ansible独自情報
 ANSIBLE_EXEC_USER               %VARCHR%(64)                      , -- ansible-playbook実行ユーザー
 ANSIBLE_ACCESS_KEY_ID           %VARCHR%(64)                      , 
@@ -117,6 +126,11 @@ NULL_DATA_HANDLING_FLG          %INT%                             , -- Null値�
 ANSIBLE_NUM_PARALLEL_EXEC       %INT%                             , -- 並列実行数
 ANSIBLE_REFRESH_INTERVAL        %INT%                             , 
 ANSIBLE_TAILLOG_LINES           %INT%                             , 
+-- Git連携先情報
+ANS_GIT_HOSTNAME                %VARCHR%(128)                     , -- バックヤードサーバー「Ansible_Driver」 接続ホスト名
+ANS_GIT_USER                    %VARCHR%(128)                     , -- バックヤードサーバー「Ansible_Driver」 Gitリポジトリ アクセス ユーザー
+ANS_GIT_SSH_KEY_FILE            %VARCHR%(256)                     , -- バックヤードサーバー「Ansible_Driver」 Gitリポジトリ アクセス 公開鍵
+ANS_GIT_SSH_KEY_FILE_PASSPHRASE text                              , -- バックヤードサーバー「Ansible_Driver」 Gitリポジトリ アクセス 公開鍵 パスフレーズ
 --
 DISP_SEQ                        %INT%                             , -- 表示順序
 ACCESS_AUTH                     TEXT                              ,
@@ -135,7 +149,7 @@ CREATE TABLE B_ANS_TWR_HOST (
   ANSTWR_HOSTNAME                 %VARCHR%(128)                     , -- ホスト名/IPアドレス
   ANSTWR_LOGIN_AUTH_TYPE          %INT%                             , -- 認証方式 パスワード認証/鍵認証
   ANSTWR_LOGIN_USER               %VARCHR%(30)                      , -- ユーザー
-  ANSTWR_LOGIN_PASSWORD           %VARCHR%(60)                      , -- パスワード
+  ANSTWR_LOGIN_PASSWORD           TEXT                              , -- パスワード
   ANSTWR_LOGIN_SSH_KEY_FILE       %VARCHR%(256)                     , -- 鍵ファイル
   ANSTWR_LOGIN_SSH_KEY_FILE_PASSPHRASE  TEXT                        ,
   ANSTWR_ISOLATED_TYPE            %INT%                             , -- 1:isolated tower 
@@ -160,7 +174,7 @@ CREATE TABLE B_ANS_TWR_HOST_JNL (
   ANSTWR_HOSTNAME                 %VARCHR%(128)                     , -- ホスト名/IPアドレス
   ANSTWR_LOGIN_AUTH_TYPE          %INT%                             , -- 認証方式 パスワード認証/鍵認証
   ANSTWR_LOGIN_USER               %VARCHR%(30)                      , -- ユーザー
-  ANSTWR_LOGIN_PASSWORD           %VARCHR%(60)                      , -- パスワード
+  ANSTWR_LOGIN_PASSWORD           TEXT                              , -- パスワード
   ANSTWR_LOGIN_SSH_KEY_FILE       %VARCHR%(256)                     , -- 鍵ファイル
   ANSTWR_LOGIN_SSH_KEY_FILE_PASSPHRASE  TEXT                        ,
   ANSTWR_ISOLATED_TYPE            %INT%                             , -- 1:isolated tower 
@@ -380,6 +394,47 @@ PRIMARY KEY(JOURNAL_SEQ_NO)
 -- 履歴系テーブル作成----
 
 -- ------------------------------
+-- -- Pioner LANGマスタ
+-- ------------------------------
+-- ----更新系テーブル作成
+CREATE TABLE B_ANS_PNS_LANG_MASTER
+(
+ID                                %INT%                            ,
+
+NAME                              %VARCHR%(64)                     ,
+
+DISP_SEQ                          %INT%                            , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
+NOTE                              %VARCHR%(4000)                   , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                            , -- 最終更新ユーザ
+
+PRIMARY KEY (ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- 更新系テーブル作成----
+
+-- ----履歴系テーブル作成
+CREATE TABLE B_ANS_PNS_LANG_MASTER_JNL
+(
+JOURNAL_SEQ_NO                    %INT%                            , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME              %DATETIME6%                      , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS              %VARCHR%(8)                      , -- 履歴用変更種別
+ID                                %INT%                            ,
+
+NAME                              %VARCHR%(64)                     ,
+
+DISP_SEQ                          %INT%                            , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
+NOTE                              %VARCHR%(4000)                   , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                            , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- 履歴系テーブル作成----
+
+-- ------------------------------
 -- -- 実行モード（エンジン）
 -- ------------------------------
 -- ----更新系テーブル作成
@@ -515,6 +570,42 @@ CREATE TABLE B_ANS_TWR_VIRTUALENV_JNL (
   ROW_ID                          %INT%                             , 
   VIRTUALENV_NAME                 %VARCHR%(512)                     , 
   VIRTUALENV_NO                   %INT%                             , 
+  DISP_SEQ                        %INT%                             , 
+  ACCESS_AUTH                     TEXT                              ,
+  NOTE                            %VARCHR%(4000)                    , 
+  DISUSE_FLAG                     %VARCHR%(1)                       , 
+  LAST_UPDATE_TIMESTAMP           %DATETIME6%                       , 
+  LAST_UPDATE_USER                %INT%                             , 
+  PRIMARY KEY (JOURNAL_SEQ_NO) 
+)%%TABLE_CREATE_OUT_TAIL%%; 
+-- 履歴系テーブル作成----
+
+-- ------------------------------
+-- -- Tower 実行環境マスタ
+-- ------------------------------
+-- ----更新系テーブル作成
+CREATE TABLE B_ANS_TWR_EXECUTION_ENVIRONMENT ( 
+  ROW_ID                          %INT%                             , 
+  EXECUTION_ENVIRONMENT_NAME      %VARCHR%(512)                     , 
+  EXECUTION_ENVIRONMENT_NO        %INT%                             , 
+  DISP_SEQ                        %INT%                             , 
+  ACCESS_AUTH                     TEXT                              ,
+  NOTE                            %VARCHR%(4000)                    , 
+  DISUSE_FLAG                     %VARCHR%(1)                       , 
+  LAST_UPDATE_TIMESTAMP           %DATETIME6%                       , 
+  LAST_UPDATE_USER                %INT%                             , 
+  PRIMARY KEY (ROW_ID) 
+)%%TABLE_CREATE_OUT_TAIL%%; 
+-- 更新系テーブル作成----
+
+-- ----履歴系テーブル作成
+CREATE TABLE B_ANS_TWR_EXECUTION_ENVIRONMENT_JNL ( 
+  JOURNAL_SEQ_NO                  %INT%                             , 
+  JOURNAL_REG_DATETIME            %DATETIME6%                       , 
+  JOURNAL_ACTION_CLASS            %VARCHR%(8)                       , 
+  ROW_ID                          %INT%                             , 
+  EXECUTION_ENVIRONMENT_NAME      %VARCHR%(512)                     , 
+  EXECUTION_ENVIRONMENT_NO        %INT%                             , 
   DISP_SEQ                        %INT%                             , 
   ACCESS_AUTH                     TEXT                              ,
   NOTE                            %VARCHR%(4000)                    , 
@@ -1043,6 +1134,7 @@ PATTERN_ID                        %INT%                            ,
 SYSTEM_ID                         %INT%                            ,
 VARS_LINK_ID                      %INT%                            ,
 VARS_ENTRY                        text                             ,
+VARS_ENTRY_FILE                   text                             ,
 SENSITIVE_FLAG                    %VARCHR%(1)                      ,
 VARS_ENTRY_USE_TPFVARS            %VARCHR%(1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        %INT%                            ,
@@ -1072,6 +1164,7 @@ PATTERN_ID                        %INT%                            ,
 SYSTEM_ID                         %INT%                            ,
 VARS_LINK_ID                      %INT%                            ,
 VARS_ENTRY                        text                             ,
+VARS_ENTRY_FILE                   text                             ,
 SENSITIVE_FLAG                    %VARCHR%(1)                      ,
 VARS_ENTRY_USE_TPFVARS            %VARCHR%(1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        %INT%                            ,
@@ -1106,7 +1199,10 @@ I_ANS_EXEC_OPTIONS                %VARCHR%(512)                    ,
 OPERATION_NO_UAPK                 %INT%                            ,
 I_OPERATION_NAME                  %VARCHR%(256)                    ,
 I_OPERATION_NO_IDBH               %INT%                            ,
-I_VIRTUALENV_NAME                 %VARCHR%(256)                    , -- virtualenv
+I_VIRTUALENV_NAME                 %VARCHR%(512)                    , -- tower virtualenv path
+I_ENGINE_VIRTUALENV_NAME          %VARCHR%(512)                    , -- ansible  virtualenv path
+I_EXECUTION_ENVIRONMENT_NAME      %VARCHR%(512)                    , -- AAP 実行環境
+I_ANSIBLE_CONFIG_FILE             %VARCHR%(512)                    , -- ansible.cfg アップロードカラム
 TIME_BOOK                         %DATETIME6%                      ,
 TIME_START                        %DATETIME6%                      ,
 TIME_END                          %DATETIME6%                      ,
@@ -1158,7 +1254,10 @@ I_ANS_EXEC_OPTIONS                %VARCHR%(512)                    ,
 OPERATION_NO_UAPK                 %INT%                            ,
 I_OPERATION_NAME                  %VARCHR%(256)                    ,
 I_OPERATION_NO_IDBH               %INT%                            ,
-I_VIRTUALENV_NAME                 %VARCHR%(256)                    , -- virtualenv
+I_VIRTUALENV_NAME                 %VARCHR%(512)                    , -- tower virtualenv path
+I_ENGINE_VIRTUALENV_NAME          %VARCHR%(512)                    , -- ansible  virtualenv path
+I_EXECUTION_ENVIRONMENT_NAME      %VARCHR%(512)                    , -- AAP 実行環境
+I_ANSIBLE_CONFIG_FILE             %VARCHR%(512)                    , -- ansible.cfg アップロードカラム
 TIME_BOOK                         %DATETIME6%                      ,
 TIME_START                        %DATETIME6%                      ,
 TIME_END                          %DATETIME6%                      ,
@@ -1259,6 +1358,9 @@ SELECT
         ANS_PLAYBOOK_HED_DEF          ,
         ANS_EXEC_OPTIONS              ,
         ANS_VIRTUALENV_NAME           ,
+        ANS_ENGINE_VIRTUALENV_NAME    ,
+        ANS_EXECUTION_ENVIRONMENT_NAME, -- AAP 実行環境
+        ANS_ANSIBLE_CONFIG_FILE       , -- ansible.cfg アップロードカラム
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
         NOTE                          ,
@@ -1281,9 +1383,12 @@ SELECT
         ANS_HOST_DESIGNATE_TYPE_ID    ,
         ANS_PARALLEL_EXE              ,
         ANS_WINRM_ID                  ,
-        ANS_PLAYBOOK_HED_DEF      ,
+        ANS_PLAYBOOK_HED_DEF          ,
         ANS_EXEC_OPTIONS              ,
         ANS_VIRTUALENV_NAME           ,
+        ANS_ENGINE_VIRTUALENV_NAME    ,
+        ANS_EXECUTION_ENVIRONMENT_NAME, -- AAP 実行環境
+        ANS_ANSIBLE_CONFIG_FILE       , -- ansible.cfg アップロードカラム
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
         NOTE                          ,
@@ -1384,6 +1489,9 @@ SELECT
          TAB_A.I_OPERATION_NAME          ,
          TAB_A.I_OPERATION_NO_IDBH       ,
          TAB_A.I_VIRTUALENV_NAME         ,
+         TAB_A.I_ENGINE_VIRTUALENV_NAME  ,
+         TAB_A.I_EXECUTION_ENVIRONMENT_NAME, -- AAP 実行環境
+         TAB_A.I_ANSIBLE_CONFIG_FILE       , -- ansible.cfg アップロードカラム
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -1437,6 +1545,9 @@ SELECT
          TAB_A.I_OPERATION_NAME          ,
          TAB_A.I_OPERATION_NO_IDBH       ,
          TAB_A.I_VIRTUALENV_NAME         ,
+         TAB_A.I_ENGINE_VIRTUALENV_NAME  ,
+         TAB_A.I_EXECUTION_ENVIRONMENT_NAME, -- AAP 実行環境
+         TAB_A.I_ANSIBLE_CONFIG_FILE       , -- ansible.cfg アップロードカラム
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -1807,6 +1918,7 @@ PATTERN_ID                        %INT%                            ,
 SYSTEM_ID                         %INT%                            ,
 VARS_LINK_ID                      %INT%                            ,
 VARS_ENTRY                        text                             ,
+VARS_ENTRY_FILE                   text                             ,
 SENSITIVE_FLAG                    %VARCHR%(1)                      ,
 VARS_ENTRY_USE_TPFVARS            %VARCHR%(1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        %INT%                            ,
@@ -1836,6 +1948,7 @@ PATTERN_ID                        %INT%                            ,
 SYSTEM_ID                         %INT%                            ,
 VARS_LINK_ID                      %INT%                            ,
 VARS_ENTRY                        text                             ,
+VARS_ENTRY_FILE                   text                             ,
 SENSITIVE_FLAG                    %VARCHR%(1)                      ,
 VARS_ENTRY_USE_TPFVARS            %VARCHR%(1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        %INT%                            ,
@@ -1870,7 +1983,10 @@ I_ANS_EXEC_OPTIONS                %VARCHR%(512)                    ,
 OPERATION_NO_UAPK                 %INT%                            ,
 I_OPERATION_NAME                  %VARCHR%(256)                    ,
 I_OPERATION_NO_IDBH               %INT%                            ,
-I_VIRTUALENV_NAME                 %VARCHR%(256)                    , -- virtualenv
+I_VIRTUALENV_NAME                 %VARCHR%(512)                    , -- tower virtualenv path
+I_ENGINE_VIRTUALENV_NAME          %VARCHR%(512)                    , -- ansible  virtualenv path
+I_EXECUTION_ENVIRONMENT_NAME      %VARCHR%(512)                    , -- AAP 実行環境
+I_ANSIBLE_CONFIG_FILE             %VARCHR%(512)                    , -- ansible.cfg アップロードカラム
 TIME_BOOK                         %DATETIME6%                      ,
 TIME_START                        %DATETIME6%                      ,
 TIME_END                          %DATETIME6%                      ,
@@ -1921,7 +2037,10 @@ I_ANS_EXEC_OPTIONS                %VARCHR%(512)                    ,
 OPERATION_NO_UAPK                 %INT%                            ,
 I_OPERATION_NAME                  %VARCHR%(256)                    ,
 I_OPERATION_NO_IDBH               %INT%                            ,
-I_VIRTUALENV_NAME                 %VARCHR%(256)                    , -- virtualenv
+I_VIRTUALENV_NAME                 %VARCHR%(512)                    , -- tower virtualenv path
+I_ENGINE_VIRTUALENV_NAME          %VARCHR%(512)                    , -- ansible  virtualenv path
+I_EXECUTION_ENVIRONMENT_NAME      %VARCHR%(512)                    , -- AAP 実行環境
+I_ANSIBLE_CONFIG_FILE             %VARCHR%(512)                    , -- ansible.cfg アップロードカラム
 TIME_BOOK                         %DATETIME6%                      ,
 TIME_START                        %DATETIME6%                      ,
 TIME_END                          %DATETIME6%                      ,
@@ -2072,6 +2191,9 @@ SELECT
         ANS_HOST_DESIGNATE_TYPE_ID    ,
         ANS_PARALLEL_EXE              ,
         ANS_VIRTUALENV_NAME           ,
+        ANS_ENGINE_VIRTUALENV_NAME    ,
+        ANS_EXECUTION_ENVIRONMENT_NAME, -- AAP 実行環境
+        ANS_ANSIBLE_CONFIG_FILE       , -- ansible.cfg アップロードカラム
         ANS_EXEC_OPTIONS              ,
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
@@ -2095,6 +2217,9 @@ SELECT
         ANS_HOST_DESIGNATE_TYPE_ID    ,
         ANS_PARALLEL_EXE              ,
         ANS_VIRTUALENV_NAME           ,
+        ANS_ENGINE_VIRTUALENV_NAME    ,
+        ANS_EXECUTION_ENVIRONMENT_NAME, -- AAP 実行環境
+        ANS_ANSIBLE_CONFIG_FILE       , -- ansible.cfg アップロードカラム
         ANS_EXEC_OPTIONS              ,
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
@@ -2196,7 +2321,10 @@ SELECT
          TAB_A.OPERATION_NO_UAPK         ,
          TAB_A.I_OPERATION_NAME          ,
          TAB_A.I_OPERATION_NO_IDBH       ,
-         TAB_A.I_VIRTUALENV_NAME         ,         
+         TAB_A.I_VIRTUALENV_NAME         ,
+         TAB_A.I_ENGINE_VIRTUALENV_NAME  ,
+         TAB_A.I_EXECUTION_ENVIRONMENT_NAME, -- AAP 実行環境
+         TAB_A.I_ANSIBLE_CONFIG_FILE       , -- ansible.cfg アップロードカラム
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -2249,7 +2377,10 @@ SELECT
          TAB_A.OPERATION_NO_UAPK         ,
          TAB_A.I_OPERATION_NAME          ,
          TAB_A.I_OPERATION_NO_IDBH       ,
-         TAB_A.I_VIRTUALENV_NAME         ,         
+         TAB_A.I_VIRTUALENV_NAME         ,
+         TAB_A.I_ENGINE_VIRTUALENV_NAME  ,
+         TAB_A.I_EXECUTION_ENVIRONMENT_NAME, -- AAP 実行環境
+         TAB_A.I_ANSIBLE_CONFIG_FILE       , -- ansible.cfg アップロードカラム
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -2336,7 +2467,10 @@ I_ANS_EXEC_OPTIONS                %VARCHR%(512)                    ,
 OPERATION_NO_UAPK                 %INT%                            , -- オペレーションNo
 I_OPERATION_NAME                  %VARCHR%(256)                    , -- オペレーション名
 I_OPERATION_NO_IDBH               %INT%                            , -- オペレーションID
-I_VIRTUALENV_NAME                 %VARCHR%(256)                    , -- virtualenv
+I_VIRTUALENV_NAME                 %VARCHR%(512)                    , -- tower virtualenv path
+I_ENGINE_VIRTUALENV_NAME          %VARCHR%(512)                    , -- ansible  virtualenv path
+I_EXECUTION_ENVIRONMENT_NAME      %VARCHR%(512)                    , -- AAP 実行環境
+I_ANSIBLE_CONFIG_FILE             %VARCHR%(512)                    , -- ansible.cfg アップロードカラム
 TIME_BOOK                         %DATETIME6%                      , -- 予約日時
 TIME_START                        %DATETIME6%                      , -- 開始日時
 TIME_END                          %DATETIME6%                      , -- 終了日時
@@ -2387,7 +2521,10 @@ I_ANS_EXEC_OPTIONS                %VARCHR%(512)                    ,
 OPERATION_NO_UAPK                 %INT%                            , -- オペレーションNo
 I_OPERATION_NAME                  %VARCHR%(256)                    , -- オペレーション名
 I_OPERATION_NO_IDBH               %INT%                            , -- オペレーションID
-I_VIRTUALENV_NAME                 %VARCHR%(256)                    , -- virtualenv
+I_VIRTUALENV_NAME                 %VARCHR%(512)                    , -- tower virtualenv path
+I_ENGINE_VIRTUALENV_NAME          %VARCHR%(512)                    , -- ansible  virtualenv path
+I_EXECUTION_ENVIRONMENT_NAME      %VARCHR%(512)                    , -- AAP 実行環境
+I_ANSIBLE_CONFIG_FILE             %VARCHR%(512)                    , -- ansible.cfg アップロードカラム
 TIME_BOOK                         %DATETIME6%                      , -- 予約日時
 TIME_START                        %DATETIME6%                      , -- 開始日時
 TIME_END                          %DATETIME6%                      , -- 終了日時
@@ -2773,6 +2910,7 @@ SYSTEM_ID                         %INT%                            , -- 機器(�
 VARS_LINK_ID                      %INT%                            , -- 作業パターン変数紐付
 COL_SEQ_COMBINATION_ID            %INT%                            , -- 多次元変数配列組合せ管理 Pkey
 VARS_ENTRY                        text                             , -- 具体値
+VARS_ENTRY_FILE                   text                             ,
 SENSITIVE_FLAG                    %VARCHR%(1)                      ,
 VARS_ENTRY_USE_TPFVARS            %VARCHR%(1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        %INT%                            ,
@@ -2803,6 +2941,7 @@ SYSTEM_ID                         %INT%                            , -- 機器(�
 VARS_LINK_ID                      %INT%                            , -- 作業パターン変数紐付
 COL_SEQ_COMBINATION_ID            %INT%                            , -- 多次元変数配列組合せ管理 Pkey
 VARS_ENTRY                        text                             , -- 具体値
+VARS_ENTRY_FILE                   text                             ,
 SENSITIVE_FLAG                    %VARCHR%(1)                      ,
 VARS_ENTRY_USE_TPFVARS            %VARCHR%(1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        %INT%                            ,
@@ -3166,6 +3305,9 @@ SELECT
         ANS_PLAYBOOK_HED_DEF          ,
         ANS_EXEC_OPTIONS              ,
         ANS_VIRTUALENV_NAME           ,
+        ANS_ENGINE_VIRTUALENV_NAME    ,
+        ANS_EXECUTION_ENVIRONMENT_NAME, -- AAP 実行環境
+        ANS_ANSIBLE_CONFIG_FILE       , -- ansible.cfg アップロードカラム
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
         NOTE                          ,
@@ -3191,6 +3333,9 @@ SELECT
         ANS_PLAYBOOK_HED_DEF          ,
         ANS_EXEC_OPTIONS              ,
         ANS_VIRTUALENV_NAME           ,
+        ANS_ENGINE_VIRTUALENV_NAME    ,
+        ANS_EXECUTION_ENVIRONMENT_NAME, -- AAP 実行環境
+        ANS_ANSIBLE_CONFIG_FILE       , -- ansible.cfg アップロードカラム
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
         NOTE                          ,
@@ -3226,6 +3371,9 @@ SELECT
          TAB_A.I_OPERATION_NAME          ,
          TAB_A.I_OPERATION_NO_IDBH       ,
          TAB_A.I_VIRTUALENV_NAME         ,
+         TAB_A.I_ENGINE_VIRTUALENV_NAME  ,
+         TAB_A.I_EXECUTION_ENVIRONMENT_NAME, -- AAP 実行環境
+         TAB_A.I_ANSIBLE_CONFIG_FILE       , -- ansible.cfg アップロードカラム
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -3279,6 +3427,9 @@ SELECT
          TAB_A.I_OPERATION_NAME          ,
          TAB_A.I_OPERATION_NO_IDBH       ,
          TAB_A.I_VIRTUALENV_NAME         ,
+         TAB_A.I_ENGINE_VIRTUALENV_NAME  ,
+         TAB_A.I_EXECUTION_ENVIRONMENT_NAME, -- AAP 実行環境
+         TAB_A.I_ANSIBLE_CONFIG_FILE       , -- ansible.cfg アップロードカラム
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,

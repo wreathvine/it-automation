@@ -59,7 +59,23 @@ const getWidgetMessage = function( id ) {
       '36':getSomeMessage("ITAWDCC92136"), // 画像URL
       '37':getSomeMessage("ITAWDCC92137"), // リンクURL
       '38':getSomeMessage("ITAWDCC92154"), // 未実行
-      '39':getSomeMessage("ITAWDCC92155")  // 表示できるメニューグループはありません。
+      '39':getSomeMessage("ITAWDCC92155"), // 表示できるメニューグループはありません。
+      '40':getSomeMessage("ITAWDCC92158"), // インスタンスID
+      '41':getSomeMessage("ITAWDCC92159"), // 名称
+      '42':getSomeMessage("ITAWDCC92160"), // オペレーション名
+      '43':getSomeMessage("ITAWDCC92161"), // ステータス
+      '44':getSomeMessage("ITAWDCC92162"), // 予約日時
+      '45':getSomeMessage("ITAWDCC92163"), // 予約作業はありません
+      '46':getSomeMessage("ITAWDCC92164"), // {{N}}日以内の予約作業はありません。
+      '47':getSomeMessage("ITAWDCC92165"), // ※0で全件表示
+      '48':getSomeMessage("ITAWDCC92166"), // 期間（日）
+      '49':getSomeMessage("ITAWDCC92167"), // 実行まで残り
+      '50':getSomeMessage("ITAWDCC92168"), // 日
+      '51':getSomeMessage("ITAWDCC92169"), // 時間
+      '52':getSomeMessage("ITAWDCC92170"), // 分
+      '53':getSomeMessage("ITAWDCC92171"), // リンクリスト保存
+      '54':getSomeMessage("ITAWDCC92172"), // リンクリスト読込
+      '55':getSomeMessage("ITAWDCC92173"), // ファイルの読み込みに失敗しました。
     };
 
     if ( message[ id ] ) {
@@ -211,11 +227,30 @@ const getWidgetItem = function( widgetID ) {
         'background': '0',
         'unique': '0',
         'data': {
-          'image': '/common/imgs/ita_icon.png',
+          'image': '/common/imgs/widget_default_image.png',
           'link': '',
           'target': '_blank'
         }
       },
+      //#488 start
+      '10': {
+        'widget_id': '10',
+        'name': 'reserve_symphony_conductor',
+        'display_name': getSomeMessage("ITAWDCC92156"),
+        'description': getSomeMessage("ITAWDCC92157"),
+        'colspan': '3',
+        'rowspan': '1',
+        'display': '1',
+        'title': '1',
+        'background': '1',
+        'unique': '1',
+        'data': {
+          'days': '14',
+          'symphony': '1',
+          'conductor': '1'
+        }
+      }
+      //#488 end
     };
 
     if( widgetID === undefined ) {
@@ -379,12 +414,17 @@ const deselection = function() {
 //   Widget HTML
 // 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// ショートカットリストHTML
 const getWidgetShortcutHTML = function( shortcutList ) {
     const shortcutLength = shortcutList.length;
     let shortcutHTML = '<ul class="shortcut-list">';
     for ( let i = 0; i < shortcutLength; i++ ) {
+      const href = encodeURI( shortcutList[i]['url'] ),
+            target = editor.textEntities( shortcutList[i]['target'], false ),
+            text = editor.textEntities( shortcutList[i]['name'], false ).replace(/^ | $/g, '&nbsp');
       shortcutHTML += '<li class="shortcut-item" data-link-id="' + shortcutCount + '">'
-        + '<a class="shortcut-link" href="' + encodeURI( shortcutList[i]['url'] ) + '" target="' + editor.textEntities( shortcutList[i]['target'] ) + '">' + editor.textEntities( shortcutList[i]['name'] ) + '</a>'
+        + '<a class="shortcut-link" href="' + href + '" target="' + target + '">' + text + '</a>'
         + '</li>';
       shortcutCount++;
     }
@@ -392,6 +432,8 @@ const getWidgetShortcutHTML = function( shortcutList ) {
     
     return shortcutHTML;
 };
+
+// Widget基本HTML
 const getWidgetHTML = function( widgetSetID, widgetData ) {
 
     const loadingWaitHTML = '<div class="widget-loading"></div>';
@@ -404,13 +446,13 @@ const getWidgetHTML = function( widgetSetID, widgetData ) {
       case '1':
         if ( Object.keys( widgetInfo['menu'] ).length !== 0 ) {
           contentHTML = '<ul class="widget-menu-list">' + widgetMenu( widgetSetID ) + '</ul>';
-          dataHTML = ' data-menu-col="' + widgetData['data']['menu_col_number'] + '"';
         } else {
           contentHTML = ''
           + '<div id="dashboard-error-message">'
             + '<p class="dashboard-error-message-text">' + getWidgetMessage('39') + '</p>'
           + '</div>';
         }
+        dataHTML = ' data-menu-col="' + widgetData['data']['menu_col_number'] + '"';
         break;
       case '2':
         contentHTML = '<ul class="widget-menu-list">' + widgetMenu( widgetSetID ) + '</ul>';
@@ -442,6 +484,12 @@ const getWidgetHTML = function( widgetSetID, widgetData ) {
         if ( widgetData['data']['link'] !== '') {
           contentHTML = '<a class="widget-image-link" href="' + encodeURI( widgetData['data']['link'] ) + '" target="' + editor.textEntities( widgetData['data']['target'] ) + '">' + contentHTML + '</a>'
         }
+        break;
+      case '10':
+        contentHTML = loadingWaitHTML;
+        dataHTML = ' data-days="' + widgetData['data']['days'] + '"';
+        dataHTML += ' data-display-symphony="' + widgetData['data']['symphony'] + '"';
+        dataHTML += ' data-display-conductor="' + widgetData['data']['conductor'] + '"';
         break;
       default:
         contentHTML = '{contents}';
@@ -491,9 +539,8 @@ const getSetID = function() {
     setIdList.push( $( this ).attr('id') );
   });
   
-  const flag = true;
   let setID = 'widget' + widgetCount++;
-  while( flag ) {
+  while( true ) {
     if ( setIdList.indexOf( setID ) === -1 ) {
       break;
     }
@@ -521,7 +568,7 @@ const initialSet = function() {
   const widgetList = widgetInfo['widget'];
   
   // 読み込みフラグ [Movement,Status,result-History]
-  const loadFlag = [ false, false, false ];
+  const loadFlag = [ false, false, false, false ];
   // gridフラグ
   const gridFlag = gridCheck();
   
@@ -546,7 +593,10 @@ const initialSet = function() {
         case '4': loadFlag[0] = true; break;
         case '5': loadFlag[1] = true; break;
         case '6': 
-        case '7': loadFlag[2] = true;
+        case '7': loadFlag[2] = true; break;
+        //#488 start
+        case '10': loadFlag[3] = widgetItem['data']['days']; break;
+        //#488 end
       }      
       
       if ( widgetItem['set_id'] ) {
@@ -608,6 +658,13 @@ const initialSet = function() {
     if ( loadFlag[1] ) get_work_info();
     // 作業結果読み込み
     if ( loadFlag[2] ) get_work_result();
+    //#488 start
+    // Symphony/Conductor 読み込み
+    if ( loadFlag[3] ) {
+      const days = loadFlag[3];
+      get_symphony_conductor( days );
+    }
+    //#488 end
     }
 };
 
@@ -681,7 +738,7 @@ const getWidgetData = function( setID ) {
               'name': $link.text(),
               'url': decodeURI( $link.attr('href') ),
               'target': $link.attr('target')
-            }
+            };
           });
           newWidgetInfo['data']['link_col_number'] = $widget.attr('data-link-col');
           } break;
@@ -695,11 +752,17 @@ const getWidgetData = function( setID ) {
           const link = decodeURI( $widget.find('.widget-image-link').attr('href') ),
                 target = $widget.find('.widget-image-link').attr('target')
           newWidgetInfo['data']['image'] = decodeURI( $widget.find('.widget-image').attr('src') );
-          newWidgetInfo['data']['link'] = ( link === undefined )? '': link;
-          newWidgetInfo['data']['target'] = ( target === undefined )? '': target;
+          newWidgetInfo['data']['link'] = ( link === undefined || link === 'undefined')? '': link;
+          newWidgetInfo['data']['target'] = ( target === undefined || link === 'undefined')? '': target;
+          console.log(newWidgetInfo['data']['link'])
           } break;
+        case '10':
+          newWidgetInfo['data']['days'] = $widget.attr('data-days');
+          newWidgetInfo['data']['symphony'] = $widget.attr('data-display-symphony');
+          newWidgetInfo['data']['conductor'] = $widget.attr('data-display-conductor');
+          break;
       }
-      
+
       return newWidgetInfo;
     } else {
       return undefined;
@@ -776,7 +839,6 @@ const setWidgetSpan = function( area, row, col, setID ) {
     }
   }
 };
-
 
 const widgetMenuButton = function() {
 
@@ -904,6 +966,12 @@ const addWidget = function( widgetID ) {
       // 作業結果読み込み
       case '6':
       case '7': get_work_result(); break;
+      // Symphony/Conductort読み込み
+      case '10': {
+        let days = widgetData['data']['days'];
+        if ( days === undefined || days === '') days = '0';
+        get_symphony_conductor( days );
+        } break;
     }
     
     widgetCheckBlank();
@@ -1011,17 +1079,23 @@ const editWidget = function( setID ) {
     case '3': {
       const getShortcutInputRow = function( name, url, target ) {
         return '<tr class="edit-shortcut-row">'
-          + '<td class="edit-shortcut-cell edit-shortcut-name"><input data-max-length="32" class="edit-shortcut-input edit-shortcut-input-name" type="text" value="' + editor.textEntities( name ) + '"></td>'
-          + '<td class="edit-shortcut-cell edit-shortcut-url"><input data-max-length="256" class="edit-shortcut-input edit-shortcut-input-url" type="text" value="' + editor.textEntities( url ) + '"></td>'
-          + '<td class="edit-shortcut-cell edit-shortcut-target"><input data-max-length="16" class="edit-shortcut-input edit-shortcut-input-target" type="text" value="' + editor.textEntities( target ) + '"></td>'
-          + '<td class="edit-shortcut-cell edit-shortcut-remove"><button class="edit-shortcut-remove-button"><span class="cross-mark"></span></button></td>'
+          + '<td class="edit-shortcut-cell edit-shortcut-name"><input data-max-length="32" class="edit-shortcut-input edit-shortcut-input-name" type="text" value="' + editor.textEntities( name, false ) + '"></td>'
+          + '<td class="edit-shortcut-cell edit-shortcut-url"><input data-max-length="256" class="edit-shortcut-input edit-shortcut-input-url" type="text" value="' + editor.textEntities( url, false ) + '"></td>'
+          + '<td class="edit-shortcut-cell edit-shortcut-target"><input data-max-length="16" class="edit-shortcut-input edit-shortcut-input-target" type="text" value="' + editor.textEntities( target, false ) + '"></td>'
+          + '<td class="edit-shortcut-cell edit-shortcut-remove"><button type="button" class="edit-shortcut-button" data-type="remove"><span class="cross-mark"></span></button></td>'
         + '</tr>';
       };
       
       widgetEditHTML += getRowHTML( getWidgetMessage('6'), getRadioHTML('link-col', [[1,1],[2,2],[3,3],[4,4]], Number( widgetData['data']['link_col_number'] ) ) );
       
       const listLength = widgetData['data']['list'].length;
-      let shortcutHTML = '<table class="edit-shortcut-table">'
+      let shortcutHTML = ''
+      + '<ul class="edit-shortcut-menu">'
+        + '<li class="edit-shortcut-menu-item edit-shortcut-menu-separate"><button type="button" class="edit-shortcut-button" data-type="add">' + getWidgetMessage('8') + '</button></li>'
+        + '<li class="edit-shortcut-menu-item"><button type="button" class="edit-shortcut-button" data-type="save">' + getWidgetMessage('53') + '</button></li>'
+        + '<li class="edit-shortcut-menu-item"><button type="button" class="edit-shortcut-button" data-type="read">' + getWidgetMessage('54') + '</button><input type="file" class="edit-shortcut-file"></li>'
+      + '</ul>'
+      + '<table class="edit-shortcut-table">'
         + '<thead><tr>'
           + '<th class="edit-shortcut-cell edit-shortcut-name">' + getWidgetMessage('3') + '</th>'
           + '<th class="edit-shortcut-cell edit-shortcut-url">URL</th>'
@@ -1040,14 +1114,88 @@ const editWidget = function( setID ) {
       shortcutHTML += getShortcutInputRow('','','');
       shortcutHTML += '</tbody></table>';
       
-      widgetEditHTML += getRowHTML( getWidgetMessage('7') + '<br><button class="edit-shortcut-add-button">' + getWidgetMessage('8') + '</button>', shortcutHTML );
+      widgetEditHTML += getRowHTML( getWidgetMessage('7'), shortcutHTML );
       
-      // 追加・削除ボタン
-      $modalBody.on('click', '.edit-shortcut-add-button', function(){
-        $modalBody.find('.edit-shortcut-table tbody').append( getShortcutInputRow('','','') );
+      // 読み込み
+      $modalBody.on('change', '.edit-shortcut-file', function(e){
+        const file = e.target.files[0];
+        if ( file ) {
+          const fileReader = new FileReader();
+          fileReader.readAsText( file );
+          fileReader.onload = function() {
+            
+            try {
+              linkList = JSON.parse( fileReader.result );
+              const $body = $modalBody.find('.edit-shortcut-table > tbody'),
+                    linkLength = linkList.length;
+              $body.empty();
+              for ( let i = 0; i < linkLength; i++ ) {
+                const name = linkList[i]['name'],
+                      url = linkList[i]['url'],
+                      target = linkList[i]['target'];
+                $body.append( getShortcutInputRow( name, url, target ) );
+              }
+            } catch(e) {
+              alert( getWidgetMessage('55') );
+              return false;
+            }
+          };
+        }
       });
-      $modalBody.on('click', '.edit-shortcut-remove-button', function(){
-        $( this ).closest('.edit-shortcut-row').remove();
+      
+      // ボタン
+      $modalBody.on('click', '.edit-shortcut-button', function(){
+        const $button = $( this ),
+              type = $button.attr('data-type');
+        switch( type ) {
+          case 'add':
+            $modalBody.find('.edit-shortcut-table > tbody').append( getShortcutInputRow('','','') );
+            break;
+          case 'remove':
+            $button.closest('.edit-shortcut-row').remove();
+            break;  
+          case 'save':
+            // リンクリストの作成
+            const linkList = [];
+            $modalBody.find('.edit-shortcut-table > tbody > tr').each(function(i){
+              const $tr = $( this ),
+                    name = $tr.find('.edit-shortcut-input-name').val();
+              if ( name !== '') {
+                linkList[i] = {
+                  'name': name,
+                  'url': $tr.find('.edit-shortcut-input-url').val(),
+                  'target': $tr.find('.edit-shortcut-input-target').val()
+                };
+              }
+            });
+            
+            //　作成したリストをダウンロードする
+            const blobText = new Blob( [ JSON.stringify( linkList ) ], { type : 'text/plain' }),
+                  $downloadAnchor = $('<a />'),
+                  userName = $('#HEADER').find('.itaLoginUserName > .userDataText').text().slice( 0, 128 ),
+                  fileName = userName + '_link-list.txt';
+
+            // 一時リンクを作成しダウンロード
+            $downloadAnchor.attr({
+              'href' : window.URL.createObjectURL( blobText ),
+              'download' : fileName,
+              'target' : '_blank'
+            });
+            $modalBody.prepend( $downloadAnchor );
+            $downloadAnchor.get(0).click();
+
+            // 生成したBlobを削除しておく
+            setTimeout( function(){
+              $downloadAnchor.remove()
+              window.URL.revokeObjectURL( blobText );
+            }, 100 );
+            break;
+          case 'read':
+            const $input = $modalBody.find('.edit-shortcut-file');
+            $input.val('');
+            $input.get(0).click();
+            break;
+        }
       });
       } break;
     case '7':
@@ -1060,6 +1208,11 @@ const editWidget = function( setID ) {
       widgetEditHTML += getRowHTML( getWidgetMessage('36'), '<input data-max-length="256" class="edit-input-text edit-image-url" type="text" value="' + editor.textEntities(  widgetData['data']['image'] ) + '">');
       widgetEditHTML += getRowHTML('Link URL', '<input data-max-length="256" class="edit-input-text edit-image-link" type="text" value="' + editor.textEntities(  widgetData['data']['link'] ) + '">');
       widgetEditHTML += getRowHTML('Link target', '<input data-max-length="16" class="edit-input-text edit-image-target" type="text" value="' + editor.textEntities( widgetData['data']['target'] ) + '">');
+      break;
+    case '10':
+      widgetEditHTML += getRowHTML( getWidgetMessage('48') + '<br><span class="edit-input-note">' + getWidgetMessage('47') + '</span>', '<input data-min="0" data-max="365" class="edit-input-number edit-days-number" type="number" value="' + widgetData['data']['days'] + '">');
+      widgetEditHTML += getRowHTML('Symphony', getRadioHTML('display-symphony',[[getWidgetMessage('34'),1],[getWidgetMessage('35'),0]], Number(widgetData['data']['symphony'] ) ) );
+      widgetEditHTML += getRowHTML('Condcutor', getRadioHTML('display-conductor',[[getWidgetMessage('34'),1],[getWidgetMessage('35'),0]], Number(widgetData['data']['conductor'] ) ) );
       break;
   }
  
@@ -1133,7 +1286,7 @@ const editWidget = function( setID ) {
             const period = $modalBody.find('.edit-period-number').val();
             // 変更があったらグラフを更新する
             if ( period !== widgetData['data']['period'] ) {
-              $widget.attr('data-period',period );
+              $widget.attr('data-period', period );
               get_work_result();
             }
             } break;
@@ -1153,6 +1306,19 @@ const editWidget = function( setID ) {
               contentHTML = '<a class="widget-image-link" href="' + encodeURI( link ) + '" target="' + editor.textEntities( target ) + '">' + contentHTML + '</a>'
             }
             $widget.find('.widget-body').html( contentHTML );
+            } break;
+          case '10': {
+            $widget.attr({
+              'data-display-symphony': getRadioChecked('display-symphony'),
+              'data-display-conductor': getRadioChecked('display-conductor')
+            });
+            let days = $modalBody.find('.edit-days-number').val();
+            if ( days === undefined || days === '') days = '0';
+            // 変更があったらグラフを更新する
+            if ( days !== widgetData['data']['days'] ) {
+              $widget.attr('data-days', days );
+              get_symphony_conductor( days );
+            }
             } break;
         }
         // 位置を再セット
@@ -1947,8 +2113,134 @@ initialSet();
 
 
 
-
-
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//   Symphony, Conductor 予約リスト
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+function setSymphonyConductorList( resultData ) {
+  const editor = new itaEditorFunctions;
+  
+  const widgetID = 10,
+        $target = $('.widget-grid[data-widget-id="' + widgetID + '"]').eq(0),
+        days = $target.attr('data-days');
+  
+  let tableHTML = '';
+  
+  for ( const type in resultData ) {
+    const title = ( type === 'conductor')? 'Conductor': 'Symphony',
+          name = ( type === 'conductor')? 'conductor_name': 'symphony_name',
+          url =  ( type === 'conductor')?
+            '/default/menu/01_browse.php?no=2100180005&conductor_instance_id=':
+            '/default/menu/01_browse.php?no=2100000309&symphony_instance_id=',
+          idLength = Object.keys( resultData[type] ).length;
+    
+    tableHTML += ''
+    + '<div class="widget-sub-name reserve-' + type + '">' + title + '</div>'
+    + '<div class="dashboard-table-wrap reserve-' + type + '">';
+  
+    if ( idLength > 0 ) {
+      tableHTML += ''
+      + '<table class="dashboard-table">'
+        + '<thead>'
+          + '<tr>'
+            + '<th>' + getWidgetMessage('40') + ' / ' + getWidgetMessage('41') + '</th>'
+            + '<th>' + getWidgetMessage('42') + '</th>'
+            + '<th>' + getWidgetMessage('43') + '</th>'
+            + '<th>' + getWidgetMessage('44') + '</th>'
+            + '<th>' + getWidgetMessage('49') + '</th>'
+          + '</tr>'
+        + '</thead>'
+        + '</tbody>';
+      
+      // ソート用配列の作成
+      const tableArray = [];
+      for ( const id in resultData[type] ) {
+        tableArray.push({
+          'id': id,
+          'name': resultData[type][id][name],
+          'operation_name': resultData[type][id].operation_name,
+          'status': resultData[type][id].status,
+          'time_book': resultData[type][id].time_book
+        });
+      }
+      // 日時でソート
+      tableArray.sort(function( a, b ){
+        if ( a.time_book > b.time_book ) {
+          return 1;          
+        } else {
+          return -1;
+        }
+      });
+      
+      const tableArrayLength = tableArray.length;
+      for ( let i = 0; i < tableArrayLength; i++ ) {
+        tableHTML += ''
+        + '<tr class="reserve-row">'
+          + '<td class="dashboard-table-cell-wrap"><a class="rID" href="' + url + tableArray[i].id + '" target="_blank">' + tableArray[i].id + '</a>' + editor.textEntities( tableArray[i].name ) + '</td>'
+          + '<td class="dashboard-table-cell-wrap">' + editor.textEntities( tableArray[i].operation_name ) + '</td>'
+          + '<td class="dashboard-table-cell-nowrap"><span class="dashboard-reserve-status"><span class="dashboard-reserve-status-icon"></span>' + editor.textEntities( tableArray[i].status ) + '</span></td>'
+          + '<td class="dashboard-table-cell-nowrap reserve-date">' + tableArray[i].time_book + '</td>'
+          + '<td class="dashboard-table-cell-nowrap reserve-count-down"></td>'
+        + '</tr>';
+      }
+      
+      tableHTML += '</tbody></table>';
+ 
+    } else {
+      if ( days === 0 ) {
+        tableHTML += '<p class="dashboard-text">' + getWidgetMessage('45') + '</p>';
+      } else {
+        const daysMessage = getWidgetMessage('46').replace(/{{N}}/, days );
+        tableHTML += '<p class="dashboard-text">' + daysMessage + '</p>';
+      }
+    }
+    tableHTML += '</div>';
+  }
+  
+  $target.find('.widget-body').html( tableHTML );
+  
+  // カウントダウンする
+  const zP = function( text, digit ){
+    const num = ('0000000000' + text ).slice( -digit ).replace(/^(0+)/,'<span class="zero">$1</span>');
+    return num;    
+  };
+  const coundDown = function(){
+    // タイマーを停止する
+    const $reserveWidget = $('.widget-grid[data-widget-id="' + widgetID + '"]').eq(0),
+          widgetTimerID = Number( $reserveWidget.attr('data-timer-id'));
+    if ( widgetTimerID !== intervalID ) {
+      clearInterval( intervalID );
+      return false;
+    }
+    
+    const today = new Date();
+    $reserveWidget.find('.reserve-date').each(function(){
+      const $date = $( this ),
+            time = new Date( $date.text() ),
+            diff = time - today;
+      
+      const day = ( diff >= 0 )? Math.floor( diff / (24 * 60 * 60 * 1000) ): 0,
+            hour = ( diff >= 0 )? Math.floor(( diff % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000)): 0,
+            min = ( diff >= 0 )? Math.floor(( diff % (24 * 60 * 60 * 1000)) / (60 * 1000)) % 60: 0,
+            html = '<span class="rd">'+zP(day,3)+'</span>' + getWidgetMessage('50') + '<span class="rd">'+zP(hour,2)+'</span>' + getWidgetMessage('51') + '<span class="rd">'+zP(min,2)+'</span>' + getWidgetMessage('52');
+      
+      if ( diff <= 0 ) {
+        $date.closest('tr').addClass('running').removeClass('shortly');
+      } else if ( day == 0 ) {
+        $date.closest('tr').addClass('shortly');
+      }
+      
+      $date.next().html( html );
+    });
+  };
+  
+  const intervalID = setInterval( coundDown, 60000 );
+  $target.attr('data-timer-id', intervalID );
+  coundDown();
+  
+  
+}
 
 
 
@@ -2439,7 +2731,7 @@ return [
 ];
 }
 function workHistory( result ) {
-
+  
 const widgetID = 7,
       $target = $('.widget-grid[data-widget-id="' + widgetID + '"]').eq(0),
       resultText = [

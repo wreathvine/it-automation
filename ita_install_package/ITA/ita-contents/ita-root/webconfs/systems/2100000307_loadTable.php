@@ -38,7 +38,8 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         'TT_SYS_06_LUP_USER_ID'=>'LAST_UPDATE_USER',
         'TT_SYS_NDB_ROW_EDIT_BY_FILE_ID'=>'ROW_EDIT_BY_FILE',
         'TT_SYS_NDB_UPDATE_ID'=>'WEB_BUTTON_UPDATE',
-        'TT_SYS_NDB_LUP_TIME_ID'=>'UPD_UPDATE_TIMESTAMP'
+        'TT_SYS_NDB_LUP_TIME_ID'=>'UPD_UPDATE_TIMESTAMP',
+        'TT_SYS_08_DUPLICATE_ID'=>'WEB_BUTTON_DUPLICATE'
     );
 
     $table = new TableControlAgent('C_SYMPHONY_CLASS_MNG','SYMPHONY_CLASS_NO', $g['objMTS']->getSomeMessage("ITABASEH-MNU-109040"), 'C_SYMPHONY_CLASS_MNG_JNL', $tmpAry);
@@ -54,6 +55,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile', $g['objMTS']->getSomeMessage("ITABASEH-MNU-109060"));
 
     $table->setAccessAuth(true);    // データごとのRBAC設定
+    $table->setNoRegisterFlg(true);    // 登録画面無し
 
 
     //----リンクボタン
@@ -136,6 +138,39 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $table->addColumn($c);
 
 
+    // 登録/更新/廃止/復活があった場合、代入値自動登録設定のbackyard処理の処理済みフラグをOFFにする
+    $tmpObjFunction = function($objColumn, $strEventKey, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
+        $boolRet = true;
+        $intErrorType = null;
+        $aryErrMsgBody = array();
+        $strErrMsg = "";
+        $strErrorBuf = "";
+        $strFxName = "";
+
+        $modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
+        if( $modeValue=="DTUP_singleRecRegister" || $modeValue=="DTUP_singleRecUpdate" || $modeValue=="DTUP_singleRecDelete" ){
+
+            $strQuery = "UPDATE A_PROC_LOADED_LIST "
+                       ."SET LOADED_FLG='0' ,LAST_UPDATE_TIMESTAMP = NOW(6) "
+                       ."WHERE ROW_ID IN (2100020002,2100020004,2100020006,2100080002) ";
+
+            $aryForBind = array();
+
+            $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
+
+            if( $aryRetBody[0] !== true ){
+                $boolRet = false;
+                $strErrMsg = $aryRetBody[2];
+                $intErrorType = 500;
+            }
+        }
+        $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
+        return $retArray;
+    };
+    $tmpAryColumn = $table->getColumns();
+    $tmpAryColumn[$table->getDBTablePK()]->setFunctionForEvent('beforeTableIUDAction',$tmpObjFunction);
+
+
     $table->fixColumn();
     $tmpAryColumn= $table->getColumns();
 
@@ -159,6 +194,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     );
     $outputType = new OutputType(new TabHFmt(), new DelTabBFmt());
     $tmpAryColumn['WEB_BUTTON_UPDATE']->getOutputType('print_table')->setVisible(false);
+    $tmpAryColumn['WEB_BUTTON_DUPLICATE']->getOutputType('print_table')->setVisible(false);
 
     list($strTmpValue,$tmpKeyExists) = isSetInArrayNestThenAssign($aryVariant,array('callType'),null);
     if( $tmpKeyExists===true ){

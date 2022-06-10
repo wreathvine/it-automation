@@ -280,7 +280,6 @@
                         $intErrorType = 610;
                         $aryErrMsgElement[] = $aryForbiddenUpLoad[$puFnv1];
                         throw new Exception( '00001200-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
-                        break;
                     }
                     
                 }
@@ -545,7 +544,7 @@
                 $objRIColumn->addFilterValueForDTiS($strRIN, null);
                 
                 // RBAC アクセス権による絞り込みは不要
-                $sql = generateJournalSelectSQL($objTable,true);  
+                $sql = generateJournalSelectSQL(2,$objTable,true);  
                 $arrayFileterBody = $objTable->getFilterArray(true);
                 $retArray = singleSQLExecuteAgent($sql, $arrayFileterBody, $strFxName);
                 if( $retArray[0] === true ){
@@ -660,10 +659,7 @@
             dev_log($tmpErrMsgBody, $intControlDebugLevel01);
             
             // ----一般訪問ユーザに見せてよいメッセージを作成
-            switch($intErrorType){
-                //----システムエラーが発生しました。
-                default : $strErrMsgBody = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-3001",$intErrorType);break;
-            }
+            $strErrMsgBody = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-3001",$intErrorType);
             // 一般訪問ユーザに見せてよいメッセージを作成----
             if( 0 < $g['dev_log_developer'] ){
                 //----ロードテーブルカスタマイザー向けメッセージを作成

@@ -296,6 +296,18 @@ class OutputType {
 	}
 	//htmlタグ取得用(2014-12-01名前にTagを追加)----
 
+	function getBodyTagDuplicate($rowData, $aryVariant, $option){
+		//----$rowData「NULLまたは連想配列を想定」
+		global $g;
+		$intControlDebugLevel01=200;
+		$strFxName = __CLASS__."::".__FUNCTION__;
+		$strInitedColId = $this->objColumn->getID();
+		$aryVariant['callerClass'] = get_class($this);
+		$aryVariant['callerVars'] = array('initedColumnID'=>$strInitedColId,'free'=>null);
+		dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
+		return $this->body->getDataDuplicate($rowData, $aryVariant, $option);
+	}
+
 	//NEW[29]
 	public function setDescription($strDescription){
 		$this->strDescription = $strDescription;
@@ -402,11 +414,41 @@ class OutputType {
 					$arraySelect = array();
 					$dlcCounter1 = 0;
 					$chkobj = null; // RBAC対応
+					$aryDataSetUnique = array();
+					$referenceFlag = (strpos($objColumn->getID(),'_CLONE_')) ? true : false;
 					if( $selectPrintType===1 ){
 						//----DB内値と表示値が食い違う場合
 						
 						//----最終更新日時
 						while ( $row = $objQuery->resultFetch() ){
+							// ----dispRestrictValue対応
+							$aryDispRestrictValue = $objTable->getDispRestrictValue();
+							if($aryDispRestrictValue != null){
+								$matchFlg = false;
+								foreach($aryDispRestrictValue as $columnName => $aryValue){
+									if(array_key_exists($columnName, $row)){
+										foreach($aryValue as $value){
+											//対象のカラムのデータと$aryValueに格納された値が一致した場合は処理を続行
+											if($value == "" || $value == null || $value == "null" || $value == "NULL"){
+												if($row[$columnName] == "" || $row[$columnName] == null || $row[$columnName] == "null" || $row[$columnName] == "NULL"){
+													$matchFlg = true;
+												}
+											}else{
+												if($row[$columnName] == $value){
+													$matchFlg = true;
+												}
+											}
+										}
+
+										//一致する値が無い場合は、処理をスキップ
+										if($matchFlg == false){
+											continue 2;
+										}
+									}
+								}
+							}
+							// dispRestrictValue対応----
+
 							// ---- RBAC対応
 			                                // ---- 対象レコードのACCESS_AUTHカラムでアクセス権を判定
 							list($ret,$permission) = chkTargetRecodeMultiPermission($objTable->getAccessAuth(),$chkobj,$row);
@@ -420,7 +462,6 @@ class OutputType {
 							if($permission === false) {
 								// アクセス権がないので処理対象から外す
 								continue;
-contionue;
 							}
 			                                // 対象レコードのACCESS_AUTHカラムでアクセス権を判定 ----
 							//  RBAC対応 ----
@@ -441,16 +482,40 @@ contionue;
 								if("IDColumn" === get_class($objColumn) && $objColumn->getDateFormat() !== null){
 									$valueDispBody = date($objColumn->getDateFormat(), strtotime($valueDispBody));
 								}
+								if("LinkIDColumn" === get_class($objColumn) && $objColumn->getDateFormat() !== null){
+									$valueDispBody = date($objColumn->getDateFormat(), strtotime($valueDispBody));
+								}
 								//date型の型変換----
 
-								$aryDataSet[] = array('KEY_COLUMN'=>$valueHtmlSpeChr,'DISP_COLUMN'=>$valueDispBody);
+								if($referenceFlag == true){
+									$aryDataSet[] = array('KEY_COLUMN'=>$valueHtmlSpeChr,'DISP_COLUMN'=>$valueDispBody, 'TEMP_KEY_ID'=>$tempValue1);
+									$aryDataSetUnique[$valueHtmlSpeChr] = array('KEY_COLUMN'=>$valueHtmlSpeChr,'DISP_COLUMN'=>$valueDispBody, 'TEMP_KEY_ID'=>$tempValue1);
+								}else{
+									$aryDataSet[] = array('KEY_COLUMN'=>$valueHtmlSpeChr,'DISP_COLUMN'=>$valueDispBody);
+								}
 							}
 							// ここまで結果データ作成----
 						}
 						// RBAC対応 ----
 						
 						//最終更新日時----
-						
+
+						//親カラムのID（KEY_COLUMN)は違うが、値（DISP_COLUMN）が一致している対象をチェックし、表示名をDISP_COLUMN(ID)とする。
+						if($referenceFlag == true && !empty($aryDataSet)){
+							$aryTempDataSet = array();
+							foreach($aryDataSet as $data){
+								$newDispColumn = $data['DISP_COLUMN'];
+								foreach($aryDataSetUnique as $data2){
+									if($data['KEY_COLUMN'] != $data2['KEY_COLUMN'] && $data['DISP_COLUMN'] == $data2['DISP_COLUMN']){
+										$newDispColumn = $data['DISP_COLUMN']."(".$data['TEMP_KEY_ID'].")";
+										break;
+									}
+								}
+								$aryTempDataSet[] = array('KEY_COLUMN'=>$data['KEY_COLUMN'],'DISP_COLUMN'=>$newDispColumn);
+							}
+							$aryDataSet = $aryTempDataSet;
+						}
+
 						$retBool = true;
 						//DB内値と表示値が食い違う場合----
 					}
@@ -458,6 +523,34 @@ contionue;
 						//----その他一般[IDcolumnを想定しない。TextColumnが基本的な処理対象]
 						//
 						while ( $row = $objQuery->resultFetch() ){
+							// ----dispRestrictValue対応
+							$aryDispRestrictValue = $objTable->getDispRestrictValue();
+							if($aryDispRestrictValue != null){
+								$matchFlg = false;
+								foreach($aryDispRestrictValue as $columnName => $aryValue){
+									if(array_key_exists($columnName, $row)){
+										foreach($aryValue as $value){
+											//対象のカラムのデータと$aryValueに格納された値が一致した場合は処理を続行
+											if($value == "" || $value == null || $value == "null" || $value == "NULL"){
+												if($row[$columnName] == "" || $row[$columnName] == null || $row[$columnName] == "null" || $row[$columnName] == "NULL"){
+													$matchFlg = true;
+												}
+											}else{
+												if($row[$columnName] == $value){
+													$matchFlg = true;
+												}
+											}
+										}
+
+										//一致する値が無い場合は、処理をスキップ
+										if($matchFlg == false){
+											continue 2;
+										}
+									}
+								}
+							}
+							// dispRestrictValue対応----
+
 							// ---- RBAC対応
 			                                // ---- 対象レコードのACCESS_AUTHカラムでアクセス権を判定
 							list($ret,$permission) = chkTargetRecodePermission($objTable->getAccessAuth(),$chkobj,$row);
@@ -729,6 +822,9 @@ class TraceOutputType extends OutputType {
             if("IDColumn" === get_class($this->objColumn) && $this->objColumn->getDateFormat() !== null){
                 $strSearchKeyValue = date($this->objColumn->getDateFormat(), strtotime($strSearchKeyValue));
             }
+            if("LinkIDColumn" === get_class($this->objColumn) && $this->objColumn->getDateFormat() !== null){
+                $strSearchKeyValue = date($this->objColumn->getDateFormat(), strtotime($strSearchKeyValue));
+            }
             //date型の型変換----
 
 			$rowData[$strInitedColId] = $strSearchKeyValue;
@@ -818,7 +914,9 @@ class IDOutputType extends OutputType {
 		$boolOutReferfence = false;
 		$strInitedColId = $this->objColumn->getID();
 		$aryVariant['callerClass'] = get_class($this);
-		$aryVariant['callerVars'] = array('initedColumnID'=>$strInitedColId,'free'=>null);
+		$aryVariant['callerVars'] = array();
+		$aryVariant['callerVars']['initedColumnID'] = $strInitedColId;
+		$aryVariant['callerVars']['free'] = null;
 
 		$aryConvValue['value'] = "";
 		$aryConvValue['rawValue'] = ""; //$aryVariant['callerVars']['free']['rawValue']で取得可能
@@ -873,6 +971,12 @@ class IDOutputType extends OutputType {
                         //----date型の型変換
                         $arrayTmp = array();
                         if("IDColumn" === get_class($this->objColumn) && $this->objColumn->getDateFormat() !== null){
+                            foreach($utnMasterTable as $key => $value){
+                                $arrayTmp[$key] = date($this->objColumn->getDateFormat(), strtotime($value));
+                            }
+                            $utnMasterTable = $arrayTmp;
+                        }
+                        if("LinkIDColumn" === get_class($this->objColumn) && $this->objColumn->getDateFormat() !== null){
                             foreach($utnMasterTable as $key => $value){
                                 $arrayTmp[$key] = date($this->objColumn->getDateFormat(), strtotime($value));
                             }
@@ -940,6 +1044,12 @@ class IDOutputType extends OutputType {
                             }
                             $jnlMasterTable = $arrayTmp;
                         }
+                        if("LinkIDColumn" === get_class($this->objColumn) && $this->objColumn->getDateFormat() !== null){
+                            foreach($jnlMasterTable as $key => $value){
+                                $arrayTmp[$key] = date($this->objColumn->getDateFormat(), strtotime($value));
+                            }
+                            $jnlMasterTable = $arrayTmp;
+                        }
                         //date型の型変換----
 
 						$rowData[$strInitedColId] = $jnlMasterTable[$mainIdColVal];
@@ -952,7 +1062,8 @@ class IDOutputType extends OutputType {
 		}
 		dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
 		//----親クラスの変数（$this->body）のメソッドgetData($rowData)を実行する;
-		$aryVariant['callerVars'] = array('initedColumnID'=>$strInitedColId,'free'=>$aryConvValue);
+		$aryVariant['callerVars']['initedColumnID'] = $strInitedColId;
+		$aryVariant['callerVars']['free'] = $aryConvValue;
 		return $this->body->getData($rowData,$aryVariant);
 	}
 	//htmlタグ取得用(2014-12-01名前にTagを追加)----
@@ -978,7 +1089,9 @@ class AUUOutputType extends OutputType {
 		$strInitedColId = $this->objColumn->getID();
 
 		$aryVariant['callerClass'] = get_class($this);
-		$aryVariant['callerVars'] = array('initedColumnID'=>$strInitedColId,'free'=>null);
+		$aryVariant['callerVars'] = array();
+		$aryVariant['callerVars']['initedColumnID'] = $strInitedColId;
+		$aryVariant['callerVars']['free'] = null;
 
 		$aryConvValue['value'] = "";
 
@@ -1032,7 +1145,8 @@ class AUUOutputType extends OutputType {
 			}
 		}
 		dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
-		$aryVariant['callerVars'] = array('initedColumnID'=>$strInitedColId,'free'=>$aryConvValue);
+		$aryVariant['callerVars']['initedColumnID'] = $strInitedColId;
+		$aryVariant['callerVars']['free'] = $aryConvValue;
 		return $this->body->getData($rowData,$aryVariant);
 	}
 
@@ -1057,7 +1171,9 @@ class FileLinkOutputType extends OutputType {
 		$strInitedColId = $this->objColumn->getID();
 		
 		$aryVariant['callerClass'] = get_class($this);
-		$aryVariant['callerVars'] = array('initedColumnID'=>$strInitedColId,'free'=>null);
+		$aryVariant['callerVars'] = array();
+		$aryVariant['callerVars']['initedColumnID'] = $strInitedColId;
+		$aryVariant['callerVars']['free'] = null;
 
 		$aryConvValue['url'] = "";
 		$aryConvValue['innerHtml'] = "";
@@ -1110,6 +1226,7 @@ class FileLinkOutputType extends OutputType {
 				
 				$aryConvValue['url'] = "";
 				$aryConvValue['innerHtml'] = $fileNameOfData;
+				
 			}
 			//ここまで履歴の場合の例外的処理----
 		}else{
@@ -1141,8 +1258,15 @@ class FileLinkOutputType extends OutputType {
 			}
 		}
 		dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
-		$aryVariant['callerVars'] = array('initedColumnID'=>$strInitedColId,'free'=>$aryConvValue);
-		return $this->body->getData($rowData,$aryVariant);
+		$aryVariant['callerVars']['initedColumnID'] = $strInitedColId;
+		$aryVariant['callerVars']['free'] = $aryConvValue;
+		$FileEncryptFunctionName = $this->objColumn->getFileEncryptFunctionName();
+
+		if($FileEncryptFunctionName == "ky_file_encrypt"){
+			return $this->body->getData($rowData,$aryVariant,1);
+		}else{
+			return $this->body->getData($rowData,$aryVariant);
+		}
 	}
 
 	//----ここまで継承メソッドの上書き処理

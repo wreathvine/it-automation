@@ -109,6 +109,7 @@
         $aryColumnInfo01 = array();
         $aryColumnInfo02 = array();
         $aryColumnInfo03 = array();
+        $aryColumnInfo04 = array();
 
         try{
             if(file_exists("{$g['root_dir_path']}/webconfs/systems/{$strMenuIdNumeric}_loadTable.php")){
@@ -322,21 +323,27 @@
                             //----TABLEを表示/更新させる設定の場合
                         }
                         if( $boolAddInfo === true ){
-                            if("IDColumn" === get_class($objColumn)){
+                            if("IDColumn" === get_class($objColumn) || "LinkIDColumn" === get_class($objColumn)){
                                 $aryColumnInfo01[] = array($strColumnId,$objColumn->getColLabel(true),$objColumn->getMasterTableIDForFilter(),$objColumn->getKeyColumnIDOfMaster(),$objColumn->getDispColumnIDOfMaster(),get_class($objColumn));
                                 $aryColumnInfo03[] = array($strColumnId,$objColumn->getColLabel(true),$objColumn->getMasterTableIDForFilter(),$objColumn->getKeyColumnIDOfMaster(),$objColumn->getDispColumnIDOfMaster(),get_class($objColumn));
                             }
                             else{
+                                if("FileUploadColumn" === get_class($objColumn)) {
+                                    $aryColumnInfo04[$strColumnId] = $objColumn->getLRPathPackageRootToBranchPerFUC();
+                                }
                                 $aryColumnInfo01[] = array($strColumnId,$objColumn->getColLabel(true),"","","",get_class($objColumn));
                                 $aryColumnInfo03[] = array($strColumnId,$objColumn->getColLabel(true),"","","",get_class($objColumn));
                             }
                         }
                         else{
-                            if("IDColumn" === get_class($objColumn)){
+                            if("IDColumn" === get_class($objColumn)  || "LinkIDColumn" === get_class($objColumn)){
                                 $aryColumnInfo02[] = array($strColumnId,$objColumn->getColLabel(true),$objColumn->getMasterTableIDForFilter(),$objColumn->getKeyColumnIDOfMaster(),$objColumn->getDispColumnIDOfMaster(),get_class($objColumn));
                                 $aryColumnInfo03[] = array($strColumnId,$objColumn->getColLabel(true),$objColumn->getMasterTableIDForFilter(),$objColumn->getKeyColumnIDOfMaster(),$objColumn->getDispColumnIDOfMaster(),get_class($objColumn));
                             }
                             else{
+                                if("FileUploadColumn" === get_class($objColumn)) {
+                                    $aryColumnInfo04[$strColumnId] = $objColumn->getLRPathPackageRootToBranchPerFUC();
+                                }
                                 $aryColumnInfo02[] = array($strColumnId,$objColumn->getColLabel(true),"","","",get_class($objColumn));
                                 $aryColumnInfo03[] = array($strColumnId,$objColumn->getColLabel(true),"","","",get_class($objColumn));
                             }
@@ -355,6 +362,7 @@
                           ,"TABLE_IUD_COLUMNS"=>$aryColumnInfo01
                           ,"OTHER_COLUMNS"    =>$aryColumnInfo02
                           ,"ALL_COLUMNS"      =>$aryColumnInfo03
+                          ,"UPLOADFILE_PATHS" =>$aryColumnInfo04
                            );
         return array($aryValues,$intErrorType,$strErrMsg);
     }

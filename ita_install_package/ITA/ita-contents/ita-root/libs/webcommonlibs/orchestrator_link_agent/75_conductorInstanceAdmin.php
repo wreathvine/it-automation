@@ -94,7 +94,7 @@ function conductorInstanceConstuct($intShmphonyClassId, $intOperationNoUAPK, $st
         // ---ConductorクラスIDの廃止チェック
         $aryRetBody = $objOLA->getInfoFromOneOfConductorClass($intShmphonyClassId, 0,0,0,1);
 
-        $disuseFlg = '';
+        $disuseFlg = 1;
         if( isset( $aryRetBody[4]['DISUSE_FLAG'] ) === true ) $disuseFlg = $aryRetBody[4]['DISUSE_FLAG'];
 
         if( $disuseFlg != 0 ){
@@ -520,6 +520,7 @@ function conductorInstanceScram($fxVarsIntConductorInstanceId){
         "OPERATION_NO_UAPK"=>"",
         "I_OPERATION_NAME"=>"",
         "STATUS_ID"=>"",
+        "PAUSE_STATUS_ID"=>"",
         "EXECUTION_USER"=>"",
         "ABORT_EXECUTE_FLAG"=>"",
         "CONDUCTOR_CALL_FLAG"=>"",
@@ -644,6 +645,7 @@ function conductorInstanceScram($fxVarsIntConductorInstanceId){
         }
         
         if( $boolExecuteContinue === true ){
+            $update_tgt_row['PAUSE_STATUS_ID']      = 2; //保留ステータスオフ
             $update_tgt_row['ABORT_EXECUTE_FLAG']   = 2; //発令済
             $update_tgt_row['LAST_UPDATE_USER']     = $g['login_id'];
             
@@ -1265,6 +1267,7 @@ function getSingleConductorInfoFromConductorInstances($intConductorInstanceId, $
         "OPERATION_NO_UAPK"=>"",
         "I_OPERATION_NAME"=>"",
         "STATUS_ID"=>"",
+        "PAUSE_STATUS_ID"=>"",
         "EXECUTION_USER"=>"",
         "ABORT_EXECUTE_FLAG"=>"",
         "CONDUCTOR_CALL_FLAG"=>"",
@@ -1272,6 +1275,9 @@ function getSingleConductorInfoFromConductorInstances($intConductorInstanceId, $
         "TIME_BOOK"=>"DATETIME",
         "TIME_START"=>"DATETIME",
         "TIME_END"=>"DATETIME",
+        "EXEC_LOG"=>"",
+        "I_NOTICE_INFO"=>"",
+        "NOTICE_LOG"=>"",
         "ACCESS_AUTH"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
@@ -1290,6 +1296,7 @@ function getSingleConductorInfoFromConductorInstances($intConductorInstanceId, $
         "OPERATION_NO_UAPK"=>"",
         "I_OPERATION_NAME"=>"",
         "STATUS_ID"=>"",
+        "PAUSE_STATUS_ID"=>"",
         "EXECUTION_USER"=>"",
         "ABORT_EXECUTE_FLAG"=>"",
         "CONDUCTOR_CALL_FLAG"=>"",
@@ -1297,6 +1304,9 @@ function getSingleConductorInfoFromConductorInstances($intConductorInstanceId, $
         "TIME_BOOK"=>"DATETIME",
         "TIME_START"=>"DATETIME",
         "TIME_END"=>"DATETIME",
+        "EXEC_LOG"=>"",
+        "I_NOTICE_INFO"=>"",
+        "NOTICE_LOG"=>"",
         "ACCESS_AUTH"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
@@ -1835,7 +1845,11 @@ function conductorInstancePrint($fxVarsIntSymphonyInstanceId,$mode=0,$getmode=""
             throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
         }
         $aryOrcListRow = $aryRetBody[0];
-        
+
+        //各ドライバのインターフェース情報設定　#587
+        $arrDataRelaystoragePath = array();
+        $arrDriversList = $objOLA->getStatusFileInfo();
+
         $aryPatternListPerOrc = array();
         //----存在するオーケストレータ分回る
         foreach($aryOrcListRow as $arySingleOrcInfo){
@@ -1864,6 +1878,27 @@ function conductorInstancePrint($fxVarsIntSymphonyInstanceId,$mode=0,$getmode=""
             //オーケストレータカラーを取得----
             
             $aryPatternListPerOrc[$varOrcId]['ThemeColor'] = $strThemeColor;
+
+            //　ステータスファイル参照先ディレクトリの取得 #587
+            if( array_key_exists($varOrcId, $arrDriversList) ){
+                //各ドライバのインターフェース情報取得　#587  
+                $strDriverTable = $arrDriversList[$varOrcId]["table"];
+                $strDriverCol = $arrDriversList[$varOrcId]["column"];
+                $strDriverPath = $arrDriversList[$varOrcId]["path"];
+                $sql =   " SELECT * FROM {$strDriverTable} TAB_A "
+                        ." WHERE TAB_A.DISUSE_FLAG = '0' "
+                        ."";
+                $objQuery = $objDBCA->sqlPrepare($sql);
+                $r = $objQuery->sqlExecute();
+                if( $r == 1 && $strDriverCol != "" ){
+                    $row = $objQuery->resultFetch();
+                    $arrDataRelaystoragePath[$varOrcId] = $row[$strDriverCol] ."/". $strDriverPath ;
+                }else{
+                    $arrDataRelaystoragePath[$varOrcId] = "";
+                }                
+            }else{
+                $arrDataRelaystoragePath[$varOrcId] = "";
+            }
         }
         //存在するオーケストレータ分回る----
 
@@ -1890,20 +1925,37 @@ function conductorInstancePrint($fxVarsIntSymphonyInstanceId,$mode=0,$getmode=""
             throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
         }
     
+        $tmpNoticeInfo = json_decode($aryRowOfSymInstanceTable['I_NOTICE_INFO'],true);
+        $arrNoticeInfo = $tmpNoticeInfo['NOTICE_INFO'];
+        
+        //緊急停止フラグを画面表示用に変換
+        $strAbortExecuteFlag = '';
+        if ($aryRowOfSymInstanceTable['ABORT_EXECUTE_FLAG'] == '1') {
+          $strAbortExecuteFlag = $objMTS->getSomeMessage("ITABASEH-MNU-203095");
+        }
+        else if ($aryRowOfSymInstanceTable['ABORT_EXECUTE_FLAG'] == '2') {
+          $strAbortExecuteFlag = $objMTS->getSomeMessage("ITABASEH-MNU-203096");
+        }
+
+
         //----Conductor(インスタンス)情報を固める
         $arySymphonySource = array('CONDUCTOR_INSTANCE_ID'=>$intSymphonyInstanceId
                                   ,'CONDUCTOR_CLASS_NO'=>$aryRowOfSymInstanceTable['I_CONDUCTOR_CLASS_NO']
+                                  ,'CONDUCTOR_NAME'=>$aryRowOfSymInstanceTable['I_CONDUCTOR_NAME'] #1825
                                   ,'STATUS_ID'=>$aryRowOfSymInstanceTable['STATUS_ID']
+                                  ,'PAUSE_STATUS'=>''
                                   ,'EXECUTION_USER'=>$aryRowOfSymInstanceTable['EXECUTION_USER']
-                                  ,'ABORT_EXECUTE_FLAG'=>$aryRowOfSymInstanceTable['ABORT_EXECUTE_FLAG']
+                                  ,'ABORT_EXECUTE_FLAG'=>$strAbortExecuteFlag
                                   ,'OPERATION_NO_IDBH'=>$aryRowOfSymInstanceTable['OPERATION_NO_UAPK']
                                   ,'OPERATION_NAME'=>$aryRowOfSymInstanceTable['I_OPERATION_NAME']
                                   ,'TIME_BOOK'=>$aryRowOfSymInstanceTable['TIME_BOOK']
                                   ,'TIME_START'=>$aryRowOfSymInstanceTable['TIME_START']
                                   ,'TIME_END'=>$aryRowOfSymInstanceTable['TIME_END']
+                                  ,'EXEC_LOG'=> htmlspecialchars($aryRowOfSymInstanceTable['EXEC_LOG'])
+                                  ,'NOTICE_INFO'=> $arrNoticeInfo
+                                  ,'NOTE'=> $aryRowOfSymInstanceTable['I_DESCRIPTION']
         );
         //Conductor(インスタンス)情報を固める----
-
 
         $aryRetBody = $objOLA->convertConductorClassJson($aryRowOfSymInstanceTable['I_CONDUCTOR_CLASS_NO'],$getmode);
         if( $aryRetBody[1] !== null ){
@@ -1981,7 +2033,9 @@ function conductorInstancePrint($fxVarsIntSymphonyInstanceId,$mode=0,$getmode=""
             $aryInstanceItems['NODE_INSTANCE_NO']                 = $row['NODE_INSTANCE_NO'];
             $aryInstanceItems['NODE_TYPE_ID']                 = $row['I_NODE_TYPE_ID'];
             $aryInstanceItems['STATUS']                 = $row['STATUS_ID'];
+            $aryInstanceItems['STATUS_FILE']    = ""; #1825
             $aryInstanceItems['SKIP']                 = $row['EXE_SKIP_FLAG'];
+            $aryInstanceItems['NOTE']                 = $row['I_DESCRIPTION']; #1825
             //ステータス----
 
             if( $row['I_NODE_TYPE_ID'] == 8){
@@ -2019,6 +2073,33 @@ function conductorInstancePrint($fxVarsIntSymphonyInstanceId,$mode=0,$getmode=""
                 $aryInstanceItems['JUMP']                   = $aryJumpInfo[0];
                 //----ジャンプ用(ITA-ROOTからの)相対URL-
 
+                //　ステータスファイル(status-file-branch用) #587
+                $strgetStatusfile = "";
+                if( $arrDataRelaystoragePath[$varOrcIdFromMovInstanceTable] != "" ){
+                    $strDataRelaystoragePath = $arrDataRelaystoragePath[$varOrcIdFromMovInstanceTable]."/". str_pad($varOrchInstanceId, 10, '0', STR_PAD_LEFT)."/out/MOVEMENT_STATUS_FILE";
+                    if( file_exists($strDataRelaystoragePath) ) {
+                        //ステータスファイル取得
+                        $tmpgetStatusfile = file_get_contents( $strDataRelaystoragePath );
+                        
+                        //BOM削除
+                        $bomcode = hex2bin('EFBBBF');
+                        $tmpgetStatusfile = preg_replace("/^{$bomcode}/", '', $tmpgetStatusfile);
+                        
+                        //ステータス取得
+                        $tmpgetStatusfile = str_replace(array("\r\n", "\r", "\n"), PHP_EOL, $tmpgetStatusfile);
+                        $tmpgetStatusfile = explode( PHP_EOL , $tmpgetStatusfile);
+                        //行頭から最初の値を評価対象
+                        foreach ($tmpgetStatusfile as $tmpStatus) {
+                            if( $tmpStatus != "" ){
+                                $strgetStatusfile = $tmpStatus;
+                                break;   
+                            }
+                        }
+
+                        $aryInstanceItems['STATUS_FILE'] = $strgetStatusfile;
+
+                    }
+                }
             }
 
             if( $row['CONDUCTOR_INSTANCE_CALL_NO'] != "" && $row['I_NODE_TYPE_ID'] == 4  ){
@@ -2036,7 +2117,32 @@ function conductorInstancePrint($fxVarsIntSymphonyInstanceId,$mode=0,$getmode=""
             $aryInstanceItems['TIME_END']               = $row['TIME_END'];
             
             $aryInstanceItems['OPERATION_ID']           = $row['OVRD_I_OPERATION_NO_IDBH']; 
-            $aryInstanceItems['OPERATION_NAME']         = $row['OVRD_I_OPERATION_NAME']; 
+            $aryInstanceItems['OPERATION_NAME']         = $row['OVRD_I_OPERATION_NAME'];
+
+            $update_tgt_row = $aryRowOfSymInstanceTable;
+            if($aryInstanceItems['NODE_TYPE_ID'] == '8' && $aryInstanceItems['STATUS'] == '8'){
+              $arySymphonySource['PAUSE_STATUS'] = $objMTS->getSomeMessage("ITABASEH-MNU-203094");
+            }
+            
+            //CONDUCTOR_CALLで呼び出しているConductorが一時停止の場合
+            if( $row['CONDUCTOR_INSTANCE_CALL_NO'] != "" ){
+              $currentPauseStatusId = "";
+              $sql = "SELECT PAUSE_STATUS_ID
+                      FROM   C_CONDUCTOR_INSTANCE_MNG
+                      WHERE  CONDUCTOR_INSTANCE_NO = {$row["CONDUCTOR_INSTANCE_CALL_NO"]}";
+
+              //SQL準備
+              $objQuery = $objDBCA->sqlPrepare($sql);
+              $r = $objQuery->sqlExecute();
+              while ( $row = $objQuery->resultFetch() ){
+                  $currentPauseStatusId = $row['PAUSE_STATUS_ID'];
+              }
+              
+              if($currentPauseStatusId == '1'){
+                $arySymphonySource['PAUSE_STATUS'] = $objMTS->getSomeMessage("ITABASEH-MNU-203094");
+              }
+            }
+            
             $aryMovementInsData[$aryClassItems['NODE_NAME']] = $aryInstanceItems;
 
             unset($aryInstanceItems);
@@ -2129,5 +2235,92 @@ function getInfoFromOneOfConductorInstances($intSymphonyInstanceId, $intMode=0){
 }
 //ある１のConductorインスタンスの、Conductor部分、Node部分の情報を取得する----
 
+
+//----ConductorクラスをJSON形式で取得
+function getConductorClassJson($intConductorClassId,$getmode=""){
+    // グローバル変数宣言
+    global $g;
+    $retBool = false;
+    $intErrorType = null;
+    $aryErrMsgBody = array();
+    $strErrMsg = "";
+    $intSymphonyInstanceId = null;
+    $strExpectedErrMsgBodyForUI = "";
+    $aryFreeErrMsgBody = array();
+    
+    $intControlDebugLevel01=250;
+    
+    $objMTS = $g['objMTS'];
+    $objDBCA = $g['objDBCA'];
+    
+    $strFxName = '([FUNCTION]'.__FUNCTION__.')';
+    dev_log($objMTS->getSomeMessage("ITAWDCH-STD-3",array(__FILE__,$strFxName)),$intControlDebugLevel01);
+    $strSysErrMsgBody = "";
+    $boolInTransactionFlag = false;
+    
+    try{
+        require_once($g['root_dir_path']."/libs/commonlibs/common_ola_classes.php");
+        $objOLA = new OrchestratorLinkAgent($objMTS,$objDBCA);
+        
+        //----ConductorCLASSIDの形式チェック
+        $objIntNumVali = new IntNumValidator(null,null,"",array("NOT_NULL"=>true));
+        if( $objIntNumVali->isValid($intConductorClassId) === false ){
+            // エラーフラグをON
+            // 例外処理へ
+            $strErrStepIdInFx="00000100";
+            $intErrorType = 2;
+            $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170003",array($objIntNumVali->getValidRule()));
+            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+        }
+        unset($objIntNumVali);
+        //ConductorCLASSIDの形式チェック----
+                
+        $retArray  = $objOLA->convertConductorClassJson($intConductorClassId,1);
+        
+        if($retArray[0] == false){
+            // エラーフラグをON
+            // 例外処理へ
+            $strErrStepIdInFx="00000500";
+            $intErrorType = $retArray[1];
+            if( $retArray[1] < 500 ){
+                $aryErrMsgBody = $retArray[2];
+                $strErrMsg = $retArray[3];
+                $strSysErrMsgBody = $retArray[4];
+                $strExpectedErrMsgBodyForUI = $retArray[6];
+            }
+            //webError出力用メッセージを出力
+            $aryFreeErrMsgBody = $retArray[7];
+            foreach($aryFreeErrMsgBody as $msg){
+                web_log($msg);
+            }
+
+            if( 0 < strlen($strSysErrMsgBody) ) web_log($strSysErrMsgBody);
+            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+        }
+        // ConductorIDおよびオペレーションNoからConductorインスタンスを新規登録----
+
+        $retBool = true;
+        $intSymphonyInstanceId = $retArray[5];
+        unset($retArray);
+
+    }
+    catch (Exception $e){
+        // エラーフラグをON
+        if( $intErrorType === null ) $intErrorType = 500;
+        $tmpErrMsgBody = $e->getMessage();
+        if( 500 <= $intErrorType ) $strSysErrMsgBody = $objMTS->getSomeMessage("ITAWDCH-ERR-4011",array($strFxName,$tmpErrMsgBody));
+        if( 0 < strlen($strSysErrMsgBody) ) web_log($strSysErrMsgBody);
+    }
+    $retArray = array($retBool,
+                      $intErrorType,
+                      $aryErrMsgBody,
+                      $strErrMsg,
+                      $intSymphonyInstanceId,
+                      $strExpectedErrMsgBodyForUI
+                      );
+    dev_log($objMTS->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
+    return $retArray;
+}
+//ConductorクラスをJSON形式で取得----
 
 ?>

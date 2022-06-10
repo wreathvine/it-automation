@@ -40,7 +40,8 @@ Ansible(Legacy)作業管理
         'TT_SYS_06_LUP_USER_ID'=>'LAST_UPDATE_USER',
         'TT_SYS_NDB_ROW_EDIT_BY_FILE_ID'=>'ROW_EDIT_BY_FILE',
         'TT_SYS_NDB_UPDATE_ID'=>'WEB_BUTTON_UPDATE',
-        'TT_SYS_NDB_LUP_TIME_ID'=>'UPD_UPDATE_TIMESTAMP'
+        'TT_SYS_NDB_LUP_TIME_ID'=>'UPD_UPDATE_TIMESTAMP',
+        'TT_SYS_08_DUPLICATE_ID'=>'WEB_BUTTON_DUPLICATE'
     );
 
     $table = new TableControlAgent('C_ANSIBLE_LRL_EXE_INS_MNG','EXECUTION_NO',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1108030"), 'C_ANSIBLE_LRL_EXE_INS_MNG_JNL', $tmpAry);
@@ -56,6 +57,7 @@ Ansible(Legacy)作業管理
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1108050"));
 
     $table->setAccessAuth(true);    // データごとのRBAC設定
+    $table->setNoRegisterFlg(true);    // 登録画面無し
 
 
     $table->setDBSortKey(array("EXECUTION_NO"=>"DESC"));
@@ -89,11 +91,18 @@ Ansible(Legacy)作業管理
     /* 実行区分 */
     $c = new IDColumn('EXEC_MODE',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1203065"),'B_ANSIBLE_EXEC_MODE','ID','NAME','', array('OrderByThirdColumn'=>'ID'));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1203066"));
-    $table->addColumn($c);
-
-    //virtualenv
-    $c = new TextColumn('I_VIRTUALENV_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000016"));
-    $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000017"));//エクセル・ヘッダでの説明
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('EXEC_MODE');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_ANSIBLE_EXEC_MODE_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     //シンフォニークラス
@@ -141,6 +150,18 @@ Ansible(Legacy)作業管理
     // ホスト指定形式
     $c = new IDColumn('I_ANS_HOST_DESIGNATE_TYPE_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1202012"),'B_HOST_DESIGNATE_TYPE_LIST','HOST_DESIGNATE_TYPE_ID','HOST_DESIGNATE_TYPE_NAME','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1202013"));//エクセル・ヘッダでの説明
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('I_ANS_HOST_DESIGNATE_TYPE_ID');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_HOST_DESIGNATE_TYPE_LIST_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'HOST_DESIGNATE_TYPE_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'HOST_DESIGNATE_TYPE_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $cg2->addColumn($c);
 
     // 並列実行数
@@ -152,6 +173,18 @@ Ansible(Legacy)作業管理
     // WinRM接続
     $c = new IDColumn('I_ANS_WINRM_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1202014"),'D_FLAG_LIST_01','FLAG_ID','FLAG_NAME','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1202015"));//エクセル・ヘッダでの説明
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('I_ANS_WINRM_ID');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'D_FLAG_LIST_01_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'FLAG_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'FLAG_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $cg2->addColumn($c);
 
     // セクションヘッダー
@@ -160,6 +193,38 @@ Ansible(Legacy)作業管理
     $cg2->addColumn($c);
 
     $cg->addColumn($cg2);
+
+    // Ansible Engine利用情報
+    $cg3 = new ColumnGroup( $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000040") );
+        /* Ansible virtualenv path*/
+        $c = new TextColumn('I_ENGINE_VIRTUALENV_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000027"));
+        $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000028"));
+        $cg3->addColumn($c);
+    $cg->addColumn($cg3);
+
+    // Tower利用情報
+    $cg4 = new ColumnGroup( $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000013") );
+        // virtualenv
+        $c = new TextColumn('I_VIRTUALENV_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000029"));
+        $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000030"));
+        $cg4->addColumn($c);
+    $cg->addColumn($cg4);
+
+    // ansible automation controller利用情報
+    $cg5 = new ColumnGroup( $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000035") );
+        // 実行環境
+        $c = new TextColumn('I_EXECUTION_ENVIRONMENT_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000036"));
+        $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000037")); //エクセル・ヘッダでの説明
+        $cg5->addColumn($c);
+
+    $cg->addColumn($cg5);
+
+    $c = new FileUploadColumn('I_ANSIBLE_CONFIG_FILE',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000038"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000039"));//エクセル・ヘッダでの説明
+    $c->setFileHideMode(true);
+    $c->setHiddenMainTableColumn(true);
+    $cg->addColumn($c);
+
     $table->addColumn($cg);
 
     //----オペレーション
@@ -245,6 +310,18 @@ Ansible(Legacy)作業管理
     //ステータス
     $c = new IDColumn('COLLECT_STATUS',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1207101"),'B_COLLECT_STATUS','COLLECT_STATUS_ID','COLLECT_STATUS_NAME','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1207102"));//エクセル・ヘッダでの説明
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('COLLECT_STATUS');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_COLLECT_STATUS_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'COLLECT_STATUS_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'COLLECT_STATUS_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $cg->addColumn($c);
 
     //収集ログ
@@ -260,10 +337,11 @@ Ansible(Legacy)作業管理
 
     $table->fixColumn();
 
-    // 廃止・更新ボタンを隠す
+    // 廃止・更新・複製ボタンを隠す
     $tmpAryColumn= $table->getColumns();
     $tmpAryColumn['DISUSE_FLAG']->getOutputType('print_table')->setVisible(false);
     $tmpAryColumn['WEB_BUTTON_UPDATE']->getOutputType('print_table')->setVisible(false);
+    $tmpAryColumn['WEB_BUTTON_DUPLICATE']->getOutputType('print_table')->setVisible(false);
 
     // ----非表示項目設定
     // 備考

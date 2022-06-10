@@ -22,6 +22,9 @@ callback.prototype = {
     registerTable : function(result){
         var ary_result = getArrayBySafeSeparator(result);
         // 正常の場合
+
+        checkTypicalFlagInHADACResult(ary_result);
+
         if( ary_result[0] == "000" ){
             var result = JSON.parse(ary_result[2]);
             var id  = result['CREATE_MENU_ID'];
@@ -43,10 +46,6 @@ callback.prototype = {
         else{
             window.alert(getSomeMessage("ITAWDCC90101"));
         }
-        // セッション切れの場合
-        if( ary_result[0]  == "redirectOrderForHADACClient"){
-            window.location.replace(ary_result[2]);
-        }
     },
     /////////////////////
     // callback: 更新
@@ -54,6 +53,13 @@ callback.prototype = {
     updateTable : function(result){
         var ary_result = getArrayBySafeSeparator(result);
         // 正常の場合
+
+        if( ary_result[0]=='redirectOrderForHADACClient' ){
+            var conductorInstanceId = location.search.split('&');
+            ary_result[2] = ary_result[2] + '&' + conductorInstanceId[1] + '&' + conductorInstanceId[2];
+            checkTypicalFlagInHADACResult(ary_result);
+        }
+
         if( ary_result[0] == "000" ){
             var result = JSON.parse(ary_result[2]);
             var id  = result['CREATE_MENU_ID'];
@@ -74,10 +80,6 @@ callback.prototype = {
         // システムエラーの場合
         else{
             window.alert(getSomeMessage("ITAWDCC90101"));
-        }
-        // セッション切れの場合
-        if( ary_result[0]  == "redirectOrderForHADACClient"){
-            window.location.replace(ary_result[2]);
         }
     },
     /////////////////////
@@ -156,7 +158,7 @@ callback.prototype = {
        // 正常の場合
        if( ary_result[0] == "000" ){
            menuEditorArray.selectPulldownList = JSON.parse(ary_result[2]);
-           selectReferenceItemList();
+           selectReferenceSheetType3List();
        }
         // システムエラーの場合
         else{
@@ -164,13 +166,14 @@ callback.prototype = {
         }
     },
     /////////////////////
-    // callback: プルダウン選択項目リスト取得
+    // callback: パラメータシート参照リスト取得(メニューのみ)
     /////////////////////
-    selectReferenceItemList : function(result){
+    selectReferenceSheetType3List : function(result){
        var ary_result = getArrayBySafeSeparator(result);
+
        // 正常の場合
        if( ary_result[0] == "000" ){
-            menuEditorArray.referenceItemList = JSON.parse(ary_result[2]);
+           menuEditorArray.selectReferenceSheetType3List = JSON.parse(ary_result[2]);
             if ( menuEditorTargetID === '') {
               menuEditor( menuEditorMode, menuEditorArray );
             } else {
@@ -190,6 +193,36 @@ callback.prototype = {
         // 正常の場合
         if( ary_result[0] == "000" ){
             menuEditorArray.selectMenuInfo = JSON.parse(ary_result[2]);
+            selectReferenceItemList(menuEditorArray.selectMenuInfo.item);
+        }
+        // システムエラーの場合
+        else{
+            window.alert(getSomeMessage("ITAWDCC90101"));
+        }
+    },
+    /////////////////////
+    // callback: 参照項目リスト取得
+    /////////////////////
+    selectReferenceItemList : function(result){
+       var ary_result = getArrayBySafeSeparator(result);
+       // 正常の場合
+       if( ary_result[0] == "000" ){
+            menuEditorArray.referenceItemList = JSON.parse(ary_result[2]);
+            selectReferenceSheetType3ItemData(menuEditorArray.selectMenuInfo.item);
+       }
+        // システムエラーの場合
+        else{
+            window.alert(getSomeMessage("ITAWDCC90101"));
+        }
+    },
+    /////////////////////
+    // callback: パラメータシート参照の項目からメニューIDを取得
+    /////////////////////
+    selectReferenceSheetType3ItemData : function(result){
+        var ary_result = getArrayBySafeSeparator(result);
+        // 正常の場合
+        if( ary_result[0] == "000" ){
+            menuEditorArray.referenceSheetType3ItemData = JSON.parse(ary_result[2]);
             menuEditor( menuEditorMode, menuEditorArray );
         }
         // システムエラーの場合
@@ -258,8 +291,22 @@ function selectPulldownList(){
 /////////////////////
 // 参照項目リスト取得
 /////////////////////
-function selectReferenceItemList(){
-    proxy.selectReferenceItemList();
+function selectReferenceItemList(itemArray){
+    proxy.selectReferenceItemList(itemArray);
+}
+
+/////////////////////
+// パラメータシート参照リスト取得(メニューのみ)
+/////////////////////
+function selectReferenceSheetType3List(){
+    proxy.selectReferenceSheetType3List();
+}
+
+/////////////////////
+// パラメータシート参照の項目からメニューIDを取得
+/////////////////////
+function selectReferenceSheetType3ItemData(itemArray){
+    proxy.selectReferenceSheetType3ItemData(itemArray);
 }
 
 /////////////////////

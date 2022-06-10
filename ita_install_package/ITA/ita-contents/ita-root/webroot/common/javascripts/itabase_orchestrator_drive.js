@@ -109,7 +109,7 @@ function printPetternInfo(boolCallProxy, pettern_id, pettern_name, timer_length)
 
 var gchkAccessAuth;
 function chkAccessAuth(operation_no,pattern_id) {
-    const chkAccessAuthURL = '/common/common_chkAccessAuth.php?OperationNoUAPK=' + operation_no + '&PatternId=' + pattern_id;
+    const chkAccessAuthURL = '/common/common_chkAccessAuth.php?OperationNoUAPK=' + operation_no + '&PatternId=' + pattern_id + '&UserId=' + gLoginUserID;
     $.ajax({
       type: 'get',
       url: chkAccessAuthURL,
@@ -181,6 +181,10 @@ function constructExecutionNo(boolCallProxy, execution_no, ary_vars, menu_id){
                 }
             }else{
                 window.alert(gchkAccessAuth["ERROR_MSG"]);
+                if (gchkAccessAuth["STATUS"]  == "redirectOrderForHADACClient"){
+                    var redirectUrl = gchkAccessAuth['ACCESS_AUTH'][1] + location.search.replace('?', '&');
+                    redirectTo(gchkAccessAuth['ACCESS_AUTH'][0], redirectUrl, gchkAccessAuth['ACCESS_AUTH'][2]);
+                }
             }
         }
         //

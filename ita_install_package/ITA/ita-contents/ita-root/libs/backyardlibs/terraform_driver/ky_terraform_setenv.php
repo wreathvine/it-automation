@@ -56,6 +56,9 @@
     // 代入値自動登録設定テーブル名
     $vg_terraform_val_assign_table_name          = "B_TERRAFORM_VAL_ASSIGN";
 
+    // 代入値自動登録設定VIEW名
+    $vg_terraform_val_assign_view_name          = "D_TERRAFORM_VAL_ASSIGN";
+
     // 代入値管理情報紐付け（代入値/変数名/Movement紐付け)管理VIEW
     $vg_terraform_vars_data_view_name            = "D_TERRAFORM_VARS_DATA";
 
@@ -77,11 +80,23 @@
     // PolicySet-Workspace紐付け管理テーブル名
     $vg_terraform_policyset_workspace_link_table_name = "B_TERRAFORM_POLICYSET_WORKSPACE_LINK";
 
-    //作業パターン一覧VIEW
+    // 作業パターン一覧VIEW
     $vg_terraform_pattern_view_name = "E_TERRAFORM_PATTERN";
 
     // 作業パターン詳細 テーブル名
     $vg_terraform_pattern_link_table_name = "B_TERRAFORM_PATTERN_LINK";
+
+    // メンバー変数管理 テーブル名
+    $vg_terraform_var_member_table_name = "B_TERRAFORM_VAR_MEMBER";
+
+    // メンバー変数管理 VIEW名
+    $vg_terraform_var_member_view_name = "D_TERRAFORM_VAR_MEMBER";
+
+    // Terraformタイプマスタ
+    $vg_terraform_types_master = "B_TERRAFORM_TYPES_MASTER";
+
+    // 変数ネスト管理
+    $vg_terraform_max_member_col_table_name = "B_TERRAFORM_LRL_MAX_MEMBER_COL";
 
 
     ///////////////////////

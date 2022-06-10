@@ -296,6 +296,10 @@
             
             echo '<div id="tail_show" style="display:none;"></div>';
             // tail処理を実施
+            if ( $send_exec_status_id >= 5) {
+                $lines = exec('wc -l '.$temp_file_name_fullpath_2);
+                $lines = trim(str_replace($temp_file_name_fullpath_2, '', $lines));
+            }
             foreach (read_tail( $temp_file_name_fullpath_2, $lines ) as $i => $line){
                 $line = rtrim($line,"\r\n");
                 
@@ -331,9 +335,6 @@
             // reg_n_up系共通ロジックパーツ01
             require_once ( $root_dir_path . "/libs/webcommonlibs/web_parts_for_reg_n_up_01.php");
             
-            // メンテナンス可能メニューを参照のみ可能の権限ユーザが見てないか判定するパーツ
-            // (この処理は非テンプレートのコンテンツのみに必要)
-            require_once ( $root_dir_path . "/libs/webcommonlibs/web_parts_for_maintenance.php");
         }
         catch (Exception $e){
             // DBアクセス例外処理パーツ

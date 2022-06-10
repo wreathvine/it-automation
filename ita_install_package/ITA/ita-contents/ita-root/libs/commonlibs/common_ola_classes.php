@@ -24,27 +24,27 @@
 class OrchestratorLinkAgent {
     protected $aryRPathFromAppRootPerOrcId;
     protected $aryFxPerOrchestrator;
-    
+
     protected $objMTS;
     protected $objDBCA;
     protected $objAryVariant;
-    
+
     function __construct($objMTS=null,$objDBCA=null,$aryVariant=array()){
         //----変数を初期化
         $this->aryRPathFromAppRootPerOrcId = array();
         $this->aryFxPerOrchestrator = array();
-        
+
         $this->objMTS = $objMTS;
         $this->objDBCA = $objDBCA;
-        
+
         $this->objAryVariant = $aryVariant;
         //変数を初期化----
     }
-    
+
     function getDBConnectAgent(){
         return $this->objDBCA;
     }
-    
+
     function getMessageTemplateStorage(){
         return $this->objMTS;
     }
@@ -52,16 +52,16 @@ class OrchestratorLinkAgent {
     function getVariant(){
         return $this->objAryVariant;
     }
-    
+
     function addFuncionsPerOrchestrator($varOrchestratorId,$strRPathFromOrcLibRoot,$strFileName="00_shymphonyLinker.php"){
         $boolRet = false;
         $intErrorType = null;
         $aryErrMsgBody = array();
         $strErrMsg = "";
         $strErrorBuf = "";
-        
+
         $strFxName = '([CLASS]'.__CLASS__.',[FUNCTION]'.__FUNCTION__.')';
-        
+
         try{
             $intOrchestratorId = intval($varOrchestratorId);
             if( $intOrchestratorId < 1 ){
@@ -98,7 +98,7 @@ class OrchestratorLinkAgent {
         return $retArray;
         //自動的に、オーケストレータテーブルから、調べる？----
     }
-    
+
     //----（下位）オーケストレータのステータスを、ムーブメントに反映させる
     function getMovementStatusFromOrchestrator($varOrchestratorId, $target_execution_no, $aryProperParameter=array()){
         //----RETSET[2016-03-11]
@@ -107,9 +107,9 @@ class OrchestratorLinkAgent {
         $aryErrMsgBody = array();
         $strErrMsg = "";
         $aryTargetParameter = array();
-        
+
         $strFxName = '([CLASS]'.__CLASS__.',[FUNCTION]'.__FUNCTION__.')';
-        
+
         try{
             $intOrchestratorId = intval($varOrchestratorId);
             if( $intOrchestratorId < 1 ){
@@ -143,16 +143,16 @@ class OrchestratorLinkAgent {
         return $retArray;
     }
     //（下位）オーケストレータのステータスを、ムーブメントに反映させる----
-    
+
     //----（下位）オーケストレータの、作業インスタンステーブルのシーケンスをロック
     function sequencesLockInTrz($varOrchestratorId, $aryProperParameter=array()){
         $boolResult = false;
         $intErrorType = null;
         $aryErrMsgBody = array();
         $strErrMsg = "";
-        
+
         $strFxName = '([CLASS]'.__CLASS__.',[FUNCTION]'.__FUNCTION__.')';
-        
+
         try{
             $intOrchestratorId = intval($varOrchestratorId);
             if( $intOrchestratorId < 1 ){
@@ -185,7 +185,7 @@ class OrchestratorLinkAgent {
         return $retArray;
     }
     //（下位）オーケストレータの、作業インスタンステーブルのシーケンスをロック----
-    
+
     //----（下位）オーケストレータに、作業№を登録する
     function registerExecuteNo($varOrchestratorId, $intPatternId, $intOperationNoUAPK, $strPreserveDatetime, $boolTrzAlreadyStarted=false, $aryProperParameter=array()){
         //----RETSET[2016-03-11]
@@ -195,9 +195,9 @@ class OrchestratorLinkAgent {
         $strErrMsg = "";
         $strRegisterDate = "";
         $strExpectedErrMsgBodyForUI = "";
-        
+
         $strFxName = '([CLASS]'.__CLASS__.',[FUNCTION]'.__FUNCTION__.')';
-        
+
         try{
             $intOrchestratorId = intval($varOrchestratorId);
             if( $intOrchestratorId < 1 ){
@@ -232,16 +232,16 @@ class OrchestratorLinkAgent {
         return $retArray;
     }
     //（下位）オーケストレータに、作業№を登録する----
-    
+
     //----モニターページへのジャンプ用URLを出力する
     function getJumpMonitorUrl($varOrchestratorId, $target_execution_no, $aryProperParameter=array()){
         $strUrlBody = false;
         $intErrorType = null;
         $aryErrMsgBody = array();
         $strErrMsg = "";
-        
+
         $strFxName = '([CLASS]'.__CLASS__.',[FUNCTION]'.__FUNCTION__.')';
-        
+
         try{
             $intOrchestratorId = intval($varOrchestratorId);
             if( $intOrchestratorId < 1 ){
@@ -274,7 +274,7 @@ class OrchestratorLinkAgent {
         return $retArray;
     }
     //モニターページへのジャンプ用URLを出力する----
-    
+
     //----ある1のオーケストレータの、存在している作業パターンを緊急停止する
     function srcamExecute($varOrchestratorId, $target_execution_no, $aryProperParameter=array()){
         $intResultDetail = null;
@@ -282,9 +282,9 @@ class OrchestratorLinkAgent {
         $aryErrMsgBody = array();
         $strErrMsg = "";
         $aryRetMsgBody = array();
-        
+
         $strFxName = '([CLASS]'.__CLASS__.',[FUNCTION]'.__FUNCTION__.')';
-        
+
         try{
             $intOrchestratorId = intval($varOrchestratorId);
             if( $intOrchestratorId < 1 ){
@@ -318,7 +318,7 @@ class OrchestratorLinkAgent {
         return $retArray;
     }
     //ある1のオーケストレータの、存在している作業パターンを緊急停止する----
-    
+
     //----ある1のオーケストレータの、存在している作業パターンを取得する
     function getLivePatternList($varOrchestratorId, $strSearchKeyValue="", $boolBinaryDistinctOnDTiS=true, $aryProperParameter=array()){
         $aryRow = array();
@@ -326,9 +326,9 @@ class OrchestratorLinkAgent {
         $aryErrMsgBody = array();
         $strErrMsg = "";
         $strErrorBuf = "";
-        
+
         $strFxName = '([CLASS]'.__CLASS__.',[FUNCTION]'.__FUNCTION__.')';
-        
+
         try{
             $intOrchestratorId = intval($varOrchestratorId);
             if( $intOrchestratorId < 1 ){
@@ -361,7 +361,7 @@ class OrchestratorLinkAgent {
         return $retArray;
     }
     //ある1のオーケストレータの、存在している作業パターンを取得する----
-    
+
     //----テーマカラーの名前を取得する
     function getThemeColorName($varOrchestratorId, $aryProperParameter=array()){
         $strThemeColorName = '';
@@ -369,9 +369,9 @@ class OrchestratorLinkAgent {
         $aryErrMsgBody = array();
         $strErrMsg = "";
         $strErrorBuf = "";
-        
+
         $strFxName = '([CLASS]'.__CLASS__.',[FUNCTION]'.__FUNCTION__.')';
-        
+
         try{
             $intOrchestratorId = intval($varOrchestratorId);
             if( $intOrchestratorId < 1 ){
@@ -404,14 +404,14 @@ class OrchestratorLinkAgent {
         return $retArray;
     }
     //テーマカラーの名前を取得する----
-    
-    
+
+
     /////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////
     // ----ここから固有定義関数                                //
     /////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////
-    
+
     function getSymphonyStatusFromMovement($aryMovementInstanceOfSingleSymphony){
         ////////////////////////////////////////////////////////////////
         // ムーブメントインスタンスから、シンフォニー関連の情報を取得 //
@@ -421,18 +421,18 @@ class OrchestratorLinkAgent {
         $aryErrMsgBody = array();
         $strErrMsg = "";
         $strErrorBuf = "";
-        
+
         $strFxName = '([CLASS]'.__CLASS__.',[FUNCTION]'.__FUNCTION__.')';
-        
+
         // 各種ローカル定数を定義
         $intFocusCorrectSeq = 0;
         $aryUnStartedMovement = array();
         $aryRunningMovement = array();
         $rowEndedMovement = array();
         $aryAbortedMovement = array();
-        
+
         $rowOfFocusMovement = null;
-        
+
         try{
             //----MOVシーケンスの値とループカウンタの値を比較しつつ、現在の楽章を探す
 
@@ -474,16 +474,16 @@ class OrchestratorLinkAgent {
                 }
             }
             //MOVシーケンスの値とループカウンタの値を比較しつつ、現在の楽章を探す----
-            
+
             // 開始していない楽章の数を取得
             $intUnstartedMovementLength = count($aryUnStartedMovement);
 
             // 中断された楽章の数を取得
             $intAbortedMovementLength = count($aryAbortedMovement);
-            
+
             // 終了した楽章の数を取得
             $intEndedMovementLength = count($rowEndedMovement);
-            
+
             if( $intUnstartedMovementLength==$intMovementLength ){
                 //----まだ第1楽章も始まっていない場合
                 $intFocusMovementSeq = 0;
@@ -491,7 +491,7 @@ class OrchestratorLinkAgent {
             }
             else{
                 //----すでに1個は楽章がはじまった後である場合
-                
+
                 //----ムーブメントで、オーケストレータに問い合わせが必要なステータスのレコードが1個かどうかを確認する
                 if( 2 <= count($aryRunningMovement) ){
                     // 例外処理へ
@@ -499,7 +499,7 @@ class OrchestratorLinkAgent {
                     throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
                 }
                 //ムーブメントで、オーケストレータに問い合わせが必要なステータスのレコードが1個かどうかを確認する----
-                
+
                 if( count($aryRunningMovement)== 1 ){
                     //----現在のムーブメントが、実行中系だった場合
                     $rowOfFocusMovement = $aryRunningMovement[0];
@@ -525,7 +525,7 @@ class OrchestratorLinkAgent {
                     //現在のムーブメントが、実行中系ではなかった場合----
                 }
                 $intFocusMovementSeq = intval($rowOfFocusMovement['I_MOVEMENT_SEQ']);
-                
+
                 //すでに1個は楽章がはじまった後である場合----
             }
             $aryStatusInfo = array('MOVEMENT_LENGTH'=>$intMovementLength
@@ -540,7 +540,7 @@ class OrchestratorLinkAgent {
         $retArray = array($aryStatusInfo,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
         return $retArray;
     }
-    
+
     //----存在しているオーケストレータ情報を取得する
     function getLiveOrchestratorFromMaster(){
         /////////////////////////////////////////////////////////////
@@ -551,19 +551,19 @@ class OrchestratorLinkAgent {
         $aryErrMsgBody = array();
         $strErrMsg = "";
         $strErrorBuf = "";
-        
+
         $strFxName = '([CLASS]'.__CLASS__.',[FUNCTION]'.__FUNCTION__.')';
-        
+
         // 各種ローカル定数を定義
         $strOrchestratorMasterTableId      = 'B_ITA_EXT_STM_MASTER';
-        
+
         $strOrchestratorMasterKeyColId     = 'ITA_EXT_STM_ID';
         $strOrchestratorMasterDispColId    = 'ITA_EXT_STM_NAME';
         $strOrchestratorMasterLibPayhColId = 'ITA_EXT_LINK_LIB_PATH';
-        
+
         try{
             $objDBCA = $this->getDBConnectAgent();
-            
+
             // SQL作成
             $tmpAryBind = array();
             $aryWhereZone = array();
@@ -571,14 +571,14 @@ class OrchestratorLinkAgent {
             $aryWhereZone[] = "DISUSE_FLAG IN ('0') ";
             //
             $strWhereZone = implode(" AND ",$aryWhereZone);
-            
+
             $sql = "SELECT {$strOrchestratorMasterKeyColId} ITA_EXT_STM_ID, "
                   ."{$strOrchestratorMasterDispColId} ITA_EXT_STM_NAME, "
                   ."{$strOrchestratorMasterLibPayhColId} ITA_EXT_LINK_LIB_PATH "
                   ."FROM   {$strOrchestratorMasterTableId} "
                   ."WHERE  {$strWhereZone} "
                   ."ORDER  BY DISP_SEQ ASC";
-            
+
             $retArray = singleSQLCoreExecute($objDBCA, $sql, $tmpAryBind, $strFxName);
             if( $retArray[0]!==true ){
                 $intErrorType = $retArray[1];
@@ -605,7 +605,7 @@ class OrchestratorLinkAgent {
         return $retArray;
     }
     //存在しているオーケストレータ情報を取得する
-    
+
     //----存在している作業パターンを取得する
     function getLivePatternFromMaster($aryOrchestratorId=array(),$strSearchKeyValue="",$aryPatternId=array()){
         /////////////////////////////////////////////////////////////
@@ -616,18 +616,18 @@ class OrchestratorLinkAgent {
         $aryErrMsgBody = array();
         $strErrMsg = "";
         $strErrorBuf = "";
-        
+
         $strFxName = '([CLASS]'.__CLASS__.',[FUNCTION]'.__FUNCTION__.')';
-        
+
         // 各種ローカル定数を定義
         $strPatternMasterTableId   = 'C_PATTERN_PER_ORCH';
-        
+
         $strPatternMasterKeyColId  = 'PATTERN_ID';
         $strPatternMasterDispColId = 'PATTERN_NAME';
         $strPatternMasterOrcColId  = 'ITA_EXT_STM_ID';
         $strPatternMasterTimeLimit = 'TIME_LIMIT';
         $strPatternMasterAccessAuth = 'ACCESS_AUTH';
-        
+
         $strPatternMasterAnsHostDesignType = 'ANS_HOST_DESIGNATE_TYPE_ID';
         $strPatternMasterAnsWinRM = 'ANS_WINRM_ID';
         $strPatternMasterAnsParaEx = 'ANS_PARALLEL_EXE';
@@ -639,13 +639,16 @@ class OrchestratorLinkAgent {
         $strPatternMasterOpenst_Template      = 'OPENST_TEMPLATE';
         $strPatternMasterOpenst_Env           = 'OPENST_ENVIRONMENT';
         $strPatternMasterAnsVirtualEnvName    = 'ANS_VIRTUALENV_NAME';
+        $strPatternMasterAnsEngineVirtualEnvName  = 'ANS_ENGINE_VIRTUALENV_NAME';
+        $strPatternMasterAnsExecutionEnvName      = "ANS_EXECUTION_ENVIRONMENT_NAME";
+        $strPatternMasterAnsAnsibleConfFile       = "ANS_ANSIBLE_CONFIG_FILE";
 
         $strPatternMasterTerraformWorkspaceID = 'TERRAFORM_WORKSPACE_ID';
-        
+
         try{
             $objDBCA = $this->getDBConnectAgent();
             $lc_db_model_ch = $objDBCA->getModelChannel();
-            
+
             // SQL作成
             $tmpAryBind = array();
             $aryWhereZone = array();
@@ -673,7 +676,7 @@ class OrchestratorLinkAgent {
                 $tmpStr01  = "{$strWFFCMInDBHead}{$strPatternMasterDispColId}{$strWFFCMInDBTail} ";
                 $tmpStr01 .= " {$strCollate}LIKE {$strWFFCMInNeedTipHead}:SEARCH_BY_LIKE_1{$strWFFCMInNeedTipTail} ESCAPE '#' ";
                 $aryWhereZone[] = $tmpStr01;
-                
+
                 $strBindValue = '%'.where_queryForLike_Wrapper($strSearchKeyValue, $boolBinaryDistinctOnDTiS).'%';
                 $tmpAryBind['SEARCH_BY_LIKE_1'] = $strBindValue;
             }
@@ -715,7 +718,7 @@ class OrchestratorLinkAgent {
             }
             //作業パターンで絞り込む----
             $strWhereZone = implode(" AND ",$aryWhereZone);
-            
+
             $sql = "SELECT {$strPatternMasterKeyColId} PATTERN_ID "
                   .",{$strPatternMasterDispColId} PATTERN_NAME "
                   .",{$strPatternMasterOrcColId} ITA_EXT_STM_ID "
@@ -727,13 +730,16 @@ class OrchestratorLinkAgent {
                   .",{$strPatternMasterAnsPlaybookHedDef} ANS_PLAYBOOK_HED_DEF "
                   .",{$strPatternMasterAnsExecOption} ANS_EXEC_OPTIONS "
                   .",{$strPatternMasterAnsVirtualEnvName} ANS_VIRTUALENV_NAME "
+                  .",{$strPatternMasterAnsEngineVirtualEnvName} ANS_ENGINE_VIRTUALENV_NAME "
+                  .",{$strPatternMasterAnsExecutionEnvName} ANS_EXECUTION_ENVIRONMENT_NAME"
+                  .",{$strPatternMasterAnsAnsibleConfFile} ANS_ANSIBLE_CONFIG_FILE"
                   .",{$strPatternMasterOpenst_Template} OPENST_TEMPLATE "
                   .",{$strPatternMasterOpenst_Env} OPENST_ENVIRONMENT "
                   .",{$strPatternMasterTerraformWorkspaceID} TERRAFORM_WORKSPACE_ID "
                   ."FROM   {$strPatternMasterTableId} "
                   ."WHERE  {$strWhereZone} "
                   ."ORDER  BY DISP_SEQ ASC";
-            
+
             $retArray = singleSQLCoreExecute($objDBCA, $sql, $tmpAryBind, $strFxName);
             if( $retArray[0]!==true ){
                 $intErrorType = $retArray[1];
@@ -760,8 +766,8 @@ class OrchestratorLinkAgent {
         return $retArray;
     }
     //存在している作業パターンを取得する----
-    
-    
+
+
     //----オペレーション情報を取得する
     function getInfoOfOneOperation($intValueForSearchOneOpeRecord,$intSearchMode=0){
         /////////////////////////////////////////////////////////////
@@ -772,18 +778,18 @@ class OrchestratorLinkAgent {
         $aryErrMsgBody = array();
         $strErrMsg = "";
         $aryRowOfOperationTable = array();
-        
+
         $strFxName = '([CLASS]'.__CLASS__.',[FUNCTION]'.__FUNCTION__.')';
-        
+
         $strSysErrMsgBody = "";
         //
         try{
             $objDBCA = $this->getDBConnectAgent();
             $lc_db_model_ch = $objDBCA->getModelChannel();
-            
+
             $tmpStrSelectPart = makeSelectSQLPartForDateWildColumn($lc_db_model_ch,"LAST_UPDATE_TIMESTAMP","DATETIME",true,true);
             $strSelectMaxLastUpdateTimestamp = "CASE WHEN LAST_UPDATE_TIMESTAMP IS NULL THEN 'VALNULL' ELSE {$tmpStrSelectPart} END LUT4U";
-            
+
             // ----全行および全行中、最後に更新された日時を取得する
             $arrayConfigForSelect = array(
                 "JOURNAL_SEQ_NO"=>"",
@@ -800,7 +806,7 @@ class OrchestratorLinkAgent {
                 "LAST_UPDATE_USER"=>"",
                 $strSelectMaxLastUpdateTimestamp=>""
             );
-            
+
             $arrayValueTmpl = array(
                 "JOURNAL_SEQ_NO"=>"",
                 "JOURNAL_ACTION_CLASS"=>"",
@@ -817,10 +823,10 @@ class OrchestratorLinkAgent {
                 $strSelectMaxLastUpdateTimestamp=>""
             );
             $arrayValue = $arrayValueTmpl;
-            
+
             $strSelectMode = "SELECT";
             $strSelectForUpdateLock = "";
-            
+
             if( $intSearchMode === 0 ){
                 $strColumnIdForSearch = "OPERATION_NO_UAPK";
             }
@@ -833,7 +839,7 @@ class OrchestratorLinkAgent {
                 throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
             }
             $temp_array = array('WHERE'=>"{$strColumnIdForSearch} = :{$strColumnIdForSearch} AND DISUSE_FLAG IN ('0') {$strSelectForUpdateLock}");
-            
+
             $retArray = makeSQLForUtnTableUpdate($lc_db_model_ch
                                                 ,$strSelectMode
                                                 ,"OPERATION_NO_UAPK"
@@ -844,9 +850,9 @@ class OrchestratorLinkAgent {
                                                 ,$temp_array );
             $sqlUtnBody = $retArray[1];
             $arrayUtnBind = $retArray[2];
-            
+
             $arrayUtnBind[$strColumnIdForSearch] = $intValueForSearchOneOpeRecord;
-            
+
             $retArray = singleSQLCoreExecute($objDBCA, $sqlUtnBody, $arrayUtnBind, $strFxName);
             if( $retArray[0]!==true ){
                 $intErrorType = $retArray[1];
@@ -857,7 +863,7 @@ class OrchestratorLinkAgent {
                 throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
             }
             $objQueryUtn =& $retArray[3];
-            
+
             //----発見行だけループ
             $intCount = 0;
             $aryRowOfSymClassTable = array();
@@ -868,7 +874,7 @@ class OrchestratorLinkAgent {
                 $intCount += 1;
             }
             //発見行だけループ----
-            
+
             if( $intCount!== 1 ){
                 // 例外処理へ
                 if( $intCount === 0 ){
@@ -903,18 +909,18 @@ class OrchestratorLinkAgent {
         $aryErrMsgBody = array();
         $strErrMsg = "";
         $aryRowOfSymClassTable = array();
-        
+
         $strFxName = '([CLASS]'.__CLASS__.',[FUNCTION]'.__FUNCTION__.')';
-        
+
         $strSysErrMsgBody = "";
         //
         try{
             $objDBCA = $this->getDBConnectAgent();
             $lc_db_model_ch = $objDBCA->getModelChannel();
-            
+
             $tmpStrSelectPart = makeSelectSQLPartForDateWildColumn($lc_db_model_ch,"LAST_UPDATE_TIMESTAMP","DATETIME",true,true);
             $strSelectMaxLastUpdateTimestamp = "CASE WHEN LAST_UPDATE_TIMESTAMP IS NULL THEN 'VALNULL' ELSE {$tmpStrSelectPart} END LUT4U";
-            
+
             // ----全行および全行中、最後に更新された日時を取得する
             $arrayConfigForSelect = array(
                 "JOURNAL_SEQ_NO"=>"",
@@ -930,7 +936,7 @@ class OrchestratorLinkAgent {
                 "LAST_UPDATE_USER"=>"",
                 $strSelectMaxLastUpdateTimestamp=>""
             );
-            
+
             $arrayValueTmpl = array(
                 "JOURNAL_SEQ_NO"=>"",
                 "JOURNAL_ACTION_CLASS"=>"",
@@ -946,7 +952,7 @@ class OrchestratorLinkAgent {
                 $strSelectMaxLastUpdateTimestamp=>""
             );
             $arrayValue = $arrayValueTmpl;
-            
+
             $strSelectMode = "SELECT";
             $strWhereDisuseFlag = "('0')";
             $strOrderByArea = "";
@@ -955,9 +961,9 @@ class OrchestratorLinkAgent {
                 $strSelectMode = "SELECT FOR UPDATE";
                 //更新用のため、ロック----
             }
-            
+
             $temp_array = array('WHERE'=>"SYMPHONY_CLASS_NO = :SYMPHONY_CLASS_NO AND DISUSE_FLAG IN {$strWhereDisuseFlag}");
-            
+
             $retArray = makeSQLForUtnTableUpdate($lc_db_model_ch
                                                 ,$strSelectMode
                                                 ,"SYMPHONY_CLASS_NO"
@@ -968,9 +974,9 @@ class OrchestratorLinkAgent {
                                                 ,$temp_array );
             $sqlUtnBody = $retArray[1];
             $arrayUtnBind = $retArray[2];
-            
+
             $arrayUtnBind['SYMPHONY_CLASS_NO'] = $intValueForSearchOneOpeRecord;
-            
+
             $retArray = singleSQLCoreExecute($objDBCA, $sqlUtnBody, $arrayUtnBind, $strFxName);
             if( $retArray[0]!==true ){
                 $intErrorType = $retArray[1];
@@ -981,7 +987,7 @@ class OrchestratorLinkAgent {
                 throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
             }
             $objQueryUtn =& $retArray[3];
-            
+
             //----発見行だけループ
             $intCount = 0;
             $aryRowOfSymClassTable = array();
@@ -992,7 +998,7 @@ class OrchestratorLinkAgent {
                 $intCount += 1;
             }
             //発見行だけループ----
-            
+
             if( $intCount!== 1 ){
                 // 例外処理へ
                 if( $intCount === 0 ){
@@ -1027,18 +1033,18 @@ class OrchestratorLinkAgent {
         $aryErrMsgBody = array();
         $strErrMsg = "";
         $aryRowOfOperationTable = array();
-        
+
         $strFxName = '([CLASS]'.__CLASS__.',[FUNCTION]'.__FUNCTION__.')';
-        
+
         $strSysErrMsgBody = "";
 
         try{
             $objDBCA = $this->getDBConnectAgent();
             $lc_db_model_ch = $objDBCA->getModelChannel();
-            
+
             $tmpStrSelectPart = makeSelectSQLPartForDateWildColumn($lc_db_model_ch,"LAST_UPDATE_TIMESTAMP","DATETIME",true,true);
             $strSelectMaxLastUpdateTimestamp = "CASE WHEN LAST_UPDATE_TIMESTAMP IS NULL THEN 'VALNULL' ELSE {$tmpStrSelectPart} END LUT4U";
-            
+
             // ----全行および全行中、最後に更新された日時を取得する
             $arrayConfigForSelect = array(
                 "JOURNAL_SEQ_NO"=>"",
@@ -1059,7 +1065,7 @@ class OrchestratorLinkAgent {
                 "LAST_UPDATE_USER"=>"",
                 $strSelectMaxLastUpdateTimestamp=>""
             );
-            
+
             $arrayValueTmpl = array(
                 "JOURNAL_SEQ_NO"=>"",
                 "JOURNAL_ACTION_CLASS"=>"",
@@ -1080,7 +1086,7 @@ class OrchestratorLinkAgent {
                 $strSelectMaxLastUpdateTimestamp=>""
             );
             $arrayValue = $arrayValueTmpl;
-            
+
             $strSelectMode = "SELECT";
             $strWhereDisuseFlag = "('0')";
             $strOrderByArea = " ORDER BY MOVEMENT_SEQ ASC";
@@ -1088,12 +1094,12 @@ class OrchestratorLinkAgent {
                 //----更新するため、廃止されているムーブメントレコードも拾う
                 $strWhereDisuseFlag = "('0','1')";
                 //更新するため、廃止されているムーブメントレコードも拾う----
-                
+
                 //----更新用のため、ロック
                 $strSelectMode = "SELECT FOR UPDATE";
                 //更新用のため、ロック----
             }
-            
+
             if( $intSearchMode === 0 ){
                 $strColumnIdForSearch = "SYMPHONY_CLASS_NO";
             }
@@ -1109,7 +1115,7 @@ class OrchestratorLinkAgent {
                 throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
             }
             $temp_array = array('WHERE'=>"{$strColumnIdForSearch} = :{$strColumnIdForSearch} AND DISUSE_FLAG IN {$strWhereDisuseFlag} {$strOrderByArea}");
-            
+
             $retArray = makeSQLForUtnTableUpdate($lc_db_model_ch
                                                 ,$strSelectMode
                                                 ,"MOVEMENT_CLASS_NO"
@@ -1120,7 +1126,7 @@ class OrchestratorLinkAgent {
                                                 ,$temp_array );
             $sqlUtnBody = $retArray[1];
             $arrayUtnBind = $retArray[2];
-            
+
             $arrayUtnBind[$strColumnIdForSearch] = $intValueForSearchOneMovRecord;
 
             $retArray = singleSQLCoreExecute($objDBCA, $sqlUtnBody, $arrayUtnBind, $strFxName);
@@ -1174,11 +1180,12 @@ class OrchestratorLinkAgent {
         $aryRowOfMovClassTable = array();
         $strFxName = '([FUNCTION]'.__FUNCTION__.')';
         $strSysErrMsgBody = "";
-        
+
         try{
             $objDBCA = $this->getDBConnectAgent();
             $lc_db_model_ch = $objDBCA->getModelChannel();
             $aryRetBody = $this->getInfoOfOneSymphony($fxVarsIntSymphonyClassId, $fxVarsIntMode);
+            $objMTS = $this->getMessageTemplateStorage();
             if( $aryRetBody[1] !== null ){
                 // エラーフラグをON
                 // 例外処理へ
@@ -1192,7 +1199,7 @@ class OrchestratorLinkAgent {
                 throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
             }
             $aryRowOfSymClassTable = $aryRetBody[4];
-            
+
             $aryRetBody = $this->getInfoOfOneMovement($fxVarsIntSymphonyClassId, $fxVarsIntMode, $intSearchMode);
             if( $aryRetBody[1] !== null ){
                 // エラーフラグをON
@@ -1221,7 +1228,7 @@ class OrchestratorLinkAgent {
 
         // グローバル変数宣言
         global $g;
-        
+
         // ----変数定義
         $boolRet = false;
         $intErrorType = null;
@@ -1246,6 +1253,7 @@ class OrchestratorLinkAgent {
             "OPERATION_NO_UAPK"=>"",
             "I_OPERATION_NAME"=>"",
             "STATUS_ID"=>"",
+            "PAUSE_STATUS_ID"=>"",
             "EXECUTION_USER"=>"",
             "ABORT_EXECUTE_FLAG"=>"",
             "TIME_BOOK"=>"DATETIME",
@@ -1257,7 +1265,7 @@ class OrchestratorLinkAgent {
             "LAST_UPDATE_TIMESTAMP"=>"",
             "LAST_UPDATE_USER"=>""
         );
-        
+
         $arraySymInsValueTmpl = array(
             "JOURNAL_SEQ_NO"=>"",
             "JOURNAL_ACTION_CLASS"=>"",
@@ -1269,6 +1277,7 @@ class OrchestratorLinkAgent {
             "OPERATION_NO_UAPK"=>"",
             "I_OPERATION_NAME"=>"",
             "STATUS_ID"=>"",
+            "PAUSE_STATUS_ID"=>"",
             "EXECUTION_USER"=>"",
             "ABORT_EXECUTE_FLAG"=>"",
             "TIME_BOOK"=>"",
@@ -1280,7 +1289,7 @@ class OrchestratorLinkAgent {
             "LAST_UPDATE_TIMESTAMP"=>"",
             "LAST_UPDATE_USER"=>""
         );
-        
+
         $arrayConfigForMovInsIUD = array(
             "JOURNAL_SEQ_NO"=>"",
             "JOURNAL_ACTION_CLASS"=>"",
@@ -1312,7 +1321,7 @@ class OrchestratorLinkAgent {
             "LAST_UPDATE_TIMESTAMP"=>"",
             "LAST_UPDATE_USER"=>""
         );
-        
+
         $arrayMovInsValueTmpl = array(
             "JOURNAL_SEQ_NO"=>"",
             "JOURNAL_ACTION_CLASS"=>"",
@@ -1454,7 +1463,7 @@ class OrchestratorLinkAgent {
                 throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
             }
 
-            $ret  = $objRBAC->getAccountInfo($userId); 
+            $ret  = $objRBAC->getAccountInfo($userId);
             list($ret,$permission) = $objRBAC->chkOneRecodeAccessPermission($targetRow);
             if($ret === false) {
                 //例外処理へ
@@ -1480,7 +1489,7 @@ class OrchestratorLinkAgent {
                 throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
             }
 
-            $ret  = $objRBAC->getAccountInfo($userId); 
+            $ret  = $objRBAC->getAccountInfo($userId);
             list($ret,$permission) = $objRBAC->chkOneRecodeAccessPermission($targetRow);
             if($ret === false) {
                 //例外処理へ
@@ -1512,7 +1521,7 @@ class OrchestratorLinkAgent {
                         throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
                     }
 
-                    $ret  = $objRBAC->getAccountInfo($userId); 
+                    $ret  = $objRBAC->getAccountInfo($userId);
                     list($ret,$permission) = $objRBAC->chkOneRecodeAccessPermission($targetRow);
                     if($ret === false) {
                         //例外処理へ
@@ -1548,7 +1557,7 @@ class OrchestratorLinkAgent {
                             throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
                         }
 
-                        $ret  = $objRBAC->getAccountInfo($userId); 
+                        $ret  = $objRBAC->getAccountInfo($userId);
                         list($ret,$permission) = $objRBAC->chkOneRecodeAccessPermission($targetRow);
                         if($ret === false) {
                             //例外処理へ
@@ -1646,6 +1655,7 @@ class OrchestratorLinkAgent {
             $register_tgt_row['ABORT_EXECUTE_FLAG']   = 1; //緊急停止発令フラグ(未発令)=[1]
             $register_tgt_row['DISUSE_FLAG']          = '0';
             $register_tgt_row['LAST_UPDATE_USER']     = $userId;
+            $register_tgt_row['PAUSE_STATUS_ID']       = 2;
 
             $register_tgt_row['ACCESS_AUTH']     = $aryRowOfSymClassTable['ACCESS_AUTH'];
 
@@ -1725,7 +1735,7 @@ class OrchestratorLinkAgent {
                     $aryTmp1ForOverride['MOVEMENT_SEQ']           = $intFocusIndex + 1;
                     $tmp1StrOrcId     = $aryDataForMovement['ORCHESTRATOR_ID'];
                     $tmp1StrPatternId = $aryDataForMovement['PATTERN_ID'];
-                    
+
                     if( array_key_exists($intFocusIndex + 1, $aryOptionOrderOverride) === true ){
                         //----あるムーブメントについて指定があった場合
                         $aryTmp2ForOverride = $aryOptionOrderOverride[$intFocusIndex + 1];
@@ -1734,10 +1744,10 @@ class OrchestratorLinkAgent {
                     else{
                         $aryTmp2ForOverride = array();
                     }
-                    
-                    list($tmp1StrExeSkipFlag, $boolTempKeyExistFlag) = isSetInArrayNestThenAssign($aryTmp2ForOverride, array('SKIP')        , ""); 
+
+                    list($tmp1StrExeSkipFlag, $boolTempKeyExistFlag) = isSetInArrayNestThenAssign($aryTmp2ForOverride, array('SKIP')        , "");
                     list($tmp1StrOvrdOpeId  , $boolTempKeyExistFlag) = isSetInArrayNestThenAssign($aryTmp2ForOverride, array('OPERATION_ID'), "");
-                    
+
                     if( $tmp1StrExeSkipFlag === "YES" ){
                         // checkedValueならスキップ
                         $tmp1StrExeSkipFlag = "checkedValue";
@@ -1748,20 +1758,20 @@ class OrchestratorLinkAgent {
                     else{
                         $tmp1StrExeSkipFlag = "FORBIDDEN_VALUE";
                     }
-                    
+
                     $aryTmp1ForOverride['ORCHESTRATOR_ID']        = $tmp1StrOrcId;
                     $aryTmp1ForOverride['PATTERN_ID']             = $tmp1StrPatternId;
                     $aryTmp1ForOverride['EXE_SKIP_FLAG']          = $tmp1StrExeSkipFlag;
                     $aryTmp1ForOverride['OVRD_OPERATION_NO_IDBH'] = $tmp1StrOvrdOpeId;
                     $aryOptionOrder[] = $aryTmp1ForOverride;
-                    
+
                     unset($tmp1StrOrcId);
                     unset($tmp1StrPatternId);
                     unset($tmp1StrExeSkipFlag);
                     unset($tmp1StrOvrdOpeNo);
                     unset($aryTmp1ForOverride);
                     unset($aryTmp2ForOverride);
-                    
+
                     $intFocusIndex += 1;
                 }
                 unset($tmpAryMultiLivePatternFromMaster);
@@ -1784,7 +1794,7 @@ class OrchestratorLinkAgent {
                 throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
             }
             //$aryOptionOrderのカウントチェック----
-            
+
 
             // ----ムーブメントインスタンス登録処理
             $MovementErrorMsg = "";
@@ -2009,7 +2019,21 @@ class OrchestratorLinkAgent {
                 unset($retArray01);
                 unset($retArray02);
                 // ムーブメントインスタンス登録の実行----
-
+                
+                //保留ステータス更新
+                if($aryDataForMovement['NEXT_PENDING_FLAG'] == '1' && $register_tgt_row['RELEASED_FLAG'] == '1'){
+                  $sql = "UPDATE C_SYMPHONY_INSTANCE_MNG SET PAUSE_STATUS_ID = '1' WHERE SYMPHONY_INSTANCE_NO = {$varSymphonyInstanceNo}";
+                  
+                  $tmpRetArray01 = singleSQLCoreExecute($objDBCA, $sql, array(), $strFxName);
+                  if( $tmpRetArray01[0] !== true ){
+                      // エラーフラグをON
+                      // 例外処理へ
+                      $strErrStepIdInFx="00001100";
+                      //
+                      throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                  }
+                  unset($tmpRetArray01);
+                }
 
                 $intFocusIndex += 1;
             }
@@ -2092,7 +2116,7 @@ class OrchestratorLinkAgent {
                     $tmpMsgBody = $objMTS->getSomeMessage("ITABASEH-ERR-102070");
                 }
                 $aryErrMsgBody[] = $tmpMsgBody;
-                
+
                 // トランザクション終了
                 if( $objDBCA->transactionExit() === true ){
                     $tmpMsgBody = $objMTS->getSomeMessage("ITABASEH-STD-103010");
@@ -2103,7 +2127,7 @@ class OrchestratorLinkAgent {
                 $aryErrMsgBody[] = $tmpMsgBody;
                 unset($tmpMsgBody);
             }
-            //トランザクション中のエラーの場合---- 
+            //トランザクション中のエラーの場合----
 
             // エラーフラグをON
             if( $intErrorType === null ) $intErrorType = 500;
@@ -2205,7 +2229,7 @@ class OrchestratorLinkAgent {
                        "   B_ANSIBLE_LNS_PHO_LINK M_TBL                                   " .
                        " WHERE                                                            " .
                        "   M_TBL.OPERATION_NO_UAPK  = %s    AND                           " .
-                       "   M_TBL.PATTERN_ID         = %s    AND                           " .  
+                       "   M_TBL.PATTERN_ID         = %s    AND                           " .
                        "   M_TBL.DISUSE_FLAG        = '0';                                ",
                        $intOperationNoUAPK,
                        $tgtSource_row['I_PATTERN_ID']);
@@ -2315,7 +2339,7 @@ class OrchestratorLinkAgent {
                        "   B_ANSIBLE_PNS_PHO_LINK M_TBL                                   " .
                        " WHERE                                                            " .
                        "   M_TBL.OPERATION_NO_UAPK  = %s    AND                           " .
-                       "   M_TBL.PATTERN_ID         = %s    AND                           " .  
+                       "   M_TBL.PATTERN_ID         = %s    AND                           " .
                        "   M_TBL.DISUSE_FLAG        = '0';                                ",
                        $intOperationNoUAPK,
                        $tgtSource_row['I_PATTERN_ID']);
@@ -2425,7 +2449,7 @@ class OrchestratorLinkAgent {
                        "   B_ANSIBLE_LRL_PHO_LINK M_TBL                                   " .
                        " WHERE                                                            " .
                        "   M_TBL.OPERATION_NO_UAPK  = %s    AND                           " .
-                       "   M_TBL.PATTERN_ID         = %s    AND                           " .  
+                       "   M_TBL.PATTERN_ID         = %s    AND                           " .
                        "   M_TBL.DISUSE_FLAG        = '0';                                ",
                        $intOperationNoUAPK,
                        $tgtSource_row['I_PATTERN_ID']);
@@ -2512,6 +2536,7 @@ class OrchestratorLinkAgent {
             "OPERATION_NO_UAPK"=>"",
             "I_OPERATION_NAME"=>"",
             "STATUS_ID"=>"",
+            "PAUSE_STATUS_ID"=>"",
             "EXECUTION_USER"=>"",
             "ABORT_EXECUTE_FLAG"=>"",
             "CONDUCTOR_CALL_FLAG"=>"",
@@ -2519,13 +2544,14 @@ class OrchestratorLinkAgent {
             "TIME_BOOK"=>"DATETIME",
             "TIME_START"=>"DATETIME",
             "TIME_END"=>"DATETIME",
+            "I_NOTICE_INFO"=>"",
             "ACCESS_AUTH"=>"",
             "NOTE"=>"",
             "DISUSE_FLAG"=>"",
             "LAST_UPDATE_TIMESTAMP"=>"",
             "LAST_UPDATE_USER"=>""
         );
-        
+
         $arraySymInsValueTmpl = array(
             "JOURNAL_SEQ_NO"=>"",
             "JOURNAL_ACTION_CLASS"=>"",
@@ -2537,6 +2563,7 @@ class OrchestratorLinkAgent {
             "OPERATION_NO_UAPK"=>"",
             "I_OPERATION_NAME"=>"",
             "STATUS_ID"=>"",
+            "PAUSE_STATUS_ID"=>"",
             "EXECUTION_USER"=>"",
             "ABORT_EXECUTE_FLAG"=>"",
             "CONDUCTOR_CALL_FLAG"=>"",
@@ -2550,7 +2577,7 @@ class OrchestratorLinkAgent {
             "LAST_UPDATE_TIMESTAMP"=>"",
             "LAST_UPDATE_USER"=>""
         );
-        
+
         $arrayConfigForMovInsIUD = array(
             "JOURNAL_SEQ_NO"=>"",
             "JOURNAL_ACTION_CLASS"=>"",
@@ -2578,12 +2605,12 @@ class OrchestratorLinkAgent {
             "OVRD_I_OPERATION_NAME"=>"",
             "OVRD_I_OPERATION_NO_IDBH"=>"",
             "NOTE"=>"",
-            #ACCESS_AUTH"=>"",  
+            #ACCESS_AUTH"=>"",
             "DISUSE_FLAG"=>"",
             "LAST_UPDATE_TIMESTAMP"=>"",
             "LAST_UPDATE_USER"=>""
         );
-        
+
         $arrayMovInsValueTmpl = array(
             "JOURNAL_SEQ_NO"=>"",
             "JOURNAL_ACTION_CLASS"=>"",
@@ -2645,7 +2672,7 @@ class OrchestratorLinkAgent {
                 $strErrStepIdInFx="00000200";
                 throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
             }
-            $retArray = getSequenceLockInTrz('C_NODE_TERMINALS_CLASS_MNG_RIC','A_SEQUENCE'); 
+            $retArray = getSequenceLockInTrz('C_NODE_TERMINALS_CLASS_MNG_RIC','A_SEQUENCE');
             if( $retArray[1] != 0 ){
                 // エラーフラグをON
                 // 例外処理へ
@@ -2662,7 +2689,7 @@ class OrchestratorLinkAgent {
                 $strErrStepIdInFx="00000200";
                 throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
             }
-            $retArray = getSequenceLockInTrz('C_NODE_INSTANCE_MNG_RIC','A_SEQUENCE'); 
+            $retArray = getSequenceLockInTrz('C_NODE_INSTANCE_MNG_RIC','A_SEQUENCE');
             if( $retArray[1] != 0 ){
                 // エラーフラグをON
                 // 例外処理へ
@@ -2672,14 +2699,14 @@ class OrchestratorLinkAgent {
             // NODE-INSTANCE-シーケンスを掴む----
 
             // ----SYM-INSTANCE-シーケンスを掴む
-            $retArray = getSequenceLockInTrz('C_CONDUCTOR_INSTANCE_MNG_JSQ','A_SEQUENCE'); 
+            $retArray = getSequenceLockInTrz('C_CONDUCTOR_INSTANCE_MNG_JSQ','A_SEQUENCE');
             if( $retArray[1] != 0 ){
                 // エラーフラグをON
                 // 例外処理へ
                 $strErrStepIdInFx="00000400";
                 throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
             }
-            $retArray = getSequenceLockInTrz('C_CONDUCTOR_INSTANCE_MNG_RIC','A_SEQUENCE'); 
+            $retArray = getSequenceLockInTrz('C_CONDUCTOR_INSTANCE_MNG_RIC','A_SEQUENCE');
             if( $retArray[1] != 0 ){
                 // エラーフラグをON
                 // 例外処理へ
@@ -2687,7 +2714,7 @@ class OrchestratorLinkAgent {
                 throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
             }
             // -SYM-INSTANCE-シーケンスを掴む----
-            
+
             ////////////////////////////////////////////////////////
             // (ここまで) ConductorとNodeのCUR/JNLの、シーケンスを取得する//
             ///////////////////////////////////////////////////////
@@ -2697,7 +2724,6 @@ class OrchestratorLinkAgent {
             /////////////////////////////////////////////////////
 
             $retArray = $this->registerInstanceConductorNode($objDBCA, $lc_db_model_ch, $objMTS, $intConductorClassId, $intOperationNoUAPK, $strPreserveDatetime, "", $aryOptionOrderOverride, $userId, $userName,$intCallNo);
-
 
             if($retArray[0] == false){
                 // エラーフラグをON
@@ -2722,7 +2748,7 @@ class OrchestratorLinkAgent {
             //////////////////////////////////////////////////////
             // (ここまで) Conductor、Node、Terminalの情報を登録する//
             /////////////////////////////////////////////////////
-            
+
             // ----トランザクション終了
             $boolResult = $objDBCA->transactionCommit();
             if ( $boolResult === false ){
@@ -2748,7 +2774,7 @@ class OrchestratorLinkAgent {
                     $tmpMsgBody = $objMTS->getSomeMessage("ITABASEH-ERR-102070");
                 }
                 $aryErrMsgBody[] = $tmpMsgBody;
-                
+
                 // トランザクション終了
                 if( $objDBCA->transactionExit() === true ){
                     $tmpMsgBody = $objMTS->getSomeMessage("ITABASEH-STD-103010");
@@ -2759,7 +2785,7 @@ class OrchestratorLinkAgent {
                 $aryErrMsgBody[] = $tmpMsgBody;
                 unset($tmpMsgBody);
             }
-            //トランザクション中のエラーの場合---- 
+            //トランザクション中のエラーの場合----
 
             // エラーフラグをON
             if( $intErrorType === null ) $intErrorType = 500;
@@ -2818,7 +2844,7 @@ class OrchestratorLinkAgent {
             "LAST_UPDATE_TIMESTAMP"=>"",
             "LAST_UPDATE_USER"=>""
         );
-        
+
         $arraySymInsValueTmpl = array(
             "JOURNAL_SEQ_NO"=>"",
             "JOURNAL_ACTION_CLASS"=>"",
@@ -2842,7 +2868,7 @@ class OrchestratorLinkAgent {
             "LAST_UPDATE_TIMESTAMP"=>"",
             "LAST_UPDATE_USER"=>""
         );
-        
+
         $arrayConfigForMovInsIUD = array(
             "JOURNAL_SEQ_NO"=>"",
             "JOURNAL_ACTION_CLASS"=>"",
@@ -2874,7 +2900,7 @@ class OrchestratorLinkAgent {
             "LAST_UPDATE_TIMESTAMP"=>"",
             "LAST_UPDATE_USER"=>""
         );
-        
+
         $arrayMovInsValueTmpl = array(
             "JOURNAL_SEQ_NO"=>"",
             "JOURNAL_ACTION_CLASS"=>"",
@@ -2971,7 +2997,7 @@ class OrchestratorLinkAgent {
                     $tmpMsgBody = $objMTS->getSomeMessage("ITABASEH-ERR-102070");
                 }
                 $aryErrMsgBody[] = $tmpMsgBody;
-                
+
                 // トランザクション終了
                 if( $objDBCA->transactionExit() === true ){
                     $tmpMsgBody = $objMTS->getSomeMessage("ITABASEH-STD-103010");
@@ -2982,7 +3008,7 @@ class OrchestratorLinkAgent {
                 $aryErrMsgBody[] = $tmpMsgBody;
                 unset($tmpMsgBody);
             }
-            //トランザクション中のエラーの場合---- 
+            //トランザクション中のエラーの場合----
 
             // エラーフラグをON
             if( $intErrorType === null ) $intErrorType = 500;
@@ -3034,6 +3060,7 @@ class OrchestratorLinkAgent {
             "OPERATION_NO_UAPK"=>"",
             "I_OPERATION_NAME"=>"",
             "STATUS_ID"=>"",
+            "PAUSE_STATUS_ID"=>"",
             "EXECUTION_USER"=>"",
             "ABORT_EXECUTE_FLAG"=>"",
             "CONDUCTOR_CALL_FLAG"=>"",
@@ -3041,13 +3068,14 @@ class OrchestratorLinkAgent {
             "TIME_BOOK"=>"DATETIME",
             "TIME_START"=>"DATETIME",
             "TIME_END"=>"DATETIME",
+            "I_NOTICE_INFO"=>"",
             "ACCESS_AUTH"=>"",
             "NOTE"=>"",
             "DISUSE_FLAG"=>"",
             "LAST_UPDATE_TIMESTAMP"=>"",
             "LAST_UPDATE_USER"=>""
         );
-        
+
         $arraySymInsValueTmpl = array(
             "JOURNAL_SEQ_NO"=>"",
             "JOURNAL_ACTION_CLASS"=>"",
@@ -3059,6 +3087,7 @@ class OrchestratorLinkAgent {
             "OPERATION_NO_UAPK"=>"",
             "I_OPERATION_NAME"=>"",
             "STATUS_ID"=>"",
+            "PAUSE_STATUS_ID"=>"",
             "EXECUTION_USER"=>"",
             "ABORT_EXECUTE_FLAG"=>"",
             "CONDUCTOR_CALL_FLAG"=>"",
@@ -3066,13 +3095,14 @@ class OrchestratorLinkAgent {
             "TIME_BOOK"=>"",
             "TIME_START"=>"",
             "TIME_END"=>"",
+            "I_NOTICE_INFO"=>"",
             "ACCESS_AUTH"=>"",
             "NOTE"=>"",
             "DISUSE_FLAG"=>"",
             "LAST_UPDATE_TIMESTAMP"=>"",
             "LAST_UPDATE_USER"=>""
         );
-        
+
         $arrayConfigForMovInsIUD = array(
             "JOURNAL_SEQ_NO"=>"",
             "JOURNAL_ACTION_CLASS"=>"",
@@ -3106,7 +3136,7 @@ class OrchestratorLinkAgent {
             "LAST_UPDATE_TIMESTAMP"=>"",
             "LAST_UPDATE_USER"=>""
         );
-        
+
         $arrayMovInsValueTmpl = array(
             "JOURNAL_SEQ_NO"=>"",
             "JOURNAL_ACTION_CLASS"=>"",
@@ -3216,8 +3246,35 @@ class OrchestratorLinkAgent {
             $register_tgt_row['I_CONDUCTOR_NAME']      = $aryRowOfSymClassTable['CONDUCTOR_NAME'];
             $register_tgt_row['I_DESCRIPTION']         = $aryRowOfSymClassTable['DESCRIPTION'];
             $register_tgt_row['ACCESS_AUTH']           = $aryRowOfSymClassTable['ACCESS_AUTH'];
+            $register_tgt_row['PAUSE_STATUS_ID']       = 2;
 
-            //上位アクセス権継承
+            #312
+            $arrNoticeInfo = array();
+            $tmpNoticeInfo = array();
+            $strNoticeList = implode( ",", array_keys( json_decode($aryRowOfSymClassTable['NOTICE_INFO'],true)  ) );
+            
+            //通知情報取得
+            $retArray = $this->getNoticeInfo($strNoticeList);
+            if( $retArray[0] === true ){
+                $arrNoticeRows = $retArray[4];
+                foreach ( $arrNoticeRows as $arrNoticeRow ) {
+                    $arrNoticeInfo[ $arrNoticeRow['NOTICE_ID'] ] = $arrNoticeRow['NOTICE_NAME'];
+                } 
+            }
+            //通知対象ステータス取得
+            $retArray = $this->getInfoOfNoticeStatusList();
+            if( $retArray[0] === true ){
+                $arrNoticeStatusRows = $retArray[4];
+                foreach ( $arrNoticeStatusRows as $arrNoticeStatusRow ) {
+                    $tmpNoticeInfo["STATUS_NAME"][ $arrNoticeStatusRow['SYM_EXE_STATUS_ID'] ] = $arrNoticeStatusRow['SYM_EXE_STATUS_NAME'];
+                } 
+            }
+            $tmpNoticeInfo['NOTICE_INFO'] = json_decode($aryRowOfSymClassTable['NOTICE_INFO'],true);
+            $tmpNoticeInfo['NOTICE_NAME'] = $arrNoticeInfo;
+
+            $register_tgt_row['I_NOTICE_INFO'] = json_encode($tmpNoticeInfo,JSON_UNESCAPED_UNICODE);
+
+            //上位アクセス権継承 
             if( array_key_exists( '__TOP_ACCESS_AUTH__' , $g ) === true ){
                 $register_tgt_row['ACCESS_AUTH'] = $g['__TOP_ACCESS_AUTH__'];
             }
@@ -3244,6 +3301,7 @@ class OrchestratorLinkAgent {
             //CONDUCTOR_CALLが設定されていた場合----
 
             $register_tgt_row['STATUS_ID']            = $varStatus; //未実行[1]または未実行(予約)[2]
+            $register_tgt_row['PAUSE_STATUS_ID']      = 2; //保留ステータスオフ
             $register_tgt_row['EXECUTION_USER']       = $userName;
             $register_tgt_row['OPERATION_NO_UAPK']    = $intOperationNoUAPK;
             $register_tgt_row['I_OPERATION_NAME']     = $aryRowOfOperationTable['OPERATION_NAME'];
@@ -3374,7 +3432,7 @@ class OrchestratorLinkAgent {
                     $tmpMsgBody = $objMTS->getSomeMessage("ITABASEH-ERR-102070");
                 }
                 $aryErrMsgBody[] = $tmpMsgBody;
-                
+
                 // トランザクション終了
                 if( $objDBCA->transactionExit() === true ){
                     $tmpMsgBody = $objMTS->getSomeMessage("ITABASEH-STD-103010");
@@ -3385,7 +3443,7 @@ class OrchestratorLinkAgent {
                 $aryErrMsgBody[] = $tmpMsgBody;
                 unset($tmpMsgBody);
             }
-            //トランザクション中のエラーの場合---- 
+            //トランザクション中のエラーの場合----
 
             // エラーフラグをON
             if( $intErrorType === null ) $intErrorType = 500;
@@ -3449,7 +3507,7 @@ class OrchestratorLinkAgent {
             "LAST_UPDATE_TIMESTAMP"=>"",
             "LAST_UPDATE_USER"=>""
         );
-        
+
         $arraySymInsValueTmpl = array(
             "JOURNAL_SEQ_NO"=>"",
             "JOURNAL_ACTION_CLASS"=>"",
@@ -3474,7 +3532,7 @@ class OrchestratorLinkAgent {
             "LAST_UPDATE_TIMESTAMP"=>"",
             "LAST_UPDATE_USER"=>""
         );
-        
+
         $arrayConfigForMovInsIUD = array(
             "JOURNAL_SEQ_NO"=>"",
             "JOURNAL_ACTION_CLASS"=>"",
@@ -3499,6 +3557,7 @@ class OrchestratorLinkAgent {
             "TIME_END"=>"DATETIME",
             "RELEASED_FLAG"=>"",
             "EXE_SKIP_FLAG"=>"",
+            "END_TYPE"=>"",
             "OVRD_OPERATION_NO_UAPK"=>"",
             "OVRD_I_OPERATION_NAME"=>"",
             "OVRD_I_OPERATION_NO_IDBH"=>"",
@@ -3508,7 +3567,7 @@ class OrchestratorLinkAgent {
             "LAST_UPDATE_TIMESTAMP"=>"",
             "LAST_UPDATE_USER"=>""
         );
-        
+
         $arrayMovInsValueTmpl = array(
             "JOURNAL_SEQ_NO"=>"",
             "JOURNAL_ACTION_CLASS"=>"",
@@ -3533,6 +3592,7 @@ class OrchestratorLinkAgent {
             "TIME_END"=>"DATETIME",
             "RELEASED_FLAG"=>"",
             "EXE_SKIP_FLAG"=>"",
+            "END_TYPE"=>"",
             "OVRD_OPERATION_NO_UAPK"=>"",
             "OVRD_I_OPERATION_NAME"=>"",
             "OVRD_I_OPERATION_NO_IDBH"=>"",
@@ -3627,7 +3687,7 @@ class OrchestratorLinkAgent {
                 }
                 // シーケンス払い出し----
 
-                // --- NODEインスタンス登録用の値をセット                
+                // --- NODEインスタンス登録用の値をセット
                 $register_tgt_row = array();
                 $register_tgt_row['NODE_INSTANCE_NO'] = $varRISeq;
                 $register_tgt_row['I_NODE_CLASS_NO']  = $aryDataForMovement['NODE_CLASS_NO'];
@@ -3641,7 +3701,7 @@ class OrchestratorLinkAgent {
                 }
 
 
-                //Movementの場合  [NODE_TYPE_ID(=3)の場合]       
+                //Movementの場合  [NODE_TYPE_ID(=3)の場合]
                 if( $aryDataForMovement['NODE_TYPE_ID'] == 3){
 
                     // ----PATTERN_IDからパターン情報を取得
@@ -3669,9 +3729,9 @@ class OrchestratorLinkAgent {
 
                     $arySinglePatternSource = $aryMultiLivePatternFromMaster[$strPatternIdNumeric];
                     unset($aryMultiLivePatternFromMaster);
-                   
+
                     $register_tgt_row['I_PATTERN_ID']         = $strPatternIdNumeric;
-                    $register_tgt_row['I_PATTERN_NAME']       = $arySinglePatternSource['PATTERN_NAME'];                    
+                    $register_tgt_row['I_PATTERN_NAME']       = $arySinglePatternSource['PATTERN_NAME'];
                     $register_tgt_row['I_ANS_HOST_DESIGNATE_TYPE_ID'] = $arySinglePatternSource['ANS_HOST_DESIGNATE_TYPE_ID'];
                     $register_tgt_row['I_ANS_WINRM_ID'] = $arySinglePatternSource['ANS_WINRM_ID'];
                     $register_tgt_row['I_ORCHESTRATOR_ID']    = $aryDataForMovement['ORCHESTRATOR_ID'];
@@ -3713,7 +3773,7 @@ class OrchestratorLinkAgent {
 
                                 $register_tgt_row['OVRD_OPERATION_NO_UAPK']      = $tmpOvrdOperation['OPERATION_NO_UAPK'];
                                 $register_tgt_row['OVRD_I_OPERATION_NO_IDBH']      = $tmpOvrdOperation['OPERATION_NO_IDBH'];
-                                $register_tgt_row['OVRD_I_OPERATION_NAME']      = $tmpOvrdOperation['OPERATION_NAME'];                                            
+                                $register_tgt_row['OVRD_I_OPERATION_NAME']      = $tmpOvrdOperation['OPERATION_NAME'];
                             }
                         }
                     }
@@ -3729,9 +3789,9 @@ class OrchestratorLinkAgent {
                 }
 
 
-                //Callの場合  [NODE_TYPE_ID(=4)の場合]       
+                //Callの場合  [NODE_TYPE_ID(=4)の場合]
                 if( $aryDataForMovement['NODE_TYPE_ID'] == 4 ||  $aryDataForMovement['NODE_TYPE_ID'] == 10){
-                   
+
                     if( $aryDataForMovement['SKIP_FLAG'] != 1 ){
                         $register_tgt_row['EXE_SKIP_FLAG']        = 1; //スキップしない
                     }
@@ -3762,7 +3822,7 @@ class OrchestratorLinkAgent {
                         $strCallname = $tmpRetBody[4]['CONDUCTOR_NAME'];
 
                     }elseif( $aryDataForMovement['NODE_TYPE_ID'] == 10 ){
-                        
+
                         $tmpRetBody = $this->getInfoFromOneOfSymphonyClasses($aryDataForMovement['CONDUCTOR_CALL_CLASS_NO'], 0);
                         if( $tmpRetBody[1] !== null ){
                             // エラーフラグをON
@@ -3782,7 +3842,7 @@ class OrchestratorLinkAgent {
                         $aryRowOfSymClassTable = $tmpRetBody[4];
                         $strCallname = $tmpRetBody[4]['SYMPHONY_NAME'];
                     }
-                    $register_tgt_row['I_PATTERN_NAME'] = $strCallname;  
+                    $register_tgt_row['I_PATTERN_NAME'] = $strCallname;
 
 
                     //実行時、変更(SKIP、オペレーション個別指定)の上書き
@@ -3814,17 +3874,28 @@ class OrchestratorLinkAgent {
 
                                 $register_tgt_row['OVRD_OPERATION_NO_UAPK']      = $tmpOvrdOperation['OPERATION_NO_UAPK'];
                                 $register_tgt_row['OVRD_I_OPERATION_NO_IDBH']      = $tmpOvrdOperation['OPERATION_NO_IDBH'];
-                                $register_tgt_row['OVRD_I_OPERATION_NAME']      = $tmpOvrdOperation['OPERATION_NAME'];                                            
+                                $register_tgt_row['OVRD_I_OPERATION_NAME']      = $tmpOvrdOperation['OPERATION_NAME'];
                             }
                         }
                     }
                 }
 
-                //pauseの場合  [NODE_TYPE_ID(=8)の場合]                 
+                //pauseの場合  [NODE_TYPE_ID(=8)の場合]
                 if( $aryDataForMovement['NODE_TYPE_ID'] == 8){
                     $register_tgt_row['RELEASED_FLAG']  = '1'; //1=未解除
                 }
 
+                //endの場合  [NODE_TYPE_ID(=2)の場合] #467
+                if( $aryDataForMovement['NODE_TYPE_ID'] == 2){
+                    if( isset( $aryDataForMovement['END_TYPE'] ) === true ){
+                        $register_tgt_row['END_TYPE'] = $aryDataForMovement['END_TYPE'];
+                        if( $register_tgt_row['END_TYPE'] == "" ){
+                            $register_tgt_row['END_TYPE'] = "5";
+                        }
+                    }else{
+                        $register_tgt_row['END_TYPE'] = "5";
+                    }
+                }
 
                 //NODE共通パラメータ
                 $register_tgt_row['ABORT_RECEPTED_FLAG']  = 1; //緊急停止受付確認フラグ=未確認[1]
@@ -3915,7 +3986,7 @@ class OrchestratorLinkAgent {
                     $tmpMsgBody = $objMTS->getSomeMessage("ITABASEH-ERR-102070");
                 }
                 $aryErrMsgBody[] = $tmpMsgBody;
-                
+
                 // トランザクション終了
                 if( $objDBCA->transactionExit() === true ){
                     $tmpMsgBody = $objMTS->getSomeMessage("ITABASEH-STD-103010");
@@ -3926,7 +3997,7 @@ class OrchestratorLinkAgent {
                 $aryErrMsgBody[] = $tmpMsgBody;
                 unset($tmpMsgBody);
             }
-            //トランザクション中のエラーの場合---- 
+            //トランザクション中のエラーの場合----
 
             // エラーフラグをON
             if( $intErrorType === null ) $intErrorType = 500;
@@ -3959,18 +4030,18 @@ class OrchestratorLinkAgent {
         $aryErrMsgBody = array();
         $strErrMsg = "";
         $aryRowOfSymClassTable = array();
-        
+
         $strFxName = '([CLASS]'.__CLASS__.',[FUNCTION]'.__FUNCTION__.')';
-        
+
         $strSysErrMsgBody = "";
         //
         try{
             $objDBCA = $this->getDBConnectAgent();
             $lc_db_model_ch = $objDBCA->getModelChannel();
-            
+
             $tmpStrSelectPart = makeSelectSQLPartForDateWildColumn($lc_db_model_ch,"LAST_UPDATE_TIMESTAMP","DATETIME",true,true);
             $strSelectMaxLastUpdateTimestamp = "CASE WHEN LAST_UPDATE_TIMESTAMP IS NULL THEN 'VALNULL' ELSE {$tmpStrSelectPart} END LUT4U";
-            
+
             // ----全行および全行中、最後に更新された日時を取得する
             $arrayConfigForSelect = array(
                 "JOURNAL_SEQ_NO"=>"",
@@ -3979,6 +4050,7 @@ class OrchestratorLinkAgent {
                 "CONDUCTOR_CLASS_NO"=>"",
                 "CONDUCTOR_NAME"=>"",
                 "DESCRIPTION"=>"",
+                "NOTICE_INFO"=>"",
                 "ACCESS_AUTH"=>"",
                 "NOTE"=>"",
                 "DISUSE_FLAG"=>"",
@@ -3986,7 +4058,7 @@ class OrchestratorLinkAgent {
                 "LAST_UPDATE_USER"=>"",
                 $strSelectMaxLastUpdateTimestamp=>""
             );
-            
+
             $arrayValueTmpl = array(
                 "JOURNAL_SEQ_NO"=>"",
                 "JOURNAL_ACTION_CLASS"=>"",
@@ -3994,6 +4066,7 @@ class OrchestratorLinkAgent {
                 "CONDUCTOR_CLASS_NO"=>"",
                 "CONDUCTOR_NAME"=>"",
                 "DESCRIPTION"=>"",
+                "NOTICE_INFO"=>"",
                 "ACCESS_AUTH"=>"",
                 "NOTE"=>"",
                 "DISUSE_FLAG"=>"",
@@ -4002,7 +4075,7 @@ class OrchestratorLinkAgent {
                 $strSelectMaxLastUpdateTimestamp=>""
             );
             $arrayValue = $arrayValueTmpl;
-            
+
             $strSelectMode = "SELECT";
             $strWhereDisuseFlag = "('0', '1')";
             $strOrderByArea = "";
@@ -4011,7 +4084,7 @@ class OrchestratorLinkAgent {
                 $strSelectMode = "SELECT FOR UPDATE";
                 //更新用のため、ロック----
             }
-            
+
             $temp_array = array('WHERE'=>"CONDUCTOR_CLASS_NO = :CONDUCTOR_CLASS_NO AND DISUSE_FLAG IN {$strWhereDisuseFlag}");
 
             if( $getmode != "" ){
@@ -4020,14 +4093,14 @@ class OrchestratorLinkAgent {
                     "conductor"     => "C_CONDUCTOR_EDIT_CLASS_MNG",
                     "node"          => "C_NODE_EDIT_CLASS_MNG",
                     "terminal"      => "C_NODE_TERMINALS_EDIT_CLASS_MNG"
-                ); 
+                );
             }else{
                 //クラス状態保存 (2100180004)
                 $arrTableName=array(
                     "conductor"     => "C_CONDUCTOR_CLASS_MNG",
                     "node"          => "C_NODE_CLASS_MNG",
                     "terminal"      => "C_NODE_TERMINALS_CLASS_MNG"
-                ); 
+                );
             }
             $retArray = makeSQLForUtnTableUpdate($lc_db_model_ch
                                                 ,$strSelectMode
@@ -4039,9 +4112,9 @@ class OrchestratorLinkAgent {
                                                 ,$temp_array );
             $sqlUtnBody = $retArray[1];
             $arrayUtnBind = $retArray[2];
-            
+
             $arrayUtnBind['CONDUCTOR_CLASS_NO'] = $intValueForSearchOneOpeRecord;
-            
+
             $retArray = singleSQLCoreExecute($objDBCA, $sqlUtnBody, $arrayUtnBind, $strFxName);
             if( $retArray[0]!==true ){
                 $intErrorType = $retArray[1];
@@ -4052,7 +4125,7 @@ class OrchestratorLinkAgent {
                 throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
             }
             $objQueryUtn =& $retArray[3];
-            
+
             //----発見行だけループ
             $intCount = 0;
             $aryRowOfSymClassTable = array();
@@ -4063,7 +4136,7 @@ class OrchestratorLinkAgent {
                 $intCount += 1;
             }
             //発見行だけループ----
-            
+
             if( $intCount!== 1 ){
                 // 例外処理へ
                 if( $intCount === 0 ){
@@ -4098,18 +4171,18 @@ class OrchestratorLinkAgent {
         $aryErrMsgBody = array();
         $strErrMsg = "";
         $aryRowOfOperationTable = array();
-        
+
         $strFxName = '([CLASS]'.__CLASS__.',[FUNCTION]'.__FUNCTION__.')';
-        
+
         $strSysErrMsgBody = "";
 
         try{
             $objDBCA = $this->getDBConnectAgent();
             $lc_db_model_ch = $objDBCA->getModelChannel();
-            
+
             $tmpStrSelectPart = makeSelectSQLPartForDateWildColumn($lc_db_model_ch,"LAST_UPDATE_TIMESTAMP","DATETIME",true,true);
             $strSelectMaxLastUpdateTimestamp = "CASE WHEN LAST_UPDATE_TIMESTAMP IS NULL THEN 'VALNULL' ELSE {$tmpStrSelectPart} END LUT4U";
-            
+
             // ----全行および全行中、最後に更新された日時を取得する
             $arrayConfigForSelect = array(
                 "JOURNAL_SEQ_NO"=>"",
@@ -4130,6 +4203,7 @@ class OrchestratorLinkAgent {
                 "POINT_Y"=>"",
                 "POINT_W"=>"",
                 "POINT_H"=>"",
+                "END_TYPE"=>"",
                 "DISP_SEQ"=>"",
                 "NOTE"=>"",
                 "DISUSE_FLAG"=>"",
@@ -4137,7 +4211,7 @@ class OrchestratorLinkAgent {
                 "LAST_UPDATE_USER"=>"",
                 $strSelectMaxLastUpdateTimestamp=>""
             );
-            
+
             $arrayValueTmpl = array(
                 "JOURNAL_SEQ_NO"=>"",
                 "JOURNAL_REG_DATETIME"=>"",
@@ -4157,6 +4231,7 @@ class OrchestratorLinkAgent {
                 "POINT_Y"=>"",
                 "POINT_W"=>"",
                 "POINT_H"=>"",
+                "END_TYPE"=>"",
                 "DISP_SEQ"=>"",
                 "NOTE"=>"",
                 "DISUSE_FLAG"=>"",
@@ -4165,7 +4240,7 @@ class OrchestratorLinkAgent {
                 $strSelectMaxLastUpdateTimestamp=>""
             );
             $arrayValue = $arrayValueTmpl;
-            
+
             $strSelectMode = "SELECT";
             $strWhereDisuseFlag = "('0')";
             $strOrderByArea = " ORDER BY NODE_CLASS_NO ASC";
@@ -4173,7 +4248,7 @@ class OrchestratorLinkAgent {
                 //----更新するため、廃止されているNodeレコードも拾う
                 $strWhereDisuseFlag = "('0')";
                 //更新するため、廃止されているNodeレコードも拾う----
-                
+
                 //----更新用のため、ロック
                 $strSelectMode = "SELECT FOR UPDATE";
                 //更新用のため、ロック----
@@ -4181,7 +4256,7 @@ class OrchestratorLinkAgent {
                 //----インスタンスから参照用取得の為、廃止も拾う
                 $strWhereDisuseFlag = "('0','1')";
                 //インスタンスから参照用取得の為、廃止も拾う----
-                
+
             }
 
             if( $getmode != "" ){
@@ -4201,7 +4276,7 @@ class OrchestratorLinkAgent {
                     "conductor"     => "C_CONDUCTOR_CLASS_MNG",
                     "node"          => "C_NODE_CLASS_MNG",
                     "terminal"      => "C_NODE_TERMINALS_CLASS_MNG"
-                ); 
+                );
             }
 
             $temp_array = array('WHERE'=>"CONDUCTOR_CLASS_NO = :CONDUCTOR_CLASS_NO AND DISUSE_FLAG IN {$strWhereDisuseFlag} {$strOrderByArea}");
@@ -4215,7 +4290,7 @@ class OrchestratorLinkAgent {
                                                 ,$temp_array );
             $sqlUtnBody = $retArray[1];
             $arrayUtnBind = $retArray[2];
-            
+
             $arrayUtnBind['CONDUCTOR_CLASS_NO'] = $intValueForSearchOneMovRecord;
 
             $retArray = singleSQLCoreExecute($objDBCA, $sqlUtnBody, $arrayUtnBind, $strFxName);
@@ -4276,18 +4351,18 @@ class OrchestratorLinkAgent {
         $aryErrMsgBody = array();
         $strErrMsg = "";
         $aryRowOfOperationTable = array();
-        
+
         $strFxName = '([CLASS]'.__CLASS__.',[FUNCTION]'.__FUNCTION__.')';
-        
+
         $strSysErrMsgBody = "";
 
         try{
             $objDBCA = $this->getDBConnectAgent();
             $lc_db_model_ch = $objDBCA->getModelChannel();
-            
+
             $tmpStrSelectPart = makeSelectSQLPartForDateWildColumn($lc_db_model_ch,"LAST_UPDATE_TIMESTAMP","DATETIME",true,true);
             $strSelectMaxLastUpdateTimestamp = "CASE WHEN LAST_UPDATE_TIMESTAMP IS NULL THEN 'VALNULL' ELSE {$tmpStrSelectPart} END LUT4U";
-            
+
             // ----全行および全行中、最後に更新された日時を取得する
             $arrayConfigForSelect = array(
                 "JOURNAL_SEQ_NO"=>"",
@@ -4313,7 +4388,7 @@ class OrchestratorLinkAgent {
                 "LAST_UPDATE_USER"=>"",
                 $strSelectMaxLastUpdateTimestamp=>""
             );
-            
+
             $arrayValueTmpl = array(
                 "JOURNAL_SEQ_NO"=>"",
                 "JOURNAL_REG_DATETIME"=>"",
@@ -4339,7 +4414,7 @@ class OrchestratorLinkAgent {
                 $strSelectMaxLastUpdateTimestamp=>""
             );
             $arrayValue = $arrayValueTmpl;
-            
+
             $strSelectMode = "SELECT";
             $strWhereDisuseFlag = "('0')";
             $strOrderByArea = " ORDER BY TERMINAL_CLASS_NO ASC";
@@ -4347,7 +4422,7 @@ class OrchestratorLinkAgent {
                 //----更新するため、廃止されているNodeレコードも拾う
                 $strWhereDisuseFlag = "('0')";
                 //更新するため、廃止されているNodeレコードも拾う----
-                
+
                 //----更新用のため、ロック
                 $strSelectMode = "SELECT FOR UPDATE";
                 //更新用のため、ロック----
@@ -4355,7 +4430,7 @@ class OrchestratorLinkAgent {
                 //----インスタンスから参照用取得の為、廃止も拾う
                 $strWhereDisuseFlag = "('0','1')";
                 //インスタンスから参照用取得の為、廃止も拾う----
-                
+
             }
             $strWhereTerminaltype = "('1','2')";
             if( $intTerminaltype == "1" )$strWhereTerminaltype = "('1')";
@@ -4367,7 +4442,7 @@ class OrchestratorLinkAgent {
                     "conductor"     => "C_CONDUCTOR_EDIT_CLASS_MNG",
                     "node"          => "C_NODE_EDIT_CLASS_MNG",
                     "terminal"      => "C_NODE_TERMINALS_EDIT_CLASS_MNG"
-                ); 
+                );
 
                 $arrayConfigForSelect["ACCESS_AUTH"]="";
                 $arrayValue["ACCESS_AUTH"]="";
@@ -4378,7 +4453,7 @@ class OrchestratorLinkAgent {
                     "conductor"     => "C_CONDUCTOR_CLASS_MNG",
                     "node"          => "C_NODE_CLASS_MNG",
                     "terminal"      => "C_NODE_TERMINALS_CLASS_MNG"
-                ); 
+                );
             }
 
             $temp_array = array('WHERE'=>"NODE_CLASS_NO = :NODE_CLASS_NO AND TERMINAL_TYPE_ID IN {$strWhereTerminaltype} AND DISUSE_FLAG IN {$strWhereDisuseFlag} {$strOrderByArea}");
@@ -4394,7 +4469,7 @@ class OrchestratorLinkAgent {
 
             $sqlUtnBody = $retArray[1];
             $arrayUtnBind = $retArray[2];
-            
+
             $arrayUtnBind['NODE_CLASS_NO'] = $intValueForSearchOneMovRecord;
 
             $retArray = singleSQLCoreExecute($objDBCA, $sqlUtnBody, $arrayUtnBind, $strFxName);
@@ -4454,6 +4529,7 @@ class OrchestratorLinkAgent {
             $objDBCA = $this->getDBConnectAgent();
             $lc_db_model_ch = $objDBCA->getModelChannel();
             $aryRetBody = $this->getInfoOfOneConductor($fxVarsIntConductorClassId, $fxVarsIntMode,$getmode);
+            $objMTS = $this->getMessageTemplateStorage();
 
             if( $aryRetBody[1] !== null ){
                 // エラーフラグをON
@@ -4517,7 +4593,7 @@ class OrchestratorLinkAgent {
         $arrNodeData = $aryRetBody[5];
 
         //----作業パターンの収集
-        
+
         $aryRetBody = $this->getLivePatternFromMaster();
         if( $aryRetBody[1] !== null ){
             // エラーフラグをON
@@ -4539,12 +4615,17 @@ class OrchestratorLinkAgent {
         $arr_json['conductor']['note']=$arrConductorData['DESCRIPTION'];
         $arr_json['conductor']['id']=$intConductorClassId;
         $arr_json['conductor']['LUT4U']=$arrConductorData['LUT4U'];
-        
-        $arr_json['conductor']['ACCESS_AUTH'] = ""; 
+
+        $arr_json['conductor']['ACCESS_AUTH'] = "";
         if( isset( $arrConductorData['ACCESS_AUTH'] )  == true ){
             $arr_json['conductor']['ACCESS_AUTH']=$arrConductorData['ACCESS_AUTH'];
         }
 
+        #312
+        $arr_json['conductor']['NOTICE_INFO'] = array();
+        if( isset( $arrConductorData['NOTICE_INFO'] )  == true ){
+            $arr_json['conductor']['NOTICE_INFO']= json_decode( $arrConductorData['NOTICE_INFO'] , true );
+        }
 
         $intNodeNumber=0;
         $intTerminalNumber=0;
@@ -4552,38 +4633,50 @@ class OrchestratorLinkAgent {
 
         //NODE2成形
         foreach ($arrNodeData as $key => $value) {
-         
+
             $arr_json[$value['NODE_NAME']]['h']=$value['POINT_H'];
             $arr_json[$value['NODE_NAME']]['id']=$value['NODE_NAME'];
             $arr_json[$value['NODE_NAME']]['terminal']=array();
             //NODE_TYPE置換
             if( $value['NODE_TYPE_ID'] == 1) $arr_json[$value['NODE_NAME']]['type']="start";
-            if( $value['NODE_TYPE_ID'] == 2) $arr_json[$value['NODE_NAME']]['type']="end";    
+            if( $value['NODE_TYPE_ID'] == 2) $arr_json[$value['NODE_NAME']]['type']="end";
             if( $value['NODE_TYPE_ID'] == 3) $arr_json[$value['NODE_NAME']]['type']="movement";
-            if( $value['NODE_TYPE_ID'] == 4) $arr_json[$value['NODE_NAME']]['type']="call";            
+            if( $value['NODE_TYPE_ID'] == 4) $arr_json[$value['NODE_NAME']]['type']="call";
             if( $value['NODE_TYPE_ID'] == 5) $arr_json[$value['NODE_NAME']]['type']="parallel-branch";
             if( $value['NODE_TYPE_ID'] == 6) $arr_json[$value['NODE_NAME']]['type']="conditional-branch";
             if( $value['NODE_TYPE_ID'] == 7) $arr_json[$value['NODE_NAME']]['type']="merge";
             if( $value['NODE_TYPE_ID'] == 8) $arr_json[$value['NODE_NAME']]['type']="pause";
-            if( $value['NODE_TYPE_ID'] == 9) $arr_json[$value['NODE_NAME']]['type']="blank"; 
-            if( $value['NODE_TYPE_ID'] == 10) $arr_json[$value['NODE_NAME']]['type']="call_s"; 
+            if( $value['NODE_TYPE_ID'] == 9) $arr_json[$value['NODE_NAME']]['type']="blank";
+            if( $value['NODE_TYPE_ID'] == 10) $arr_json[$value['NODE_NAME']]['type']="call_s";
+
+            //#587
+            if( $value['NODE_TYPE_ID'] == 11) $arr_json[$value['NODE_NAME']]['type']="status-file-branch";
+
+            //END個別 #467
+            if( $value['NODE_TYPE_ID'] == 2) {
+                if( isset($value['END_TYPE']) === true ){
+                    $arr_json[$value['NODE_NAME']]['END_TYPE']=$value['END_TYPE'];
+                }else{
+                    $arr_json[$value['NODE_NAME']]['END_TYPE']="5";
+                }
+            }
 
             //Movement個別
             if( $value['NODE_TYPE_ID'] == 3) {
                 if( isset( $aryPatternList[$value['PATTERN_ID']] ) ){
                     $arr_json[$value['NODE_NAME']]['PATTERN_ID']=$value['PATTERN_ID'];
                     $arr_json[$value['NODE_NAME']]['ORCHESTRATOR_ID']=$value['ORCHESTRATOR_ID'];
-                    $arr_json[$value['NODE_NAME']]['Name']=$aryPatternList[$value['PATTERN_ID']]['PATTERN_NAME'];                    
+                    $arr_json[$value['NODE_NAME']]['Name']=$aryPatternList[$value['PATTERN_ID']]['PATTERN_NAME'];
                 }else{
                     if( $getmode == "" ){
                         $arr_json[$value['NODE_NAME']]['PATTERN_ID']=$value['PATTERN_ID'];
                         $arr_json[$value['NODE_NAME']]['ORCHESTRATOR_ID']=$value['ORCHESTRATOR_ID'];
-                        $arr_json[$value['NODE_NAME']]['Name']="";  
+                        $arr_json[$value['NODE_NAME']]['Name']="";
                     }else{
                         //廃止済みMovemnt対応
-                        $arr_json[$value['NODE_NAME']]['PATTERN_ID']="-";
+                        $arr_json[$value['NODE_NAME']]['PATTERN_ID']=$value['PATTERN_ID'];#"-";
                         $arr_json[$value['NODE_NAME']]['ORCHESTRATOR_ID']="-";
-                        $arr_json[$value['NODE_NAME']]['Name']="-";                        
+                        $arr_json[$value['NODE_NAME']]['Name']="-";
                     }
 
                 }
@@ -4601,12 +4694,12 @@ class OrchestratorLinkAgent {
                     if( $aryRetBody[1] !== null ){
                         //廃止済みの場合
                         $strConductorName = "";
-                        $arr_json[$value['NODE_NAME']]['CALL_CONDUCTOR_ID']="---";
+                        $arr_json[$value['NODE_NAME']]['CALL_CONDUCTOR_ID']=$value['CONDUCTOR_CALL_CLASS_NO'];#"---";
                     }else{
                         if($aryRetBody[4]['DISUSE_FLAG'] == 1){
                             //廃止済みの場合
                             $strConductorName = "";
-                            $arr_json[$value['NODE_NAME']]['CALL_CONDUCTOR_ID']="---";
+                            $arr_json[$value['NODE_NAME']]['CALL_CONDUCTOR_ID']=$value['CONDUCTOR_CALL_CLASS_NO'];#"---";
                         }else{
                             $strConductorName = $aryRetBody[4]['CONDUCTOR_NAME'];
                         }
@@ -4629,9 +4722,9 @@ class OrchestratorLinkAgent {
                         //廃止済みの場合
                         $strConductorName = "";
                         #$arr_json[$value['NODE_NAME']]['CALL_CONDUCTOR_ID']="---";
-                        $arr_json[$value['NODE_NAME']]['CALL_SYMPHONY_ID']="---";
+                        #$arr_json[$value['NODE_NAME']]['CALL_SYMPHONY_ID']="---";
                     }else{
-                        $strConductorName = $aryRetBody[4]['SYMPHONY_NAME'];    
+                        $strConductorName = $aryRetBody[4]['SYMPHONY_NAME'];
                     }
                 }
                 $arr_json[$value['NODE_NAME']]['SYMPHONY_NAME']=$strConductorName;
@@ -4641,9 +4734,9 @@ class OrchestratorLinkAgent {
             $objDBCA = $this->getDBConnectAgent();
 
             $sql = "SELECT * FROM C_CONDUCTOR_INSTANCE_MNG
-                    WHERE I_CONDUCTOR_CLASS_NO = {$value['CONDUCTOR_CLASS_NO']} 
+                    WHERE I_CONDUCTOR_CLASS_NO = {$value['CONDUCTOR_CLASS_NO']}
                     AND STATUS_ID NOT IN (1,2,3,4)
-                    AND DISUSE_FLAG = 0 
+                    AND DISUSE_FLAG = 0
                     ";
 
             //SQL準備
@@ -4666,9 +4759,9 @@ class OrchestratorLinkAgent {
                                     LEFT JOIN C_CONDUCTOR_INSTANCE_MNG TAB_C ON TAB_B.CONDUCTOR_CLASS_NO = TAB_C.CONDUCTOR_CALLER_NO
                                     WHERE TAB_A.CONDUCTOR_INSTANCE_NO IN
                                     (SELECT CONDUCTOR_INSTANCE_NO FROM C_CONDUCTOR_INSTANCE_MNG WHERE I_CONDUCTOR_CLASS_NO = {$value['CONDUCTOR_CLASS_NO']} )
-                                    AND I_NODE_TYPE_ID IN ( {$value['NODE_TYPE_ID']} ) 
-                                    AND TAB_A.DISUSE_FLAG = 0 
-                                    ";                        
+                                    AND I_NODE_TYPE_ID IN ( {$value['NODE_TYPE_ID']} )
+                                    AND TAB_A.DISUSE_FLAG = 0
+                                    ";
                         }
 
                         if( $value['NODE_TYPE_ID'] == 10  ){
@@ -4677,8 +4770,8 @@ class OrchestratorLinkAgent {
                                 LEFT JOIN C_SYMPHONY_INSTANCE_MNG TAB_C ON TAB_A.CONDUCTOR_INSTANCE_CALL_NO = TAB_C.SYMPHONY_INSTANCE_NO
                                 WHERE TAB_A.CONDUCTOR_INSTANCE_NO IN
                                 (SELECT CONDUCTOR_INSTANCE_NO FROM C_CONDUCTOR_INSTANCE_MNG WHERE I_CONDUCTOR_CLASS_NO = {$value['CONDUCTOR_CLASS_NO']} )
-                                AND I_NODE_TYPE_ID IN ( {$value['NODE_TYPE_ID']} ) 
-                                AND TAB_A.DISUSE_FLAG = 0 
+                                AND I_NODE_TYPE_ID IN ( {$value['NODE_TYPE_ID']} )
+                                AND TAB_A.DISUSE_FLAG = 0
                                 ";
                         }
 
@@ -4693,16 +4786,27 @@ class OrchestratorLinkAgent {
 
                         if( $value['NODE_TYPE_ID'] == 4 && isset( $rows[$value['NODE_CLASS_NO']] ) ==  true ){
                             $arr_json[$value['NODE_NAME']]['CALL_CONDUCTOR_ID']=$rows[$value['NODE_CLASS_NO']]['CONDUCTOR_INSTANCE_CALL_NO'];
+                            //Conductorインスタンス無し場合
+                            if( $arr_json[$value['NODE_NAME']]['CALL_CONDUCTOR_ID'] == "" ){
+                                $arr_json[$value['NODE_NAME']]['CALL_CONDUCTOR_ID']=$value['CONDUCTOR_CALL_CLASS_NO'];
+                            }
+
                             $arr_json[$value['NODE_NAME']]['CONDUCTOR_NAME']=$rows[$value['NODE_CLASS_NO']]['I_PATTERN_NAME'];
                         }
 
                         if( $value['NODE_TYPE_ID'] == 10 && isset( $rows[$value['NODE_CLASS_NO']] ) ==  true ){
                             $arr_json[$value['NODE_NAME']]['CALL_SYMPHONY_ID']=$rows[$value['NODE_CLASS_NO']]['CONDUCTOR_INSTANCE_CALL_NO'];
+
+                            //Symphonyインスタンス無し場合
+                            if( $arr_json[$value['NODE_NAME']]['CALL_SYMPHONY_ID'] == "" ){
+                                $arr_json[$value['NODE_NAME']]['CALL_SYMPHONY_ID']=$value['CONDUCTOR_CALL_CLASS_NO'];
+                            }
+
                             $arr_json[$value['NODE_NAME']]['SYMPHONY_NAME']=$rows[$value['NODE_CLASS_NO']]['I_PATTERN_NAME'];
                         }
                     }
-                }                
-            } 
+                }
+            }
 
             //Movement,call,call_s共通
             if( $value['NODE_TYPE_ID'] == 3 || $value['NODE_TYPE_ID'] == 4 || $value['NODE_TYPE_ID'] == 10 ) {
@@ -4716,7 +4820,7 @@ class OrchestratorLinkAgent {
                     if( $arrayRetBody[1] !== null ){
                         //廃止済みの場合
                         $strOpeName = "";
-                        $arr_json[$value['NODE_NAME']]['OPERATION_NO_IDBH']="-";
+                        $arr_json[$value['NODE_NAME']]['OPERATION_NO_IDBH']=$value['OPERATION_NO_IDBH'];#"-";
                     }else{
                         // オペレーションNoからオペレーションの情報を取得する----
                         $aryRowOfOperationTable = $arrayRetBody[4];
@@ -4733,7 +4837,7 @@ class OrchestratorLinkAgent {
             $arr_json[$value['NODE_NAME']]['w']=$value['POINT_W'];
             $arr_json[$value['NODE_NAME']]['x']=$value['POINT_X'];
             $arr_json[$value['NODE_NAME']]['y']=$value['POINT_Y'];
-            
+
             //NODEカウンタの取得
             $tmpNodeNumber  = intval( str_replace( "node-", "", $value['NODE_NAME'] ));
             if( $intNodeNumber < $tmpNodeNumber )$intNodeNumber=$tmpNodeNumber;
@@ -4741,19 +4845,27 @@ class OrchestratorLinkAgent {
             //TERMINAL整形
             foreach ($value['TERMINAL'] as $tkey => $tval) {
 
-                if($tval['CASE_NO'] != "" )$arr_json[$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['case']=$tval['CASE_NO'];
-                if($tval['LINE_NAME'] != "" )$arr_json[$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['edge']=$tval['LINE_NAME'];  
+                if( $tval['CASE_NO'] != "" ){
+                    $arr_json[$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['case']=$tval['CASE_NO'];
+
+                    //#587
+                    if( $tval['CASE_NO'] == "0" && $value['NODE_TYPE_ID'] == 11 ){
+                        $arr_json[$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['case'] = "else";
+                    }
+
+                }
+                if($tval['LINE_NAME'] != "" )$arr_json[$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['edge']=$tval['LINE_NAME'];
                 $arr_json[$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['id']=$tval['TERMINAL_CLASS_NAME'];
                 $arr_json[$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['targetNode']=$tval['CONNECTED_NODE_NAME'];
                 if( $tval['TERMINAL_TYPE_ID'] == 1) $arr_json[$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['type']="in";
-                if( $tval['TERMINAL_TYPE_ID'] == 2) $arr_json[$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['type']="out"; 
+                if( $tval['TERMINAL_TYPE_ID'] == 2) $arr_json[$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['type']="out";
 
                 if($tval['CONDITIONAL_ID'] != null ){
                     $arrConditionalID = explode(',', $tval['CONDITIONAL_ID']);
                     foreach ($arrConditionalID as $tckey => $tcvalue) {
                         $arr_json[$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['condition'][]=$tcvalue;
                     }
-                   
+
                 }
 
                 if($tval['POINT_X'] != "" )$arr_json[$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['x']=$tval['POINT_X'];
@@ -4771,9 +4883,9 @@ class OrchestratorLinkAgent {
                     $arr_json[$tval['LINE_NAME']]['inNode']=$tval['CONNECTED_NODE_NAME'];
                     $arr_json[$tval['LINE_NAME']]['outTerminal']=$tval['TERMINAL_CLASS_NAME'];
                 }
-                ksort($arr_json[$tval['LINE_NAME']]);    
+                ksort($arr_json[$tval['LINE_NAME']]);
 
-           
+
             //TERMINAL、LINEカウンタの取得
             $tmpTerminalNumber  = intval( str_replace( "terminal-", "", $tval['TERMINAL_CLASS_NAME'] ));
             if( $intTerminalNumber < $tmpTerminalNumber )$intTerminalNumber=$tmpTerminalNumber;
@@ -4808,18 +4920,18 @@ class OrchestratorLinkAgent {
         $aryErrMsgBody = array();
         $strErrMsg = "";
         $strErrorBuf = "";
-        
+
         $strFxName = '([CLASS]'.__CLASS__.',[FUNCTION]'.__FUNCTION__.')';
-        
+
         // 各種ローカル定数を定義
         $intFocusCorrectSeq = 0;
         $aryUnStartedMovement = array();
         $aryRunningMovement = array();
         $rowEndedMovement = array();
         $aryAbortedMovement = array();
-        
+
         $rowOfFocusMovement = null;
-        
+
         try{
 
             // 楽章の数を取得
@@ -4842,6 +4954,7 @@ class OrchestratorLinkAgent {
                         break;
                     case "9":  // 正常終了
                     case "14": // SKIP終了
+                    case "15": // 警告終了
                         $rowEndedMovement[] = $rowOfMovement;
                         break;
                     case "6": // 異常終了
@@ -4853,16 +4966,16 @@ class OrchestratorLinkAgent {
                         break;
                 }
             }
-            
+
             // 開始していない楽章の数を取得
             $intUnstartedMovementLength = count($aryUnStartedMovement);
 
             // 中断された楽章の数を取得
             $intAbortedMovementLength = count($aryAbortedMovement);
-            
+
             // 終了した楽章の数を取得
             $intEndedMovementLength = count($rowEndedMovement);
-            
+
             if( $intUnstartedMovementLength==$intMovementLength ){
                 //----まだ第1楽章も始まっていない場合
                 $intFocusMovementSeq = 0;
@@ -4925,19 +5038,19 @@ class OrchestratorLinkAgent {
         $aryErrMsgBody = array();
         $strErrMsg = "";
         $aryRowOfOperationTable = array();
-        
+
         $strFxName = '([CLASS]'.__CLASS__.',[FUNCTION]'.__FUNCTION__.')';
-        
+
         $strSysErrMsgBody = "";
         //
         try{
             $objDBCA = $this->getDBConnectAgent();
             $lc_db_model_ch = $objDBCA->getModelChannel();
-            $obj = new RoleBasedAccessControl($objDBCA);     
+            $obj = new RoleBasedAccessControl($objDBCA);
 
             $tmpStrSelectPart = makeSelectSQLPartForDateWildColumn($lc_db_model_ch,"LAST_UPDATE_TIMESTAMP","DATETIME",true,true);
             $strSelectMaxLastUpdateTimestamp = "CASE WHEN LAST_UPDATE_TIMESTAMP IS NULL THEN 'VALNULL' ELSE {$tmpStrSelectPart} END LUT4U";
-            
+
             // ----全行および全行中、最後に更新された日時を取得する
             $arrayConfigForSelect = array(
                 "JOURNAL_SEQ_NO"=>"",
@@ -4954,7 +5067,7 @@ class OrchestratorLinkAgent {
                 "LAST_UPDATE_USER"=>"",
                 $strSelectMaxLastUpdateTimestamp=>""
             );
-            
+
             $arrayValueTmpl = array(
                 "JOURNAL_SEQ_NO"=>"",
                 "JOURNAL_ACTION_CLASS"=>"",
@@ -4971,12 +5084,12 @@ class OrchestratorLinkAgent {
                 $strSelectMaxLastUpdateTimestamp=>""
             );
             $arrayValue = $arrayValueTmpl;
-            
+
             $strSelectMode = "SELECT";
             $strSelectForUpdateLock = "";
-            
+
             $temp_array = array('WHERE'=>" DISUSE_FLAG IN ('0') {$strSelectForUpdateLock}");
-            
+
             $retArray = makeSQLForUtnTableUpdate($lc_db_model_ch
                                                 ,$strSelectMode
                                                 ,"OPERATION_NO_UAPK"
@@ -4987,7 +5100,7 @@ class OrchestratorLinkAgent {
                                                 ,$temp_array );
             $sqlUtnBody = $retArray[1];
             $arrayUtnBind = $retArray[2];
-            
+
             $retArray = singleSQLCoreExecute($objDBCA, $sqlUtnBody, $arrayUtnBind, $strFxName);
             if( $retArray[0]!==true ){
                 $intErrorType = $retArray[1];
@@ -4998,13 +5111,13 @@ class OrchestratorLinkAgent {
                 throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
             }
             $objQueryUtn =& $retArray[3];
-            
+
             //----発見行だけループ
             $rows = array();
             while ( $row = $objQueryUtn->resultFetch() ){
 
                 $user_id = $g['login_id'];
-                $ret  = $obj->getAccountInfo($user_id); 
+                $ret  = $obj->getAccountInfo($user_id);
                 list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
 
                 if($ret === false) {
@@ -5015,7 +5128,7 @@ class OrchestratorLinkAgent {
                 }
             }
             //発見行だけループ----
-            
+
             unset($objQueryUtn);
             unset($retArray);
             $boolRet = true;
@@ -5044,9 +5157,9 @@ class OrchestratorLinkAgent {
         $aryErrMsgBody = array();
         $strErrMsg = "";
         $aryRowOfOperationTable = array();
-        
+
         $strFxName = '([CLASS]'.__CLASS__.',[FUNCTION]'.__FUNCTION__.')';
-        
+
         $strSysErrMsgBody = "";
         //
         try{
@@ -5056,7 +5169,7 @@ class OrchestratorLinkAgent {
 
             $tmpStrSelectPart = makeSelectSQLPartForDateWildColumn($lc_db_model_ch,"LAST_UPDATE_TIMESTAMP","DATETIME",true,true);
             $strSelectMaxLastUpdateTimestamp = "CASE WHEN LAST_UPDATE_TIMESTAMP IS NULL THEN 'VALNULL' ELSE {$tmpStrSelectPart} END LUT4U";
-            
+
             // ----全行および全行中、最後に更新された日時を取得する
             $arrayConfigForSelect = array(
                 "JOURNAL_SEQ_NO"=>"",
@@ -5072,7 +5185,7 @@ class OrchestratorLinkAgent {
                 "LAST_UPDATE_USER"=>"",
                 $strSelectMaxLastUpdateTimestamp=>""
             );
-            
+
             $arrayValueTmpl = array(
                 "JOURNAL_SEQ_NO"=>"",
                 "JOURNAL_ACTION_CLASS"=>"",
@@ -5088,12 +5201,12 @@ class OrchestratorLinkAgent {
                 $strSelectMaxLastUpdateTimestamp=>""
             );
             $arrayValue = $arrayValueTmpl;
-            
+
             $strSelectMode = "SELECT";
             $strSelectForUpdateLock = "";
-            
+
             $temp_array = array('WHERE'=>" DISUSE_FLAG IN ('0') {$strSelectForUpdateLock}");
-            
+
             $retArray = makeSQLForUtnTableUpdate($lc_db_model_ch
                                                 ,$strSelectMode
                                                 ,"CONDUCTOR_CLASS_NO"
@@ -5104,7 +5217,7 @@ class OrchestratorLinkAgent {
                                                 ,$temp_array );
             $sqlUtnBody = $retArray[1];
             $arrayUtnBind = $retArray[2];
-            
+
             $retArray = singleSQLCoreExecute($objDBCA, $sqlUtnBody, $arrayUtnBind, $strFxName);
             if( $retArray[0]!==true ){
                 $intErrorType = $retArray[1];
@@ -5115,13 +5228,13 @@ class OrchestratorLinkAgent {
                 throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
             }
             $objQueryUtn =& $retArray[3];
-            
+
             //----発見行だけループ
             $rows = array();
             while ( $row = $objQueryUtn->resultFetch() ){
 
                 $user_id = $g['login_id'];
-                $ret  = $obj->getAccountInfo($user_id); 
+                $ret  = $obj->getAccountInfo($user_id);
                 list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
 
                 if($ret === false) {
@@ -5129,10 +5242,10 @@ class OrchestratorLinkAgent {
                     if($permission === true) {
                         $rows[] = $row;
                     }
-                }       
+                }
             }
             //発見行だけループ----
-            
+
             unset($objQueryUtn);
             unset($retArray);
             $boolRet = true;
@@ -5159,18 +5272,18 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
     $strDetailCode = "000";
     $intConductorClassId = '';
     $strExpectedErrMsgBodyForUI = "";
-    
+
     $intControlDebugLevel01=250;
-    
+
     $objMTS = $g['objMTS'];
     $objDBCA = $g['objDBCA'];
-    
+
     $intErrorType = null;
     $intDetailType = null;
     $aryErrMsgBody = array();
-   
+
     $strFxName = '([FUNCTION]'.__FUNCTION__.')';
-    
+
     $aryConfigForSymClassIUD = array(
         "JOURNAL_SEQ_NO"=>"",
         "JOURNAL_ACTION_CLASS"=>"",
@@ -5178,13 +5291,14 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
         "CONDUCTOR_CLASS_NO"=>"",
         "CONDUCTOR_NAME"=>"",
         "DESCRIPTION"=>"",
+        "NOTICE_INFO"=>"",
         "ACCESS_AUTH"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
         "LAST_UPDATE_TIMESTAMP"=>"",
         "LAST_UPDATE_USER"=>""
     );
-    
+
     $arySymClassValueTmpl = array(
         "JOURNAL_SEQ_NO"=>"",
         "JOURNAL_ACTION_CLASS"=>"",
@@ -5192,6 +5306,7 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
         "CONDUCTOR_CLASS_NO"=>"",
         "CONDUCTOR_NAME"=>"",
         "DESCRIPTION"=>"",
+        "NOTICE_INFO"=>"",
         "ACCESS_AUTH"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
@@ -5218,13 +5333,14 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
         "POINT_Y"=>"",
         "POINT_W"=>"",
         "POINT_H"=>"",
+        "END_TYPE"=>"",
         "DISP_SEQ"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
         "LAST_UPDATE_TIMESTAMP"=>"",
         "LAST_UPDATE_USER"=>""
-    ); 
-    
+    );
+
     $aryNodeClassValueTmpl = array(
         "JOURNAL_SEQ_NO"=>"",
         "JOURNAL_REG_DATETIME"=>"",
@@ -5244,13 +5360,14 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
         "POINT_Y"=>"",
         "POINT_W"=>"",
         "POINT_H"=>"",
+        "END_TYPE"=>"",
         "DISP_SEQ"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
         "LAST_UPDATE_TIMESTAMP"=>"",
         "LAST_UPDATE_USER"=>""
     );
-    
+
 
     $arrayConfigForTermClassIUD = array(
         "JOURNAL_SEQ_NO"=>"",
@@ -5274,8 +5391,8 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
         "DISUSE_FLAG"=>"",
         "LAST_UPDATE_TIMESTAMP"=>"",
         "LAST_UPDATE_USER"=>""
-    ); 
-    
+    );
+
     $aryTermClassValueTmpl = array(
         "JOURNAL_SEQ_NO"=>"",
         "JOURNAL_REG_DATETIME"=>"",
@@ -5302,7 +5419,7 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
 
     $strSysErrMsgBody = "";
     $boolInTransactionFlag = false;
- 
+
     #$getmode= 1;
     //Conductor対象テーブル先
     if( $getmode != "" ){
@@ -5324,7 +5441,7 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
             "conductor"     => "C_CONDUCTOR_CLASS_MNG",
             "node"          => "C_NODE_CLASS_MNG",
             "terminal"      => "C_NODE_TERMINALS_CLASS_MNG"
-        ); 
+        );
     }
 
     try{
@@ -5336,13 +5453,13 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
         $aryExecuteData = $fxVarsAryReceptData;
         $aryNodeData = $this->nodeDateDecodeForedit($fxVarsStrSortedData);
         #'start','end','movement','call','parallel-branch','conditional-branch','merge','pause','blank'
-        
+
         $boolInTransactionFlag = true;
 
 
 
         // ---CONCUCTOR、NODE、TERMINALクラスのCUR/JNLの、シーケンスを取得する（デッドロックを防ぐために、値昇順序））
-           
+
         // ----NODE-CLASS-シーケンスを掴む
         $retArray = getSequenceLockInTrz($arrTableName['node'].'_JSQ','A_SEQUENCE');
 
@@ -5353,7 +5470,7 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
             //
             throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
         }
-           
+
         $retArray = getSequenceLockInTrz($arrTableName['node'].'_RIC','A_SEQUENCE');
 
         if( $retArray[1] != 0 ){
@@ -5363,7 +5480,7 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
             //
             throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
         }
-        
+
         // ----TERMINAL-CLASS-シーケンスを掴む
         $retArray = getSequenceLockInTrz($arrTableName['terminal'].'_JSQ','A_SEQUENCE');
 
@@ -5387,7 +5504,7 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
 
         // ----SYM-CLASS-シーケンスを掴む
         $retArray = getSequenceLockInTrz($arrTableName['conductor'].'_JSQ','A_SEQUENCE');
-        
+
         if( $retArray[1] != 0 ){
             // エラーフラグをON
             // 例外処理へ
@@ -5408,15 +5525,15 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
         // -SYM-CLASS-シーケンスを掴む----
 
         //----CONCUCTOR、NODE、TERMINALクラスのCUR/JNLの、シーケンスを取得する（デッドロックを防ぐために、値昇順序））----
-        
+
         // ----Conductorを登録
 
         if( $fxVarsIntConductorClassId == "" ){
 
             $register_tgt_row = $arySymClassValueTmpl;
-            
+
             $retArray = getSequenceValueFromTable($arrTableName['conductor'].'_RIC', 'A_SEQUENCE', FALSE );
-            
+
             if( $retArray[1] != 0 ){
                 // エラーフラグをON
                 // 例外処理へ
@@ -5431,11 +5548,28 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
             $varConductorClassNo = $varRISeq;
             $register_tgt_row['CONDUCTOR_CLASS_NO'] = $varRISeq;
             $register_tgt_row['CONDUCTOR_NAME']     = $aryExecuteData['conductor_name'];
-            $register_tgt_row['DESCRIPTION']       = $aryExecuteData['note'];
+            $register_tgt_row['DESCRIPTION'] = "";
+            if(isset($aryExecuteData['note'])){
+              $register_tgt_row['DESCRIPTION']       = $aryExecuteData['note'];
+            }
             $register_tgt_row['DISUSE_FLAG']       = '0';
             $register_tgt_row['LAST_UPDATE_USER']  = $g['login_id'];
 
-            $register_tgt_row['ACCESS_AUTH'] = ""; 
+            #312 
+            $register_tgt_row['NOTICE_INFO'] = "";
+            if(isset($aryExecuteData['NOTICE_INFO'])){
+                //通知チェック,廃止除外
+                $retArray = $this->getNoticeInfo( implode( ",", array_keys($aryExecuteData['NOTICE_INFO']) ) );
+                $tmpnoticeIDs = array_keys($retArray[2]);
+                if( $tmpnoticeIDs !== array() ){
+                    foreach ($tmpnoticeIDs as $tmpnoticeID ) {
+                        unset($aryExecuteData['NOTICE_INFO'][$tmpnoticeID]);
+                    }
+                }
+              $register_tgt_row['NOTICE_INFO']       = json_encode( $aryExecuteData['NOTICE_INFO'] );
+            }
+
+            $register_tgt_row['ACCESS_AUTH'] = "";
 
             if( isset( $aryExecuteData['ACCESS_AUTH'] ) === true ){
                 $register_tgt_row['ACCESS_AUTH']=$aryExecuteData['ACCESS_AUTH'];
@@ -5456,30 +5590,45 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
             $aryRetBody = $this->getInfoOfOneConductor($fxVarsIntConductorClassId, 0 ,$getmode);
 
             $aryRowOfSymClassTable=$aryRetBody[4];
-            
-            $fxVarsStrLT4UBody = 'T_'.$aryRetBody[4]['LUT4U'];
-            
+
             //追い越しチェック　
-            if( $fxVarsStrLT4UBody != 'T_'.$aryRowOfSymClassTable['LUT4U'] ){
+            if( 'T_'.$aryRetBody[4]['LUT4U'] != 'T_'.$aryRowOfSymClassTable['LUT4U'] ){
                 // エラーフラグをON
                 // 例外処理へ
                 $strErrStepIdInFx="00001200";
                 $intErrorType = 2;
-                
+
                 $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-5720305");
-                
-                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );        
+
+                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
             }
-            
+
 
             $varConductorClassNo = $fxVarsIntConductorClassId;
             $register_tgt_row['CONDUCTOR_CLASS_NO'] = $fxVarsIntConductorClassId;
             $register_tgt_row['CONDUCTOR_NAME']     = $aryExecuteData['conductor_name'];
-            $register_tgt_row['DESCRIPTION']       = $aryExecuteData['note'];
+            $register_tgt_row['DESCRIPTION'] = "";
+            if(isset($aryExecuteData['note'])){
+              $register_tgt_row['DESCRIPTION']       = $aryExecuteData['note'];
+            }
             $register_tgt_row['DISUSE_FLAG']       = '0';
             $register_tgt_row['LAST_UPDATE_USER']  = $g['login_id'];
 
-            $register_tgt_row['ACCESS_AUTH'] = ""; 
+            #312 
+            $register_tgt_row['NOTICE_INFO'] = "";
+            if(isset($aryExecuteData['NOTICE_INFO'])){
+                //通知チェック,廃止除外
+                $retArray = $this->getNoticeInfo( implode( ",", array_keys($aryExecuteData['NOTICE_INFO']) ) );
+                $tmpnoticeIDs = array_keys($retArray[2]);
+                if( $tmpnoticeIDs !== array() ){
+                    foreach ($tmpnoticeIDs as $tmpnoticeID ) {
+                        unset($aryExecuteData['NOTICE_INFO'][$tmpnoticeID]);
+                    }
+                }
+                $register_tgt_row['NOTICE_INFO']       = json_encode( $aryExecuteData['NOTICE_INFO'] );
+            }
+
+            $register_tgt_row['ACCESS_AUTH'] = "";
             if( isset( $aryExecuteData['ACCESS_AUTH'] )  == true ){
                 $register_tgt_row['ACCESS_AUTH']=$aryExecuteData['ACCESS_AUTH'];
             }
@@ -5515,13 +5664,13 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
 
         $sqlUtnBody = $retArray[1];
         $arrayUtnBind = $retArray[2];
-        
+
         $sqlJnlBody = $retArray[3];
         $arrayJnlBind = $retArray[4];
-        
+
         // ----履歴シーケンス払い出し
         $retArray = getSequenceValueFromTable($arrTableName['conductor'].'_JSQ', 'A_SEQUENCE', FALSE );
-    
+
         if( $retArray[1] != 0 ){
             // エラーフラグをON
             // 例外処理へ
@@ -5534,7 +5683,7 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
             $arrayJnlBind['JOURNAL_SEQ_NO'] = $varJSeq;
         }
         // 履歴シーケンス払い出し----
-        
+
         $retArray01 = singleSQLCoreExecute($objDBCA, $sqlUtnBody, $arrayUtnBind, $strFxName);
         $retArray02 = singleSQLCoreExecute($objDBCA, $sqlJnlBody, $arrayJnlBind, $strFxName);
 
@@ -5565,7 +5714,7 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
             $tmpDataSet = array();
             $tmpForBind = array();
             $tmpForBind['CONDUCTOR_CLASS_NO']=$fxVarsIntConductorClassId;
-            
+
             $tmpRetBody = singleSQLExecuteAgent($strQuery, $tmpForBind, $strFxName);
 
             if( $tmpRetBody[0] === true ){
@@ -5598,7 +5747,7 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
                     "DISUSE_FLAG"=>"",
                     "LAST_UPDATE_TIMESTAMP"=>"",
                     "LAST_UPDATE_USER"=>""
-                ); 
+                );
 
                 $arrayConfigForIUD = $tmparrayConfigForNodeClassIUD_2;
                 $tgtSource_row = $register_tgt_row;
@@ -5611,7 +5760,7 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
                                                     ,$arrTableName['node']."_JNL"
                                                     ,$arrayConfigForIUD
                                                     ,$tgtSource_row);
-                
+
 
                 if( $retArray[0] === false ){
                     // エラーフラグをON
@@ -5620,13 +5769,13 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
                     //
                     throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
                 }
-                
+
                 $sqlUtnBody = $retArray[1];
                 $arrayUtnBind = $retArray[2];
-                
+
                 $sqlJnlBody = $retArray[3];
                 $arrayJnlBind = $retArray[4];
-                
+
                 // ----履歴シーケンス払い出し
                 $retArray = getSequenceValueFromTable($arrTableName['node'].'_JSQ', 'A_SEQUENCE', FALSE );
 
@@ -5641,7 +5790,7 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
                     $arrayJnlBind['JOURNAL_SEQ_NO'] = $varJSeq;
                 }
                 // 履歴シーケンス払い出し----
-                
+
                 $retArray01 = singleSQLCoreExecute($objDBCA, $sqlUtnBody, $arrayUtnBind, $strFxName);
                 $retArray02 = singleSQLCoreExecute($objDBCA, $sqlJnlBody, $arrayJnlBind, $strFxName);
 
@@ -5665,7 +5814,7 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
                                 ."WHERE "
                                 ." DISUSE_FLAG IN ('0') "
                                 ."AND CONDUCTOR_CLASS_NO = :CONDUCTOR_CLASS_NO "
-                                ."AND NODE_CLASS_NO = :NODE_CLASS_NO " 
+                                ."AND NODE_CLASS_NO = :NODE_CLASS_NO "
                                 ."ORDER BY "
                                 ."NODE_CLASS_NO"
                                 ."";
@@ -5708,7 +5857,7 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
                             "DISUSE_FLAG"=>"",
                             "LAST_UPDATE_TIMESTAMP"=>"",
                             "LAST_UPDATE_USER"=>""
-                        ); 
+                        );
 
                         $arrayConfigForIUD = $arrayConfigForTermClassIUD2;
                         $tgtSource_row = $register_tgt_row;
@@ -5721,7 +5870,7 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
                                                             ,$arrTableName['terminal']."_JNL"
                                                             ,$arrayConfigForIUD
                                                             ,$tgtSource_row);
-                        
+
 
                         if( $retArray[0] === false ){
                             // エラーフラグをON
@@ -5730,13 +5879,13 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
                             //
                             throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
                         }
-                        
+
                         $sqlUtnBody = $retArray[1];
                         $arrayUtnBind = $retArray[2];
-                        
+
                         $sqlJnlBody = $retArray[3];
                         $arrayJnlBind = $retArray[4];
-                        
+
                         // ----履歴シーケンス払い出し
                         $retArray = getSequenceValueFromTable($arrTableName['terminal'].'_JSQ', 'A_SEQUENCE', FALSE );
 
@@ -5751,11 +5900,11 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
                             $arrayJnlBind['JOURNAL_SEQ_NO'] = $varJSeq;
                         }
                         // 履歴シーケンス払い出し----
-                        
+
                         $retArray01 = singleSQLCoreExecute($objDBCA, $sqlUtnBody, $arrayUtnBind, $strFxName);
                         $retArray02 = singleSQLCoreExecute($objDBCA, $sqlJnlBody, $arrayJnlBind, $strFxName);
-                        
- 
+
+
                         if( $retArray01[0] !== true || $retArray02[0] !== true ){
                             // エラーフラグをON
                             // 例外処理へ
@@ -5774,11 +5923,10 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
 
         // ----nodeを登録
         $aryMovement  = $aryNodeData;
-
         foreach($aryMovement as $aryDataForMovement){
             // ----ムーブメントを更新
             $register_tgt_row = $aryNodeClassValueTmpl;
-            
+
             $retArray = getSequenceValueFromTable($arrTableName['node'].'_RIC', 'A_SEQUENCE', FALSE );
 
             if( $retArray[1] != 0 ){
@@ -5799,7 +5947,7 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
             {
                 $tmpStrOpeNoIDBH = $aryDataForMovement['OPERATION_NO_IDBH'];
                 $tmpStrPatternID = $aryDataForMovement['PATTERN_ID'];
- 
+
                 $tmpAryRetBody = $this->getInfoOfOneOperation($tmpStrOpeNoIDBH,1);
 
                 if( $tmpAryRetBody[1] !== null ){
@@ -5836,7 +5984,7 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
             //廃止済みMovement対応
             if( $aryDataForMovement['type'] == "movement" ){
                 if (  ( $aryDataForMovement['ORCHESTRATOR_ID'] == "" || !is_numeric( $aryDataForMovement['ORCHESTRATOR_ID'] ) ) &&
-                      ( $aryDataForMovement['PATTERN_ID'] == "" || !is_numeric( $aryDataForMovement['PATTERN_ID'] ) ) 
+                      ( $aryDataForMovement['PATTERN_ID'] == "" || !is_numeric( $aryDataForMovement['PATTERN_ID'] ) )
                 ){
                         $intErrorType = 2;
                         $strErrStepIdInFx="00002800";
@@ -5844,7 +5992,6 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
                         throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
                 }
             }
-
             //CALL呼び出し値有無
             if( $aryDataForMovement['type'] == "call" && ( $aryDataForMovement['CALL_CONDUCTOR_ID'] == "" || !is_numeric( $aryDataForMovement['CALL_CONDUCTOR_ID'] ) ) ){
                     $intErrorType = 2;
@@ -5875,7 +6022,7 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
             $register_tgt_row = array();
             $register_tgt_row['NODE_CLASS_NO']     = $varRISeq;
             $register_tgt_row['NODE_NAME']         = $aryDataForMovement['id'];
-            $register_tgt_row['NODE_TYPE_ID']      = $aryDataForMovement['type'];            
+            $register_tgt_row['NODE_TYPE_ID']      = $aryDataForMovement['type'];
             $register_tgt_row['ORCHESTRATOR_ID']   = $aryDataForMovement['ORCHESTRATOR_ID'];
             $register_tgt_row['PATTERN_ID']        = $aryDataForMovement['PATTERN_ID'];
 
@@ -5884,8 +6031,8 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
 
             $register_tgt_row['DESCRIPTION']       = $aryDataForMovement['note'];
             $register_tgt_row['CONDUCTOR_CLASS_NO'] = $varConductorClassNo;
-            $register_tgt_row['OPERATION_NO_IDBH'] = $aryDataForMovement['OPERATION_NO_IDBH'];         
-            $register_tgt_row['SKIP_FLAG'] = $aryDataForMovement['SKIP_FLAG'];         
+            $register_tgt_row['OPERATION_NO_IDBH'] = $aryDataForMovement['OPERATION_NO_IDBH'];
+            $register_tgt_row['SKIP_FLAG'] = $aryDataForMovement['SKIP_FLAG'];
             $register_tgt_row['NEXT_PENDING_FLAG'] = $aryDataForMovement['NEXT_PENDING_FLAG'];
             $register_tgt_row['DISUSE_FLAG']       = '0';
             $register_tgt_row['LAST_UPDATE_USER']  = $g['login_id'];
@@ -5894,20 +6041,35 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
             $register_tgt_row['POINT_Y']   = $aryDataForMovement['y'];
             $register_tgt_row['POINT_W']   = $aryDataForMovement['w'];
             $register_tgt_row['POINT_H']   = $aryDataForMovement['h'];
-            
+
+            //ENDタイプ設定 #467 
+            if( $aryDataForMovement['type'] == "end" ){
+                if( isset( $aryDataForMovement['END_TYPE'] ) === true ){
+                    $register_tgt_row['END_TYPE'] = $aryDataForMovement['END_TYPE'];
+                    if( $register_tgt_row['END_TYPE'] == "" ){
+                        $register_tgt_row['END_TYPE'] = "5";
+                    }
+                }else{
+                    $register_tgt_row['END_TYPE'] = "5";
+                }
+            }
+
             #変換
             if( $aryDataForMovement['type'] == "start" )            $register_tgt_row['NODE_TYPE_ID']=1;
-            if( $aryDataForMovement['type'] == "end")               $register_tgt_row['NODE_TYPE_ID']=2;    
+            if( $aryDataForMovement['type'] == "end")               $register_tgt_row['NODE_TYPE_ID']=2;
             if( $aryDataForMovement['type'] == "movement")          $register_tgt_row['NODE_TYPE_ID']=3;
-            if( $aryDataForMovement['type'] == "call")              $register_tgt_row['NODE_TYPE_ID']=4;            
+            if( $aryDataForMovement['type'] == "call")              $register_tgt_row['NODE_TYPE_ID']=4;
             if( $aryDataForMovement['type'] == "parallel-branch")   $register_tgt_row['NODE_TYPE_ID']=5;
             if( $aryDataForMovement['type'] == "conditional-branch")$register_tgt_row['NODE_TYPE_ID']=6;
             if( $aryDataForMovement['type'] == "merge")             $register_tgt_row['NODE_TYPE_ID']=7;
             if( $aryDataForMovement['type'] == "pause")             $register_tgt_row['NODE_TYPE_ID']=8;
-            if( $aryDataForMovement['type'] == "blank")             $register_tgt_row['NODE_TYPE_ID']=9; 
-            if( $aryDataForMovement['type'] == "call_s")             $register_tgt_row['NODE_TYPE_ID']=10; 
+            if( $aryDataForMovement['type'] == "blank")             $register_tgt_row['NODE_TYPE_ID']=9;
+            if( $aryDataForMovement['type'] == "call_s")             $register_tgt_row['NODE_TYPE_ID']=10;
 
-            $register_tgt_row['ACCESS_AUTH'] = ""; 
+            //#587
+            if( $aryDataForMovement['type'] == "status-file-branch")$register_tgt_row['NODE_TYPE_ID']=11;
+            
+            $register_tgt_row['ACCESS_AUTH'] = "";
             if( isset( $aryExecuteData['ACCESS_AUTH'] ) === true ){
                 $register_tgt_row['ACCESS_AUTH']=$aryExecuteData['ACCESS_AUTH'];
             }
@@ -5917,7 +6079,6 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
 
                 $register_tgt_row['ACCESS_AUTH'] = $g['__TOP_ACCESS_AUTH__'];
             }
-
 
             $arrayConfigForIUD = $arrayConfigForNodeClassIUD;
             $tgtSource_row = $register_tgt_row;
@@ -5938,13 +6099,13 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
                 //
                 throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
             }
-            
+
             $sqlUtnBody = $retArray[1];
             $arrayUtnBind = $retArray[2];
-            
+
             $sqlJnlBody = $retArray[3];
             $arrayJnlBind = $retArray[4];
-            
+
             // ----履歴シーケンス払い出し
             $retArray = getSequenceValueFromTable($arrTableName['node'].'_JSQ', 'A_SEQUENCE', FALSE );
 
@@ -5960,7 +6121,7 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
                 $arrayJnlBind['JOURNAL_SEQ_NO'] = $varJSeq;
             }
             // 履歴シーケンス払い出し----
-            
+
             $retArray01 = singleSQLCoreExecute($objDBCA, $sqlUtnBody, $arrayUtnBind, $strFxName);
             $retArray02 = singleSQLCoreExecute($objDBCA, $sqlJnlBody, $arrayJnlBind, $strFxName);
 
@@ -5972,9 +6133,9 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
                 throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
             }
             unset($retArray01);
-            unset($retArray02);      
-            
-            
+            unset($retArray02);
+
+
             // ムーブメントを更新----
 
             // ----TERMINALを登録
@@ -6004,8 +6165,8 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
                     $register_tgt_row = array();
                     $register_tgt_row['TERMINAL_CLASS_NO']     = $varRISeq;
                     $register_tgt_row['TERMINAL_CLASS_NAME']   = $aryDataForTerminal['id'];
-                    $register_tgt_row['TERMINAL_TYPE_ID']      = $aryDataForTerminal['type'];   
-                    $register_tgt_row['NODE_CLASS_NO']         = $varNodeClassID;         
+                    $register_tgt_row['TERMINAL_TYPE_ID']      = $aryDataForTerminal['type'];
+                    $register_tgt_row['NODE_CLASS_NO']         = $varNodeClassID;
                     $register_tgt_row['CONDUCTOR_CLASS_NO']     = $varConductorClassNo;
                     $register_tgt_row['CONNECTED_NODE_NAME']   = $aryDataForTerminal['targetNode'];
                     $register_tgt_row['LINE_NAME']             = $aryDataForTerminal['edge'];
@@ -6025,7 +6186,12 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
                     }
 
 
-                    $register_tgt_row['CASE_NO']               = $aryDataForTerminal['case'];         
+                    $register_tgt_row['CASE_NO']               = $aryDataForTerminal['case'];
+
+                    // #587
+                    if( $aryDataForTerminal['case'] == "else" && $aryDataForMovement['type'] == "status-file-branch" ){
+                        $register_tgt_row['CASE_NO'] = 0 ;
+                    }
 
                     $register_tgt_row['DISUSE_FLAG']       = '0';
                     $register_tgt_row['LAST_UPDATE_USER']  = $g['login_id'];
@@ -6036,7 +6202,7 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
                     if( $aryDataForTerminal['type'] == "in" )$register_tgt_row['TERMINAL_TYPE_ID']=1;
                     if( $aryDataForTerminal['type'] == "out")$register_tgt_row['TERMINAL_TYPE_ID']=2;
 
-                    $register_tgt_row['ACCESS_AUTH'] = ""; 
+                    $register_tgt_row['ACCESS_AUTH'] = "";
                     if( isset( $aryExecuteData['ACCESS_AUTH'] )  == true ){
                         $register_tgt_row['ACCESS_AUTH']=$aryExecuteData['ACCESS_AUTH'];
                     }
@@ -6051,7 +6217,7 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
                     $arrayConfigForIUD = $arrayConfigForTermClassIUD;
                     $tgtSource_row = $register_tgt_row;
                     $sqlType = "INSERT";
-                    
+
                     $retArray = makeSQLForUtnTableUpdate($lc_db_model_ch
                                                         ,$sqlType
                                                         ,"TERMINAL_CLASS_NO"
@@ -6067,10 +6233,10 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
                         //
                         throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
                     }
-                    
+
                     $sqlUtnBody = $retArray[1];
                     $arrayUtnBind = $retArray[2];
-                    
+
                     $sqlJnlBody = $retArray[3];
                     $arrayJnlBind = $retArray[4];
 
@@ -6101,7 +6267,7 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
                         throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
                     }
                     unset($retArray01);
-                    unset($retArray02);   
+                    unset($retArray02);
 
                 }
             }
@@ -6123,7 +6289,7 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
                 $tmpMsgBody = $objMTS->getSomeMessage("ITABASEH-ERR-101030");
             }
             web_log($tmpMsgBody);
-            
+
             // トランザクション終了
             if( $objDBCA->transactionExit() === true ){
                 $tmpMsgBody = $objMTS->getSomeMessage("ITABASEH-STD-102020");
@@ -6135,7 +6301,7 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
             unset($tmpMsgBody);
         }
         //トランザクション中のエラーの場合----
-        
+
         // エラーフラグをON
         if( $intErrorType === null ) $intErrorType = 500;
         $tmpErrMsgBody = $e->getMessage();
@@ -6164,11 +6330,11 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
     $intErrorType = null;
     $aryErrMsgBody = array();
     $strErrMsg = "";
-    
+
     $intControlDebugLevel01=250;
-    
+
     $objMTS = $g['objMTS'];
-    
+
     $strFxName = '([FUNCTION]'.__FUNCTION__.')';
 
     $strSysErrMsgBody = "";
@@ -6179,7 +6345,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
     //node分繰り返し
     $aryNode = array();
     $arrpatternDel = array('/__proto__/');
-    $arrpatternPrm = array('/node/','/id/','/type/','/note/','/condition/','/case/','/x/','/y/','/w/','/h/','/edge/','/targetNode/','/PATTERN_ID/','/ORCHESTRATOR_ID/','/OPERATION_NO_IDBH/','/SYMPHONY_CALL_CLASS_NO/','/SKIP_FLAG/','/CONDUCTOR_CALL_CLASS_NO/','/CALL_CONDUCTOR_ID/','/CALL_SYMPHONY_ID/','/ACCESS_AUTH/' );
+    $arrpatternPrm = array('/node/','/id/','/type/','/note/','/condition/','/case/','/x/','/y/','/w/','/h/','/edge/','/targetNode/','/PATTERN_ID/','/ORCHESTRATOR_ID/','/OPERATION_NO_IDBH/','/SYMPHONY_CALL_CLASS_NO/','/SKIP_FLAG/','/CONDUCTOR_CALL_CLASS_NO/','/CALL_CONDUCTOR_ID/','/CALL_SYMPHONY_ID/','/ACCESS_AUTH/','/END_TYPE/' );
 
     foreach( $fxVarsStrSortedData as $nodename => $nodeinfo ){
         //　nodeの処理開始
@@ -6211,9 +6377,9 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
                                 }
                             }
                         }
-                    }            
+                    }
                 }
-            }                
+            }
         }
     }
 
@@ -6236,9 +6402,9 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
         $aryErrMsgBody = array();
         $strErrMsg = "";
         $aryRowOfOperationTable = array();
-        
+
         $strFxName = '([CLASS]'.__CLASS__.',[FUNCTION]'.__FUNCTION__.')';
-        
+
         $strSysErrMsgBody = "";
         //
         try{
@@ -6248,7 +6414,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
 
             $tmpStrSelectPart = makeSelectSQLPartForDateWildColumn($lc_db_model_ch,"LAST_UPDATE_TIMESTAMP","DATETIME",true,true);
             $strSelectMaxLastUpdateTimestamp = "CASE WHEN LAST_UPDATE_TIMESTAMP IS NULL THEN 'VALNULL' ELSE {$tmpStrSelectPart} END LUT4U";
-            
+
             // ----全行および全行中、最後に更新された日時を取得する
             $arrayConfigForSelect = array(
                 "JOURNAL_SEQ_NO"=>"",
@@ -6264,7 +6430,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
                 "LAST_UPDATE_USER"=>"",
                 $strSelectMaxLastUpdateTimestamp=>""
             );
-            
+
             $arrayValueTmpl = array(
                 "JOURNAL_SEQ_NO"=>"",
                 "JOURNAL_ACTION_CLASS"=>"",
@@ -6280,12 +6446,12 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
                 $strSelectMaxLastUpdateTimestamp=>""
             );
             $arrayValue = $arrayValueTmpl;
-            
+
             $strSelectMode = "SELECT";
             $strSelectForUpdateLock = "";
-            
+
             $temp_array = array('WHERE'=>" DISUSE_FLAG IN ('0') {$strSelectForUpdateLock}");
-            
+
             $retArray = makeSQLForUtnTableUpdate($lc_db_model_ch
                                                 ,$strSelectMode
                                                 ,"SYMPHONY_CLASS_NO"
@@ -6296,7 +6462,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
                                                 ,$temp_array );
             $sqlUtnBody = $retArray[1];
             $arrayUtnBind = $retArray[2];
-            
+
             $retArray = singleSQLCoreExecute($objDBCA, $sqlUtnBody, $arrayUtnBind, $strFxName);
             if( $retArray[0]!==true ){
                 $intErrorType = $retArray[1];
@@ -6307,13 +6473,13 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
                 throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
             }
             $objQueryUtn =& $retArray[3];
-            
+
             //----発見行だけループ
             $rows = array();
             while ( $row = $objQueryUtn->resultFetch() ){
 
                 $user_id = $g['login_id'];
-                $ret  = $obj->getAccountInfo($user_id); 
+                $ret  = $obj->getAccountInfo($user_id);
                 list($ret,$permission) = $obj->chkOneRecodeAccessPermission($row);
 
                 if($ret === false) {
@@ -6324,7 +6490,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
                 }
             }
             //発見行だけループ----
-            
+
             unset($objQueryUtn);
             unset($retArray);
             $boolRet = true;
@@ -6379,7 +6545,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
             "LAST_UPDATE_TIMESTAMP"=>"",
             "LAST_UPDATE_USER"=>""
         );
-        
+
         $arraySymInsValueTmpl = array(
             "JOURNAL_SEQ_NO"=>"",
             "JOURNAL_ACTION_CLASS"=>"",
@@ -6402,7 +6568,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
             "LAST_UPDATE_TIMESTAMP"=>"",
             "LAST_UPDATE_USER"=>""
         );
-        
+
         $arrayConfigForMovInsIUD = array(
             "JOURNAL_SEQ_NO"=>"",
             "JOURNAL_ACTION_CLASS"=>"",
@@ -6434,7 +6600,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
             "LAST_UPDATE_TIMESTAMP"=>"",
             "LAST_UPDATE_USER"=>""
         );
-        
+
         $arrayMovInsValueTmpl = array(
             "JOURNAL_SEQ_NO"=>"",
             "JOURNAL_ACTION_CLASS"=>"",
@@ -6687,7 +6853,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
                     $aryTmp1ForOverride['MOVEMENT_SEQ']           = $intFocusIndex + 1;
                     $tmp1StrOrcId     = $aryDataForMovement['ORCHESTRATOR_ID'];
                     $tmp1StrPatternId = $aryDataForMovement['PATTERN_ID'];
-                    
+
                     if( array_key_exists($intFocusIndex + 1, $aryOptionOrderOverride) === true ){
                         //----あるムーブメントについて指定があった場合
                         $aryTmp2ForOverride = $aryOptionOrderOverride[$intFocusIndex + 1];
@@ -6696,10 +6862,10 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
                     else{
                         $aryTmp2ForOverride = array();
                     }
-                    
-                    list($tmp1StrExeSkipFlag, $boolTempKeyExistFlag) = isSetInArrayNestThenAssign($aryTmp2ForOverride, array('SKIP')        , ""); 
+
+                    list($tmp1StrExeSkipFlag, $boolTempKeyExistFlag) = isSetInArrayNestThenAssign($aryTmp2ForOverride, array('SKIP')        , "");
                     list($tmp1StrOvrdOpeId  , $boolTempKeyExistFlag) = isSetInArrayNestThenAssign($aryTmp2ForOverride, array('OPERATION_ID'), "");
-                    
+
                     if( $tmp1StrExeSkipFlag === "YES" ){
                         // checkedValueならスキップ
                         $tmp1StrExeSkipFlag = "checkedValue";
@@ -6710,20 +6876,20 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
                     else{
                         $tmp1StrExeSkipFlag = "FORBIDDEN_VALUE";
                     }
-                    
+
                     $aryTmp1ForOverride['ORCHESTRATOR_ID']        = $tmp1StrOrcId;
                     $aryTmp1ForOverride['PATTERN_ID']             = $tmp1StrPatternId;
                     $aryTmp1ForOverride['EXE_SKIP_FLAG']          = $tmp1StrExeSkipFlag;
                     $aryTmp1ForOverride['OVRD_OPERATION_NO_IDBH'] = $tmp1StrOvrdOpeId;
                     $aryOptionOrder[] = $aryTmp1ForOverride;
-                    
+
                     unset($tmp1StrOrcId);
                     unset($tmp1StrPatternId);
                     unset($tmp1StrExeSkipFlag);
                     unset($tmp1StrOvrdOpeNo);
                     unset($aryTmp1ForOverride);
                     unset($aryTmp2ForOverride);
-                    
+
                     $intFocusIndex += 1;
                 }
                 unset($tmpAryMultiLivePatternFromMaster);
@@ -6746,7 +6912,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
                 throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
             }
             //$aryOptionOrderのカウントチェック----
-            
+
 
             // ----ムーブメントインスタンス登録処理
             $MovementErrorMsg = "";
@@ -7045,7 +7211,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
                     $tmpMsgBody = $objMTS->getSomeMessage("ITABASEH-ERR-102070");
                 }
                 $aryErrMsgBody[] = $tmpMsgBody;
-                
+
                 // トランザクション終了
                 if( $objDBCA->transactionExit() === true ){
                     $tmpMsgBody = $objMTS->getSomeMessage("ITABASEH-STD-103010");
@@ -7056,7 +7222,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
                 $aryErrMsgBody[] = $tmpMsgBody;
                 unset($tmpMsgBody);
             }
-            //トランザクション中のエラーの場合---- 
+            //トランザクション中のエラーの場合----
 
             // エラーフラグをON
             if( $intErrorType === null ) $intErrorType = 500;
@@ -7091,16 +7257,16 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
         $aryErrMsgBody = array();
         $strErrMsg = "";
         $rows = array();
-        
+
         $strFxName = '([CLASS]'.__CLASS__.',[FUNCTION]'.__FUNCTION__.')';
-        
+
         $strSysErrMsgBody = "";
         //
         try{
             $objDBCA = $this->getDBConnectAgent();
             $lc_db_model_ch = $objDBCA->getModelChannel();
             $obj = new RoleBasedAccessControl($objDBCA);
-            
+
             $user_id = $g['login_id'];
             $ret  = $obj->getAccountInfo($user_id);
             $DefaultAccessRoles = $obj->getDefaultAccessRoles();
@@ -7174,7 +7340,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
             if( $mode == "S" ) $aryRetBody = $this->getInfoFromOneOfSymphonyClasses($fxVarsIntClassId);
             //Conductor
             if( $mode == "C" ) $aryRetBody = $this->getInfoFromOneOfConductorClass($fxVarsIntClassId, 0,0,0,1);
-            
+
             if( $aryRetBody[1] !== null ){
                 // エラーフラグをON
                 // 例外処理へ
@@ -7215,11 +7381,11 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
             $arrOverrideOpeAccessAuth=array();
             //Symphony
             if( $mode == "S" ){
-                foreach ($aryOptionOverride as $nodename => $nodeinfo) {                
-                    //個別指定のオペレーションのID取得（作業実行時変更分）    
+                foreach ($aryOptionOverride as $nodename => $nodeinfo) {
+                    //個別指定のオペレーションのID取得（作業実行時変更分）
                     if( $nodeinfo["OVRD_OPERATION_NO_IDBH"] != "" ){
                         $arrMovSpAccesAuthList[] = $nodeinfo['OVRD_OPERATION_NO_IDBH'];
-                    }   
+                    }
                 }
             //Conductor
             }elseif( $mode == "C" ){
@@ -7240,7 +7406,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
                 //個別指定のオペレーションのID取得（作業実行時変更分）
                 foreach ($aryOptionOverride as $nodename => $nodeinfo) {
                     if( array_search( $nodeinfo['type'] , $arrExeNode ) == true ){
-                        #作業実行時個別指定変更    
+                        #作業実行時個別指定変更
                         if( $nodeinfo["OPERATION_NO_IDBH"] != "" ){
                             $arrMovSpAccesAuthList[] = $nodeinfo['OPERATION_NO_IDBH'];
                         }
@@ -7262,13 +7428,14 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
                     if( $tmpRetBody[1] === 101 ){
                         //----１行も発見できなかった場合
                         $intErrorType = 101;
+                        $strErrMsg = $objMTS->getSomeMessage("ITABASEH-ERR-170038");
                         //１行も発見できなかった場合----
                     }
                     throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
                 }
-                $arrSpOpeAccesAuth[] = $tmpRetBody[4]['ACCESS_AUTH'];                
+                $arrSpOpeAccesAuth[] = $tmpRetBody[4]['ACCESS_AUTH'];
             }
-            // 個別指定のオペレーションIDからアクセス権取得 --- 
+            // 個別指定のオペレーションIDからアクセス権取得 ---
 
             //作業実行時のアクセス権　（ Symphony/Conductor ∩　Operation ）
 
@@ -7306,15 +7473,15 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
             //　作業実行時のアクセス権（個別）　（ 作業実行時のアクセス権 ∩　個別指定オペレーション ）
             foreach ($arrSpOpeAccesAuth as $strSpOpeAccesAuth) {
                 if( $strExeAccesAuth == "" && $strSpOpeAccesAuth == "" ){
-                    
+
                     $strExeAccesAuth = "";
                 }elseif( $strExeAccesAuth == "" && $strSpOpeAccesAuth != "" ){
-                    
+
                     $strExeAccesAuth = $strSpOpeAccesAuth;
 
                 }elseif( $strExeAccesAuth != "" && $strSpOpeAccesAuth == "" ){
-                    
-                    $strExeAccesAuth = $strExeAccesAuth;
+
+                    continue;
                 }else{
                     $arrExeAccesAuth = explode(",", $strExeAccesAuth);
                     $tmpSpOpeAccesAuth = explode(",", $strSpOpeAccesAuth);
@@ -7463,7 +7630,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
                         //callコンダクタのアクセス権をチェック
                         $sql = "SELECT *
                                 FROM C_CONDUCTOR_EDIT_CLASS_MNG
-                                WHERE CONDUCTOR_CLASS_NO = {$callConductorID} 
+                                WHERE CONDUCTOR_CLASS_NO = {$callConductorID}
                                 AND DISUSE_FLAG = 0";
 
                         //SQL準備
@@ -7502,7 +7669,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
                         if($operationId != ""){
                             $sql = "SELECT *
                                     FROM C_OPERATION_LIST
-                                    WHERE OPERATION_NO_UAPK = {$operationId} 
+                                    WHERE OPERATION_NO_UAPK = {$operationId}
                                     AND DISUSE_FLAG = 0";
 
                             //SQL準備
@@ -7537,7 +7704,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
                                 }
                             }
                         }
-                    } 
+                    }
                 }
 
                 //callシンフォニーチェック
@@ -7558,7 +7725,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
 
                         //callシンフォニーおよびシンフォニー内で実行するMovementのアクセス権をチェック
                         $ret = $this->checkSymphonyAccessAuth($callSymphonyID, $fxVarsIntExecuteUserId, $conductorID);
-                        if($ret[0] == false){  
+                        if($ret[0] == false){
                             $strErrStepIdInFx="00000300";
                             $intErrorType = $ret[1];
                             $strExpectedErrMsgBodyForUI = $ret[3];
@@ -7569,7 +7736,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
                         if($operationId != ""){
                             $sql = "SELECT *
                                     FROM C_OPERATION_LIST
-                                    WHERE OPERATION_NO_UAPK = {$operationId} 
+                                    WHERE OPERATION_NO_UAPK = {$operationId}
                                     AND DISUSE_FLAG = 0";
 
                             //SQL準備
@@ -7604,7 +7771,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
                                 }
                             }
                         }
-                    } 
+                    }
                 }
 
                 //単発Movementチェック
@@ -7626,7 +7793,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
                         //Movementのアクセス権をチェック
                         $sql = "SELECT *
                                 FROM C_PATTERN_PER_ORCH
-                                WHERE PATTERN_ID = {$patternId} 
+                                WHERE PATTERN_ID = {$patternId}
                                 AND DISUSE_FLAG = 0";
 
                         //SQL準備
@@ -7665,7 +7832,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
                         if($operationId != ""){
                             $sql = "SELECT *
                                     FROM C_OPERATION_LIST
-                                    WHERE OPERATION_NO_UAPK = {$operationId} 
+                                    WHERE OPERATION_NO_UAPK = {$operationId}
                                     AND DISUSE_FLAG = 0";
 
                             //SQL準備
@@ -7700,7 +7867,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
                                 }
                             }
                         }
-                    } 
+                    }
                 }
             }
 
@@ -7739,7 +7906,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
             //シンフォニーのアクセス権をチェック
             $sql = "SELECT *
                     FROM C_SYMPHONY_CLASS_MNG
-                    WHERE SYMPHONY_CLASS_NO = {$parentSymphonyID} 
+                    WHERE SYMPHONY_CLASS_NO = {$parentSymphonyID}
                     AND DISUSE_FLAG = 0";
 
             //SQL準備
@@ -7781,7 +7948,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
             //シンフォニーに紐づくMovementのアクセス権をチェック
             $sql = "SELECT *
                     FROM C_MOVEMENT_CLASS_MNG
-                    WHERE SYMPHONY_CLASS_NO = {$parentSymphonyID} 
+                    WHERE SYMPHONY_CLASS_NO = {$parentSymphonyID}
                     AND DISUSE_FLAG = 0";
 
             //SQL準備
@@ -7804,7 +7971,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
                 if($operationId != ""){
                     $sql = "SELECT *
                             FROM C_OPERATION_LIST
-                            WHERE OPERATION_NO_UAPK = {$operationId} 
+                            WHERE OPERATION_NO_UAPK = {$operationId}
                             AND DISUSE_FLAG = 0";
 
                     //SQL準備
@@ -7842,7 +8009,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
                 //対象Movementのアクセス権チェック
                 $sql = "SELECT *
                         FROM C_PATTERN_PER_ORCH
-                        WHERE PATTERN_ID = {$patternId} 
+                        WHERE PATTERN_ID = {$patternId}
                         AND DISUSE_FLAG = 0";
 
                 //SQL準備
@@ -7923,9 +8090,1091 @@ function checkCallLoopValidator( $intConductorclass,$arrOperationList=array() ){
 
     return $arrOperationList;
 }
-// 個別指定オペレーションの取得 ----     
+// 個別指定オペレーションの取得 ----
+
+//----シンフォニーIDおよびオペレーションNoからMovementのバリデーション(ConductorからのSymphony呼び出し)
+    function chkSymphonyInstanceForConductor($intShmphonyClassId, $intOperationNoUAPK, $strPreserveDatetime, $aryOptionOrder, $aryOptionOrderOverride=null, $userId, $userName){
+
+        // グローバル変数宣言
+        global $g;
+
+        // ----変数定義
+        $boolRet = false;
+        $intErrorType = null;
+        $aryErrMsgBody = array();
+        $strErrMsg = "";
+        $intSymphonyInstanceId = null;
+        $strExpectedErrMsgBodyForUI = "";
+        $aryFreeErrMsgBody = array();
+
+        $strFxName = '([CLASS]'.__CLASS__.',[FUNCTION]'.__FUNCTION__.')';
+        $strSysErrMsgBody = "";
+        $boolInTransactionFlag = false;
+
+        $arrayConfigForMovInsIUD = array(
+            "JOURNAL_SEQ_NO"=>"",
+            "JOURNAL_ACTION_CLASS"=>"",
+            "JOURNAL_REG_DATETIME"=>"",
+            "MOVEMENT_INSTANCE_NO"=>"",
+            "I_MOVEMENT_CLASS_NO"=>"",
+            "I_ORCHESTRATOR_ID"=>"",
+            "I_PATTERN_ID"=>"",
+            "I_PATTERN_NAME"=>"",
+            "I_ANS_HOST_DESIGNATE_TYPE_ID"=>"",
+            "I_ANS_WINRM_ID"=>"",
+            "I_MOVEMENT_SEQ"=>"",
+            "I_NEXT_PENDING_FLAG"=>"",
+            "I_DESCRIPTION"=>"",
+            "SYMPHONY_INSTANCE_NO"=>"",
+            "EXECUTION_NO"=>"",
+            "STATUS_ID"=>"",
+            "ABORT_RECEPTED_FLAG"=>"",
+            "TIME_START"=>"DATETIME",
+            "TIME_END"=>"DATETIME",
+            "RELEASED_FLAG"=>"",
+            "EXE_SKIP_FLAG"=>"",
+            "OVRD_OPERATION_NO_UAPK"=>"",
+            "OVRD_I_OPERATION_NAME"=>"",
+            "OVRD_I_OPERATION_NO_IDBH"=>"",
+            "ACCESS_AUTH"=>"",
+            "NOTE"=>"",
+            "DISUSE_FLAG"=>"",
+            "LAST_UPDATE_TIMESTAMP"=>"",
+            "LAST_UPDATE_USER"=>""
+        );
+        
+        $arrayMovInsValueTmpl = array(
+            "JOURNAL_SEQ_NO"=>"",
+            "JOURNAL_ACTION_CLASS"=>"",
+            "JOURNAL_REG_DATETIME"=>"",
+            "MOVEMENT_INSTANCE_NO"=>"",
+            "I_MOVEMENT_CLASS_NO"=>"",
+            "I_ORCHESTRATOR_ID"=>"",
+            "I_PATTERN_ID"=>"",
+            "I_PATTERN_NAME"=>"",
+            "I_ANS_HOST_DESIGNATE_TYPE_ID"=>"",
+            "I_ANS_WINRM_ID"=>"",
+            "I_MOVEMENT_SEQ"=>"",
+            "I_NEXT_PENDING_FLAG"=>"",
+            "I_DESCRIPTION"=>"",
+            "SYMPHONY_INSTANCE_NO"=>"",
+            "EXECUTION_NO"=>"",
+            "STATUS_ID"=>"",
+            "ABORT_RECEPTED_FLAG"=>"",
+            "TIME_START"=>"DATETIME",
+            "TIME_END"=>"DATETIME",
+            "RELEASED_FLAG"=>"",
+            "EXE_SKIP_FLAG"=>"",
+            "OVRD_OPERATION_NO_UAPK"=>"",
+            "OVRD_I_OPERATION_NAME"=>"",
+            "OVRD_I_OPERATION_NO_IDBH"=>"",
+            "ACCESS_AUTH"=>"",
+            "NOTE"=>"",
+            "DISUSE_FLAG"=>"",
+            "LAST_UPDATE_TIMESTAMP"=>"",
+            "LAST_UPDATE_USER"=>""
+        );
+        // 変数定義----
+
+        try{
+            $objDBCA = $g['objDBCA'];
+            $objMTS  = $g['objMTS'];
+            $lc_db_model_ch = $objDBCA->getModelChannel();
+            $boolInTransactionFlag = true;
+
+            //////////////////////////////////////////////////////
+            // (ここから) シンフォニー、ムーブメント、オペレーションの情報を取得する//
+            /////////////////////////////////////////////////////
+            // ----シンフォニークラスIDからシンフォニー部分、ムーブメント部分の情報を取得する
+            $aryRetBody = $this->getInfoFromOneOfSymphonyClasses($intShmphonyClassId, 0);
+            if( $aryRetBody[1] !== null ){
+                // エラーフラグをON
+                // 例外処理へ
+                $strErrStepIdInFx="00000600";
+                if( $aryRetBody[1] === 101 ){
+                    //----該当のシンフォニーClassIDが１行も発見できなかった場合
+                    $intErrorType = 101;
+                    //$strExpectedErrMsgBodyForUI = "SymphonyクラスID：存在している必要があります。";
+                    $strErrMsg = $aryRetBody[3];
+                    $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-5733107");
+                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                    //該当のシンフォニーClassIDが１行も発見できなかった場合----
+                }
+                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+            }
+            $aryRowOfSymClassTable = $aryRetBody[4];
+            $aryRowOfMovClassTable = $aryRetBody[5];
+            // シンフォニークラスIDからシンフォニー部分、ムーブメント部分の情報を取得する----
+
+            // ----オペレーションNoからオペレーションの情報を取得する
+            $arrayRetBody = $this->getInfoOfOneOperation($intOperationNoUAPK);
+            if( $arrayRetBody[1] !== null ){
+                // エラーフラグをON
+                // 例外処理へ
+                $strErrStepIdInFx="00000700";
+                if( $arrayRetBody[1] === 101 ){
+                    $intErrorType = 102;
+                    //$strExpectedErrMsgBodyForUI = "オペレーション№：存在している必要があります。";
+                    $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-5733108");
+                }
+                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+            }
+            $aryRowOfOperationTable = $arrayRetBody[4];
+            // オペレーションNoからオペレーションの情報を取得する----
+            //////////////////////////////////////////////////////
+            // (ここまで) シンフォニー、ムーブメント、オペレーションの情報を取得する//
+            /////////////////////////////////////////////////////
 
 
+
+            /////////////////////////////////////
+            // (ここから) ムーブメントインスタンスを登録する//
+            /////////////////////////////////////
+            // ----ムーブメントから、廃止されているレコードを除外する
+            $aryMovement = array();
+            foreach($aryRowOfMovClassTable as $aryDataForMovement){
+                if( $aryDataForMovement['DISUSE_FLAG']=='0' ){
+                    $aryMovement[] = $aryDataForMovement;
+                }
+            }
+            // ムーブメントから、廃止されているレコードを除外する----
+
+            //----$aryOptionOrderOverrideがnullでない場合、各値をセットする
+            //（RESTおよびbackyard処理で登録する場合を想定。）
+            if( is_array($aryOptionOrderOverride) === true ){
+                $intFocusIndex = 0;
+                $aryOptionOrder = array();
+                foreach($aryMovement as $aryDataForMovement){
+                    $aryTmp1ForOverride = array();
+                    $aryTmp1ForOverride['MOVEMENT_SEQ']           = $intFocusIndex + 1;
+                    $tmp1StrOrcId     = $aryDataForMovement['ORCHESTRATOR_ID'];
+                    $tmp1StrPatternId = $aryDataForMovement['PATTERN_ID'];
+                    
+                    if( array_key_exists($intFocusIndex + 1, $aryOptionOrderOverride) === true ){
+                        //----あるムーブメントについて指定があった場合
+                        $aryTmp2ForOverride = $aryOptionOrderOverride[$intFocusIndex + 1];
+                        //あるムーブメントについて指定があった場合----
+                    }
+                    else{
+                        $aryTmp2ForOverride = array();
+                    }
+                    
+                    list($tmp1StrExeSkipFlag, $boolTempKeyExistFlag) = isSetInArrayNestThenAssign($aryTmp2ForOverride, array('SKIP')        , ""); 
+                    list($tmp1StrOvrdOpeId  , $boolTempKeyExistFlag) = isSetInArrayNestThenAssign($aryTmp2ForOverride, array('OPERATION_ID'), "");
+                    
+                    if( $tmp1StrExeSkipFlag === "YES" ){
+                        // checkedValueならスキップ
+                        $tmp1StrExeSkipFlag = "checkedValue";
+                    }
+                    else if( $tmp1StrExeSkipFlag === "NO" || strlen($tmp1StrExeSkipFlag) === 0 ){
+                        $tmp1StrExeSkipFlag = "";
+                    }
+                    else{
+                        $tmp1StrExeSkipFlag = "FORBIDDEN_VALUE";
+                    }
+                    
+                    $aryTmp1ForOverride['ORCHESTRATOR_ID']        = $tmp1StrOrcId;
+                    $aryTmp1ForOverride['PATTERN_ID']             = $tmp1StrPatternId;
+                    $aryTmp1ForOverride['EXE_SKIP_FLAG']          = $tmp1StrExeSkipFlag;
+                    $aryTmp1ForOverride['OVRD_OPERATION_NO_IDBH'] = $tmp1StrOvrdOpeId;
+                    $aryOptionOrder[] = $aryTmp1ForOverride;
+                    
+                    unset($tmp1StrOrcId);
+                    unset($tmp1StrPatternId);
+                    unset($tmp1StrExeSkipFlag);
+                    unset($tmp1StrOvrdOpeNo);
+                    unset($aryTmp1ForOverride);
+                    unset($aryTmp2ForOverride);
+                    
+                    $intFocusIndex += 1;
+                }
+                unset($tmpAryMultiLivePatternFromMaster);
+            }
+            //$aryOptionOrderOverrideがnullでない場合、各値をセットする----
+
+            //----$aryMovementのカウントチェック
+            if( count($aryMovement) !== count($aryOptionOrder) ){
+                // エラーフラグをON
+                // 例外処理へ
+                $strErrStepIdInFx="00001200";
+                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+            }
+            //$aryMovementのカウントチェック----
+            //----$aryOptionOrderのカウントチェック
+            if( count($aryOptionOrder) == 0 ){
+                // エラーフラグをON
+                // 例外処理へ
+                $strErrStepIdInFx="00001300";
+                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+            }
+            //$aryOptionOrderのカウントチェック----
+            
+
+            // ----ムーブメントインスタンス登録処理
+            $MovementErrorMsg = "";
+            $intFocusIndex = 0;
+
+            foreach($aryMovement as $aryDataForMovement){
+                $aryValuePerOptionOrderKey = $aryOptionOrder[$intFocusIndex];
+                //テーブル情報をセット
+                $arrayConfigForIUD = $arrayConfigForMovInsIUD;
+                $register_tgt_row = $arrayMovInsValueTmpl;
+
+                // ----シーケンス払い出し
+                $retArray = getSequenceValueFromTable('C_MOVEMENT_INSTANCE_MNG_RIC', 'A_SEQUENCE', FALSE );
+                if( $retArray[1] != 0 ){
+                    // エラーフラグをON
+                    // 例外処理へ
+                    $strErrStepIdInFx="00001400";
+                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                }
+                else{
+                    $varRISeq = $retArray[0];
+                }
+                // シーケンス払い出し----
+
+                // ----PATTERN_IDからパターン情報を取得
+                $strPatternIdNumeric = $aryDataForMovement['PATTERN_ID'];
+                $retArray = $this->getLivePatternFromMaster(array($aryDataForMovement['ORCHESTRATOR_ID']),"",array($strPatternIdNumeric));
+                if($retArray[1] !== null ){
+                    // エラーフラグをON
+                    // 例外処理へ
+                    $strErrStepIdInFx="00001500";
+                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                }
+                $aryMultiLivePatternFromMaster = $retArray[0];
+                // PATTERN_IDからパターン情報を取得----
+
+                // ----movementの存在をチェック
+                if( array_key_exists($strPatternIdNumeric, $aryMultiLivePatternFromMaster) === false ){
+                    // エラーフラグをON
+                    // 例外処理へ
+                    $strErrStepIdInFx="00001600";
+                    $intErrorType = 2;
+                    $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-1990037",array($intFocusIndex + 1));
+                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                }
+                // movementの存在をチェック----
+
+                //----差分がないかをチェック
+                if( ($intFocusIndex + 1) != $aryValuePerOptionOrderKey['MOVEMENT_SEQ'] ){
+                    // エラーフラグをON
+                    // 例外処理へ
+                    $strErrStepIdInFx="00001700";
+                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                }
+                // オーケストレータが同じかどうか、をチェック
+                if( $aryDataForMovement['ORCHESTRATOR_ID'] != $aryValuePerOptionOrderKey['ORCHESTRATOR_ID'] ){
+                    // エラーフラグをON
+                    // 例外処理へ
+                    $strErrStepIdInFx="00001800";
+                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                }
+                // 作業パターンが同じかどうか、をチェック
+                if( $strPatternIdNumeric != $aryValuePerOptionOrderKey['PATTERN_ID'] ){
+                    // エラーフラグをON
+                    // 例外処理へ
+                    $strErrStepIdInFx="00001900";
+                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                }
+
+                $arySinglePatternSource = $aryMultiLivePatternFromMaster[$strPatternIdNumeric];
+                unset($aryMultiLivePatternFromMaster);
+                //差分がないかをチェック----
+
+                // ----ムーブメントインスタンス登録用の値をセット
+                $register_tgt_row = array();
+                #$register_tgt_row['MOVEMENT_INSTANCE_NO'] = $varRISeq;
+                $register_tgt_row['I_MOVEMENT_SEQ']       = $intFocusIndex + 1;
+                $register_tgt_row['I_MOVEMENT_CLASS_NO']  = $aryDataForMovement['MOVEMENT_CLASS_NO'];
+                $register_tgt_row['I_PATTERN_ID']         = $strPatternIdNumeric;
+                $register_tgt_row['I_PATTERN_NAME']       = $arySinglePatternSource['PATTERN_NAME'];
+                $register_tgt_row['I_ANS_HOST_DESIGNATE_TYPE_ID'] = $arySinglePatternSource['ANS_HOST_DESIGNATE_TYPE_ID'];
+                $register_tgt_row['I_ANS_WINRM_ID'] = $arySinglePatternSource['ANS_WINRM_ID'];
+                $register_tgt_row['I_ORCHESTRATOR_ID']    = $aryDataForMovement['ORCHESTRATOR_ID'];
+                $register_tgt_row['I_NEXT_PENDING_FLAG']  = $aryDataForMovement['NEXT_PENDING_FLAG'];
+                if( $aryDataForMovement['NEXT_PENDING_FLAG'] === '1' ){
+                    //----保留解除ポイントが存在する場合
+                    $register_tgt_row['RELEASED_FLAG']  = '1'; //1=未解除
+                    //保留解除ポイントが存在する場合----
+                }
+                else if( $aryDataForMovement['NEXT_PENDING_FLAG'] === '2' ){
+                    //----保留解除ポイントが存在しない場合
+                    //$register_tgt_row['RELEASED_FLAG']  = '';
+                    //保留解除ポイントが存在しない場合----
+                }
+                else{
+                    // エラーフラグをON
+                    // 例外処理へ
+                    $strErrStepIdInFx="00002000";
+                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                }
+
+                //Conductor(SymphonyCall)用処理
+                if( isset( $aryValuePerOptionOrderKey['EXE_SKIP_FLAG'] ) !== true )$aryValuePerOptionOrderKey['EXE_SKIP_FLAG']='';
+                if( isset( $aryValuePerOptionOrderKey['OVRD_OPERATION_NO_IDBH'] ) !== true )$aryValuePerOptionOrderKey['OVRD_OPERATION_NO_IDBH']='';
+
+                if( $aryValuePerOptionOrderKey['EXE_SKIP_FLAG'] == '' ){
+                    $register_tgt_row['EXE_SKIP_FLAG']        = 1; //スキップしない
+                }
+                else if( $aryValuePerOptionOrderKey['EXE_SKIP_FLAG'] == 'checkedValue' ){
+                    $register_tgt_row['EXE_SKIP_FLAG']        = 2; //スキップする
+                }
+                else{
+                    // エラーフラグをON
+                    // 例外処理へ
+                    $strErrStepIdInFx="00002100";
+                    $intErrorType = 2;
+                    $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-5733111",array($intFocusIndex + 1));
+                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                }
+                // ----オペレーション情報を取得し値をセット
+                if( 0 < strlen($aryValuePerOptionOrderKey['OVRD_OPERATION_NO_IDBH']) ){
+                    $tmpStrOpeNoIDBH = $aryValuePerOptionOrderKey['OVRD_OPERATION_NO_IDBH'];
+                    $strRegexpFormat='/^0$|^-?[1-9][0-9]*$/s';
+                    if( preg_match($strRegexpFormat, $tmpStrOpeNoIDBH) !== 1 ){
+                        // エラーフラグをON
+                        // 例外処理へ
+                        $strErrStepIdInFx="00002200";
+                        $intErrorType = 2;
+                        $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-5733109",array($intFocusIndex + 1),$tmpStrOpeNoIDBH);
+                        throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                    }
+                    $tmpAryRetBody = $this->getInfoOfOneOperation($tmpStrOpeNoIDBH,1);
+                    if( $tmpAryRetBody[1] !== null ){
+                        // エラーフラグをON
+                        // 例外処理へ
+                        $strErrStepIdInFx="00002300";
+                        if( $tmpAryRetBody[1] == 101 ){
+                            $intErrorType = 2;
+                            $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-5733110",array($intFocusIndex + 1));
+                            throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                        }
+                    }
+                    $tmpAryRowOfOpeTblPerMov = $tmpAryRetBody[4];
+                    $register_tgt_row['OVRD_OPERATION_NO_UAPK']   = $tmpAryRowOfOpeTblPerMov['OPERATION_NO_UAPK'];
+                    $register_tgt_row['OVRD_I_OPERATION_NAME']    = $tmpAryRowOfOpeTblPerMov['OPERATION_NAME'];
+                    $register_tgt_row['OVRD_I_OPERATION_NO_IDBH'] = $tmpStrOpeNoIDBH;
+                    unset($tmpAryRowOfOpeTblPerMov);
+                    unset($tmpAryRetBody);
+                }
+                else{
+                    $register_tgt_row['OVRD_OPERATION_NO_UAPK']   = $intOperationNoUAPK;
+                }
+                // オペレーション情報を取得し値をセット----
+
+                $register_tgt_row['I_DESCRIPTION']        = $aryDataForMovement['DESCRIPTION'];
+                $register_tgt_row['ABORT_RECEPTED_FLAG']  = 1; //緊急停止受付確認フラグ=未確認[1]
+                #$register_tgt_row['SYMPHONY_INSTANCE_NO'] = $varSymphonyInstanceNo;
+                $register_tgt_row['STATUS_ID']            = 1; //未実行[1]で
+                $register_tgt_row['EXECUTION_USER']       = $userName;
+                $register_tgt_row['DISUSE_FLAG']          = '0';
+                $register_tgt_row['LAST_UPDATE_USER']     = $userId;
+
+                $register_tgt_row['ACCESS_AUTH']          = $aryRowOfSymClassTable['ACCESS_AUTH'];
+
+                //上位アクセス権継承
+                if( array_key_exists( '__TOP_ACCESS_AUTH__' , $g ) === true ){
+                    $register_tgt_row['ACCESS_AUTH'] = $g['__TOP_ACCESS_AUTH__'];
+                }
+
+                // ムーブメントインスタンス登録用の値をセット----
+
+                // 各Movementの登録状態を確認する。
+                $tgtSource_row = $register_tgt_row;
+                $ret = $this->MovementValidator($tgtSource_row,$intOperationNoUAPK,$MovementErrorMsg,($intFocusIndex + 1),$aryFreeErrMsgBody);
+        
+                if( $ret === false ){
+                    // エラーフラグをON
+                    // 例外処理へ
+                    $strErrStepIdInFx="00002400";
+                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                }
+
+                $intFocusIndex += 1;
+            }
+
+            // ----ムーブメントインスタンス登録処理後のチェック
+            // ムーブメントの登録内容に不備がなかったことを確認
+            if($MovementErrorMsg != ""){
+                $strErrStepIdInFx="00002800";
+                $intErrorType = 2;
+                $strExpectedErrMsgBodyForUI = $MovementErrorMsg;
+                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+            }
+            // ムーブメントインスタンス登録処理後のチェック----
+
+            /////////////////////////////////////
+            // (ここまで) ムーブメントインスタンスを登録する//
+            /////////////////////////////////////
+            $boolRet = true;
+
+        }catch(Exception $e){
+
+            // エラーフラグをON
+            if( $intErrorType === null ) $intErrorType = 500;
+            $tmpErrMsgBody = $e->getMessage();
+            if( 500 <= $intErrorType ) $strSysErrMsgBody = $objMTS->getSomeMessage("ITAWDCH-ERR-4011",array($strFxName,$tmpErrMsgBody));
+        }
+
+        $retArray = array($boolRet,
+                          $intErrorType,
+                          $aryErrMsgBody,
+                          $strErrMsg,
+                          $strSysErrMsgBody,
+                          $intSymphonyInstanceId,
+                          $strExpectedErrMsgBodyForUI,
+                          $aryFreeErrMsgBody,
+                          );
+
+        return $retArray;
+    }
+
+//----通知の取得 #312 
+    function getNoticeInfo($strNoticeList,$intSearchMode=0){
+        /////////////////////////////////////////////////////////////
+        // 通知の取得                                //
+        /////////////////////////////////////////////////////////////
+        $boolRet = false;
+        $intErrorType = null;
+        $aryErrMsgBody = array();
+        $strErrMsg = "";
+        $aryRowOfNotificationTable = array();
+
+        $strFxName = '([CLASS]'.__CLASS__.',[FUNCTION]'.__FUNCTION__.')';
+
+        $strSysErrMsgBody = "";
+        //
+        try{
+            #/*
+            $objDBCA = $this->getDBConnectAgent();
+            $lc_db_model_ch = $objDBCA->getModelChannel();
+            $objMTS = $this->getMessageTemplateStorage();
+
+            #$tmpStrSelectPart = makeSelectSQLPartForDateWildColumn($lc_db_model_ch,"LAST_UPDATE_TIMESTAMP","DATETIME",true,true);
+            #$strSelectMaxLastUpdateTimestamp = "";#"CASE WHEN LAST_UPDATE_TIMESTAMP IS NULL THEN 'VALNULL' ELSE {$tmpStrSelectPart} END LUT4U";
+
+            // ----全行および全行中、最後に更新された日時を取得する
+            $arrayConfigForSelect = array(
+                "JOURNAL_SEQ_NO" => "" ,
+                "JOURNAL_REG_DATETIME" => "",
+                "JOURNAL_ACTION_CLASS" => "",
+                "NOTICE_ID" => "" ,
+                "NOTICE_NAME" => "" ,
+                "NOTICE_URL" => "" ,
+                "HEADER" => "" ,
+                "FIELDS" => "" ,
+                "PROXY_URL" => "" ,
+                "PROXY_PORT" => "" ,
+                "FQDN" => "" ,
+                "OTHER" => "" ,
+                "SUPPRESS_START" => "" ,
+                "SUPPRESS_END" => "" ,
+                "ACCESS_AUTH" => "" ,
+                "NOTE" => "" ,
+                "DISUSE_FLAG" => "" ,
+                "LAST_UPDATE_TIMESTAMP" => "" ,
+                "LAST_UPDATE_USER" => "" ,
+            );
+
+            $arrayValueTmpl = array(
+                "JOURNAL_SEQ_NO" => "" ,
+                "JOURNAL_REG_DATETIME" => "",
+                "JOURNAL_ACTION_CLASS" => "",
+                "NOTICE_ID" => "" ,
+                "NOTICE_NAME" => "" ,
+                "NOTICE_URL" => "" ,
+                "HEADER" => "" ,
+                "FIELDS" => "" ,
+                "PROXY_URL" => "" ,
+                "PROXY_PORT" => "" ,
+                "FQDN" => "" ,
+                "OTHER" => "" ,
+                "SUPPRESS_START" => "" ,
+                "SUPPRESS_END" => "" ,
+                "ACCESS_AUTH" => "" ,
+                "NOTE" => "" ,
+                "DISUSE_FLAG" => "" ,
+                "LAST_UPDATE_TIMESTAMP" => "" ,
+                "LAST_UPDATE_USER" => "" ,
+            );
+            $arrayValue = $arrayValueTmpl;
+
+            $strSelectMode = "SELECT";
+            $strSelectForUpdateLock = "";
+            $strColumnIdForSearch = "NOTICE_ID";
+            #*/
+            $arrNotificationList = explode(",", $strNoticeList);
+
+            foreach ($arrNotificationList as $NotificationId ) {
+                
+                $temp_array = array('WHERE'=>"{$strColumnIdForSearch} = :{$strColumnIdForSearch} AND DISUSE_FLAG IN ('0') {$strSelectForUpdateLock}");
+
+                $retArray = makeSQLForUtnTableUpdate($lc_db_model_ch
+                                                    ,$strSelectMode
+                                                    ,"NOTICE_ID"
+                                                    ,"C_CONDUCTOR_NOTICE_INFO"
+                                                    ,"C_CONDUCTOR_NOTICE_INFO_JNL"
+                                                    ,$arrayConfigForSelect
+                                                    ,$arrayValue
+                                                    ,$temp_array );
+                $sqlUtnBody = $retArray[1];
+                $arrayUtnBind = $retArray[2];
+
+                $arrayUtnBind[$strColumnIdForSearch] = $NotificationId;
+
+                $retArray = singleSQLCoreExecute($objDBCA, $sqlUtnBody, $arrayUtnBind, $strFxName);    
+                 
+                if( $retArray[0]!==true ){
+                    $intErrorType = $retArray[1];
+                    $aryErrMsgBody = $retArray[2];
+                    $strErrMsg = $retArray[4];
+                    // 例外処理へ
+                    $strErrStepIdInFx="00000200";
+                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                }
+                $objQueryUtn =& $retArray[3];
+ 
+                //----発見行だけループ
+                $intCount = 0;
+                $aryRowOfTable = array();
+                while ( $row = $objQueryUtn->resultFetch() ){
+                    if( $intCount==0 ){
+                        $aryRowOfTable = $row;
+                    }
+                    $intCount += 1;
+                }
+                //発見行だけループ----
+
+                if( $intCount == 1 ){
+                    $aryRowOfNotificationTable[] =  $aryRowOfTable;
+                }else{
+                    $aryErrMsgBody[$NotificationId] = $objMTS->getSomeMessage("ITABASEH-STD-171004",array($NotificationId) );//"対象の通知が見つかりません。レコードが廃止されている可能性があります。()"
+                }
+                unset($objQueryUtn);
+                unset($retArray);
+            }
+            if( count($aryRowOfNotificationTable) == 0 ){
+                $boolRet = false;
+            }else{
+                $boolRet = true;
+            }
+
+        }
+        catch(Exception $e){
+            if( $intErrorType===null ) $intErrorType = 501;
+            $tmpErrMsgBody = $e->getMessage();
+            $aryErrMsgBody[] = $tmpErrMsgBody;
+        }
+        $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$aryRowOfNotificationTable);
+        return $retArray;
+    }
+//通知の取得----
+
+//----通知実行 #312 
+    function execNotice($arrNoticeRows,$arrDefinedList=array() ){
+        /////////////////////////////////////////////////////////////
+        // 通知実行(curl_exec)                                //
+        /////////////////////////////////////////////////////////////
+        $boolRet = false;
+        $intErrorType = null;
+        $aryErrMsgBody = array();
+        $strErrMsg = "";
+        $aryRowOfexecNotification = array();
+
+        $strFxName = '([CLASS]'.__CLASS__.',[FUNCTION]'.__FUNCTION__.')';
+
+        $strSysErrMsgBody = "";
+
+        ////////////////////////////////
+        // ルートディレクトリを取得   //
+        ////////////////////////////////       
+        $root_dir_temp = array();
+        $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
+        $root_dir_path = $root_dir_temp[0] . "ita-root";
+
+        try{
+            $objMTS = $this->getMessageTemplateStorage();
+
+            //作業No
+            $execNo  = $arrDefinedList['__CONDUCTOR_INSTANCE_ID__'];
+            //通知結果　ログ出力先
+            $tmpNoticelogdir = $root_dir_path . "/uploadfiles/2100180006/NOTICE_LOG/" . sprintf('%010d', $execNo) ;
+            $tmpNoticelogfile = "NoticeLog_". sprintf('%010d', $execNo) . ".log" ;
+            $logPath = $tmpNoticelogdir . "/" . $tmpNoticelogfile;
+
+            //ログ出力先チェック、ディレクトリ作成
+            if( !is_dir($tmpNoticelogdir) ){
+                #1907　umask退避-設定-戻し
+                $mask = umask();
+                umask(000);
+                if ( mkdir($tmpNoticelogdir,0777,true) ){
+                    chmod($tmpNoticelogdir, 0777);
+                }
+                umask($mask);
+            }
+
+            foreach( $arrNoticeRows as $tmpNotice ){
+
+                $suppressflg = "";
+                $nowDate = "";
+                $suppressStartDate = "";
+                $suppressEndDat = "";
+                $subject = "";
+                $arrNoticeResult = array();
+                $strURL = "";
+
+                $restApiResponse = "";
+                $restApiResponseInfo = "";
+
+                //日時(strtotime)
+                $nowDate = strtotime( date('Y/m/d H:i:s.u') );
+                $suppressStartDate = "";
+                $suppressEndDate = "";
+
+                //抑止期間ありなら比較用に
+                if( array_key_exists('SUPPRESS_START', $tmpNotice) &&  array_key_exists('SUPPRESS_END', $tmpNotice) ){
+                    $suppressStartDate = strtotime( $tmpNotice['SUPPRESS_START'] );
+                    $suppressEndDate = strtotime( $tmpNotice['SUPPRESS_END'] );
+                }
+
+                //抑止期間設定あり( 開始-終了 / 開始 / 終了 )
+                if( $suppressStartDate != "" && $suppressEndDate != "" ){
+                    if( $suppressStartDate < $nowDate && $nowDate < $suppressEndDate  ){
+                        //抑止期間中
+                        $suppressflg = 1; //抑止
+                    }
+                }elseif( $suppressStartDate == "" && $suppressEndDate != "" && $nowDate < $suppressEndDate ) {
+                    //　 （抑止開始無し） ～ 抑止終了 
+                        $suppressflg = 1; //抑止
+                }elseif( $suppressStartDate != "" && $suppressEndDate == "" && $nowDate > $suppressStartDate ){
+                    //  抑止開始　～ （抑止終了無し）
+                        $suppressflg = 1; //抑止       
+                }
+
+                //抑止フラグOFF時
+                if( $suppressflg == "" ){
+                    //通知名の初期化
+                    $arrDefinedList['__NOTICE_NAME__'] = "";
+                    if( isset($tmpNotice['NOTICE_NAME']) === true ){
+                        $arrDefinedList['__NOTICE_NAME__'] = $tmpNotice['NOTICE_NAME'];
+                    }else{
+                        $arrDefinedList['__NOTICE_NAME__'] = $objMTS->getSomeMessage("ITABASEH-STD-171005");//"不明な通知"; 
+                    }
+
+                    $strURL = $tmpNotice['FQDN'] . $arrDefinedList['___TMP_URL___'];
+
+                    //作業確認URLの初期化
+                    $arrDefinedList['__JUMP_URL__'] = $strURL; 
+
+                    //上書き禁止項目
+                    $arrConstList = array(
+                        "CURLOPT_URL",
+                        "CURLOPT_HTTPHEADER",
+                        "CURLOPT_POSTFIELDS",
+                        "CURLOPT_PROXY",
+                        "CURLOPT_PROXYPORT",
+                        "CURLOPT_RETURNTRANSFER",
+                    );
+
+                    //基本設定値
+                    $method = "POST";                
+                    $Notificationurl = $tmpNotice['NOTICE_URL'];
+                    $str_header = $tmpNotice['HEADER'];
+                    $arr_header = json_decode($str_header);
+                    if( is_array($arr_header) !== true ){
+                        $arr_header = array( 
+                            "Content-Type: application/json"
+                        );
+                    }
+
+                    $str_post_data =  $tmpNotice['FIELDS'];
+                    $proxy_url  = $tmpNotice['PROXY_URL'];
+                    $proxy_port = $tmpNotice['PROXY_PORT'];
+
+                    //予約変数置換
+                    foreach ($arrDefinedList as $tmpkey => $tmpval) {
+                        $str_post_data = str_replace( $tmpkey, $tmpval , $str_post_data);
+                    }
+
+                    //curl_setoptオプションリスト
+                    $arrCurlPptList = array();
+                    //初期設定固定値
+                    $arrCurlPptList['CURLOPT_CUSTOMREQUEST']    = $method;  //初期値:POST
+                    $arrCurlPptList['CURLOPT_HEADER']           = FALSE;    //true を設定すると、ヘッダの内容も出力します。
+                    $arrCurlPptList['CURLOPT_SSL_VERIFYPEER']   = FALSE;    //false を設定すると、cURL はサーバー証明書の検証を行いません。
+                    $arrCurlPptList['CURLOPT_SSL_VERIFYHOST']   = 0;        //0 は、名前をチェックしません。
+                    $arrCurlPptList['CURLOPT_TIMEOUT']   = 5;               //cURL 関数の実行にかけられる時間の最大値。
+                    $arrCurlPptList['CURLOPT_CONNECTTIMEOUT']   = 2;        //接続の試行を待ち続ける秒数。0 は永遠に待ち続けることを意味します。
+                    $arrCurlPptList['CURLOPT_RETURNTRANSFER']   = TRUE;     //true を設定すると、curl_exec() の返り値を 文字列で返します。
+                    $arrCurlPptList['CURLOPT_HTTPPROXYTUNNEL']  = TRUE;
+                    //WEB入力項目
+                    $arrCurlPptList['CURLOPT_URL']              = $Notificationurl;
+                    $arrCurlPptList['CURLOPT_HTTPHEADER']       = $arr_header;
+                    $arrCurlPptList['CURLOPT_POSTFIELDS']       = $str_post_data;
+                    $arrCurlPptList['CURLOPT_PROXY']            = $proxy_url;
+                    $arrCurlPptList['CURLOPT_PROXYPORT']        = $proxy_port;
+
+                    $arrOtherOption = json_decode( $tmpNotice['OTHER'] ,true );
+
+                    //形式不正の場合、その他無効
+                    if( is_array($arrOtherOption) !== true ){
+                        $arrOtherOption =array();
+                    }
+
+                    //その他のオプションを設定
+                    foreach ($arrOtherOption as $curlkey => $curlval ) {
+                        if( array_search($curlkey, $arrConstList) === false ){
+                            if($curlval === null || $curlval === "" ){
+                            }else{
+                                $arrCurlPptList[$curlkey] =  $curlval;        
+                            }
+                        }else{
+                            if(strpos($curlkey,'__FORCED__') !== false){
+                                $curlkey = str_replace('__FORCED__','',$curlkey);
+                                $arrCurlPptList[$curlkey] =  $curlval;
+                            }
+                        }
+                    }
+
+                    //CURL実行準備
+                    $curl = curl_init();
+                    //curl_setopt設定
+                    foreach ($arrCurlPptList as $curlkey => $curlval) {
+                        if($curlval === null || $curlval === "" ){
+                        }else{  
+                            curl_setopt($curl, constant($curlkey), $curlval );    
+                        }
+                    }
+                    //CURL実行
+                    $restApiResponse = curl_exec($curl);
+                    $restApiResponseInfo = curl_getinfo($curl);
+
+                    $aryRowOfexecNotification[$tmpNotice['NOTICE_ID']] = $restApiResponseInfo;
+
+                    //通知ログ出力
+                    $strNoticeStatus = $tmpNotice['NOTICE_ID'].":". $tmpNotice['NOTICE_NAME'] .",". $arrDefinedList['__STATUS_ID__'] .":". $arrDefinedList['__STATUS_NAME__'];
+                    $subject = $objMTS->getSomeMessage("ITABASEH-STD-171000",array($strNoticeStatus) );//通知実行結果()
+                    $arrNoticeResult = array(
+                        "RETURN_MSG" => $restApiResponse,
+                        "OPTION"  => $arrCurlPptList,
+                        "RESSULT" => $aryRowOfexecNotification[$tmpNotice['NOTICE_ID']],
+                        
+                    );
+                    error_log(print_r( date('Y-m-d H:i:s') . " " . $subject . "\n", true), 3, $logPath );
+
+                    if( $arrNoticeResult != "" || $arrNoticeResult != array() ){
+                        error_log(print_r( $arrNoticeResult, true ), 3, $logPath );
+                    }
+                     //CURL終了
+                    curl_close($curl);
+
+                }else{
+                    $strNoticeStatus = $tmpNotice['NOTICE_ID'].":". $tmpNotice['NOTICE_NAME'] .",". $arrDefinedList['__STATUS_ID__'] .":". $arrDefinedList['__STATUS_NAME__'];
+                    $aryRowOfexecNotification[$tmpNotice['NOTICE_ID']]  = $objMTS->getSomeMessage("ITABASEH-STD-171001",array($strNoticeStatus) );//通知を抑止しました。()
+                    //通知ログ出力
+                    $subject = $aryRowOfexecNotification[$tmpNotice['NOTICE_ID']];
+                    error_log(print_r( date('Y-m-d H:i:s') . " " . $subject . "\n", true), 3, $logPath );
+                }
+            }
+            $boolRet = true;
+        }
+        catch(Exception $e){
+            if( $intErrorType===null ) $intErrorType = 501;
+            $tmpErrMsgBody = $e->getMessage();
+            $aryErrMsgBody[] = $tmpErrMsgBody;
+        }
+        $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$aryRowOfexecNotification);
+        return $retArray;
+    }
+//通知実行----
+
+//----通知取得、実行 #312 
+    function getExecNotice($aryConInsInfo,$strNoticeList,$strNoticeStatusList){
+        /////////////////////////////////////////////////////////////
+        // 通知の取得、実行                                //
+        /////////////////////////////////////////////////////////////
+        $boolRet = false;
+        $intErrorType = null;
+        $aryErrMsgBody = array();
+        $strErrMsg = "";
+        $aryResultNotice = array();
+
+        $strFxName = '([CLASS]'.__CLASS__.',[FUNCTION]'.__FUNCTION__.')';
+
+        $strSysErrMsgBody = "";
+        //
+        try{
+            $objMTS = $this->getMessageTemplateStorage();
+
+            //通知情報取得
+            $aryRetBody = $this->getNoticeInfo($strNoticeList);
+
+            if( $aryRetBody[0] !== true ){
+                $strErrMsg = $objMTS->getSomeMessage("ITABASEH-STD-171002" );//"通知対象がありません"
+
+                if( $aryRetBody[2] != array() ){
+                    $aryErrMsgBody = $aryRetBody[2];
+                }
+            }
+
+            if( $aryRetBody[1] !== null ){
+                $strErrMsg = $objMTS->getSomeMessage("ITABASEH-STD-171003" );//"通知対象が不正なため、通知処理をSKIPしました。";
+                // 例外処理へ
+                $strErrStepIdInFx="00000100";
+                throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+
+            //通知処理設定
+            $arrNoticeRows = $aryRetBody[4];
+            
+            //通知用予約変数：値の設定（デフォルト空）
+            $arrDefinedList = array(
+                "__CONDUCTOR_INSTANCE_ID__" => "",  //ConductorインスタンスID
+                "__CONDUCTOR_NAME__"        => "",  //Conductorインスタンス名
+                "__OPERATION_ID__"          => "",  //オペレーションID
+                "__OPERATION_NAME__"        => "",  //オペレーション名
+                "__STATUS_ID__"             => "",  //ステータスID
+                "__STATUS_NAME__"           => "",  //ステータス名
+                "__EXECUTION_USER__"        => "",  //実行ユーザー
+                "__TIME_BOOK__"             => "",  //予約日時
+                "__TIME_START__"            => "",  //開始日時
+                "__TIME_END__"              => "",  //終了日時
+                "__JUMP_URL__"              => "",  //作業確認URL
+                "___TMP_URL___"              => "",  //作業確認URLの/defaultから
+            );
+
+            //通知用予約変数：値の設定
+            if( isset($aryConInsInfo['CONDUCTOR_INSTANCE_NO']) === true ) $arrDefinedList['__CONDUCTOR_INSTANCE_ID__']  = $aryConInsInfo['CONDUCTOR_INSTANCE_NO'];
+            if( isset($aryConInsInfo['I_CONDUCTOR_NAME'])      === true ) $arrDefinedList['__CONDUCTOR_NAME__']         = $aryConInsInfo['I_CONDUCTOR_NAME'];
+            if( isset($aryConInsInfo['OPERATION_NO_UAPK'])     === true ) $arrDefinedList['__OPERATION_ID__']           = $aryConInsInfo['OPERATION_NO_UAPK'];
+            if( isset($aryConInsInfo['I_OPERATION_NAME'])      === true ) $arrDefinedList['__OPERATION_NAME__']         = $aryConInsInfo['I_OPERATION_NAME'];
+            if( isset($aryConInsInfo['STATUS_ID'])             === true ) $arrDefinedList['__STATUS_ID__']              = $aryConInsInfo['STATUS_ID'];
+            if( isset($aryConInsInfo['STATUS_NAME'])           === true ) $arrDefinedList['__STATUS_NAME__']            = $aryConInsInfo['STATUS_NAME'];
+            if( isset($aryConInsInfo['EXECUTION_USER'])        === true ) $arrDefinedList['__EXECUTION_USER__']         = $aryConInsInfo['EXECUTION_USER'];
+            if( isset($aryConInsInfo['ABORT_FLAG_NAME'])       === true ) $arrDefinedList['__ABORT_FLAG__']             = $aryConInsInfo['ABORT_FLAG_NAME'];
+            if( isset($aryConInsInfo['TIME_BOOK'])             === true ) $arrDefinedList['__TIME_BOOK__']              = date('Y/m/d H:i:s',  strtotime($aryConInsInfo['TIME_BOOK']));
+            if( isset($aryConInsInfo['TIME_START'])            === true ) $arrDefinedList['__TIME_START__']             = date('Y/m/d H:i:s',  strtotime($aryConInsInfo['TIME_START']));
+            if( isset($aryConInsInfo['TIME_END'])              === true ) $arrDefinedList['__TIME_END__']               = date('Y/m/d H:i:s',  strtotime($aryConInsInfo['TIME_END']));
+            
+            if( isset($aryConInsInfo['CONDUCTOR_INSTANCE_NO']) === true ){                            
+                ###URL　作業確認URLのFQDN    
+                $arrDefinedList['___TMP_URL___'] = "/default/menu/01_browse.php?no=2100180005&conductor_instance_id=".$aryConInsInfo['CONDUCTOR_INSTANCE_NO'];
+
+            //通知実行
+                $arrNoticeStatusList =  explode(',', $strNoticeStatusList);
+
+                if( array_search( $aryConInsInfo['STATUS_ID'] , $arrNoticeStatusList ) !== false || $strNoticeStatusList !== "" && count($arrNoticeRows) != 0 ){
+                    $aryRetBody = $this->execNotice($arrNoticeRows,$arrDefinedList);
+                    if( $aryRetBody[2] != array() ){
+                        $aryErrMsgBody = $aryRetBody[2];
+                    }
+                    $aryResultNotice = $aryRetBody[4];
+                }
+
+            }else{
+                $strErrStepIdInFx="00000100";
+                throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+
+            $boolRet = true;
+        }
+        catch(Exception $e){
+            if( $intErrorType===null ) $intErrorType = 501;
+            $tmpErrMsgBody = $e->getMessage();
+            $aryErrMsgBody[] = $tmpErrMsgBody;
+        }
+        $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$aryResultNotice);
+        return $retArray;
+    }
+//通知取得、実行----
+
+
+//----通知一覧を取得する #312 
+    function getInfoOfNoticeList(){
+        /////////////////////////////////////////////////////////////
+        // 通知一覧を取得                                //
+        /////////////////////////////////////////////////////////////
+
+        global $g;
+
+        $boolRet = false;
+        $intErrorType = null;
+        $aryErrMsgBody = array();
+        $strErrMsg = "";
+        $rows = array();
+        $user_id = "";
+        $strFxName = '([CLASS]'.__CLASS__.',[FUNCTION]'.__FUNCTION__.')';
+
+        $strSysErrMsgBody = "";
+        //
+        try{
+            $objDBCA = $this->getDBConnectAgent();
+            $objMTS = $this->getMessageTemplateStorage();
+            $lc_db_model_ch = $objDBCA->getModelChannel();
+            $objRBAC = new RoleBasedAccessControl($objDBCA);
+
+            #$g['login_id'] = "4";
+            if( isset($g['login_id']) === true ){
+                $user_id = $g['login_id'];
+                $ret  = $objRBAC->getAccountInfo($user_id);
+            }
+
+            // 表示データをSELECT
+            $sql =  " SELECT "
+                   ." * "
+                   ." FROM C_CONDUCTOR_NOTICE_INFO TAB_A "
+                   ." WHERE TAB_A.DISUSE_FLAG='0' "
+                   ."";
+
+            $objQuery = $objDBCA->sqlPrepare($sql);
+            $r = $objQuery->sqlExecute();
+            $rows = array();
+
+            while($row = $objQuery->resultFetch()) {
+                list($ret,$permission) = $objRBAC->chkOneRecodeAccessPermission($row);
+
+                if( $user_id != "" ){
+                    if($ret === false) {
+                        // 例外処理へ
+                        $strErrStepIdInFx="00000100";
+                        $intErrorType = 1; //システムエラー
+                        throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                    } else {
+                        if($permission !== true) {
+                            //アクセス権限を持っていない場合 伏字対応
+                            $row["NOTICE_NAME"] = $objMTS->getSomeMessage("ITAWDCH-STD-11102");
+                        }
+                    }
+                }
+                $rows[] = $row;
+            }
+
+            unset($objQuery);
+            unset($r);
+            $boolRet = true;
+        }
+        catch(Exception $e){
+            if( $intErrorType===null ) $intErrorType = 501;
+            $tmpErrMsgBody = $e->getMessage();
+            $aryErrMsgBody[] = $tmpErrMsgBody;
+        }
+        $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$rows);
+        return $retArray;
+    }
+//通知一覧を取得する----
+
+//----ステータスス一覧を取得する #312 
+    function getInfoOfNoticeStatusList($getmode=""){
+        /////////////////////////////////////////////////////////////
+        // ステータス一覧を取得                                //
+        /////////////////////////////////////////////////////////////
+
+        global $g;
+
+        $boolRet = false;
+        $intErrorType = null;
+        $aryErrMsgBody = array();
+        $strErrMsg = "";
+        $rows = array();
+        $user_id = "";
+        $strStatusList = "";
+
+        $strFxName = '([CLASS]'.__CLASS__.',[FUNCTION]'.__FUNCTION__.')';
+
+        $strSysErrMsgBody = "";
+        //
+        try{
+            $objDBCA = $this->getDBConnectAgent();
+            $objMTS = $this->getMessageTemplateStorage();
+            $lc_db_model_ch = $objDBCA->getModelChannel();
+            $objRBAC = new RoleBasedAccessControl($objDBCA);
+            
+            if( $getmode == "" ){
+                $arrStatusList = array(3,4,5,11,6,7,8); //実行中,実行中(遅延),正常終了,警告終了,緊急停止,異常終了,想定外エラー
+                $strStatusList = implode(",", $arrStatusList);
+            }
+
+            $rows = array();
+            // ステータス表示順変更 #587
+            if( $getmode == "" ){
+                foreach ($arrStatusList as $tmpstatusid ) {
+                    // 表示データをSELECT
+                    $sql =  " SELECT "
+                           ." * "
+                           ." FROM B_SYM_EXE_STATUS TAB_A "
+                           ." WHERE TAB_A.DISUSE_FLAG='0' "
+                           ."";
+                    if( $getmode == "" ){
+                        $sql .=" AND TAB_A.SYM_EXE_STATUS_ID = {$tmpstatusid} ";;               
+                    }
+
+                    $objQuery = $objDBCA->sqlPrepare($sql);
+                    $r = $objQuery->sqlExecute();
+                    
+                    while($row = $objQuery->resultFetch()) {
+                        $rows[] = $row;
+                    }
+                }                
+            }else{
+            
+                // 表示データをSELECT
+                $sql =  " SELECT "
+                       ." * "
+                       ." FROM B_SYM_EXE_STATUS TAB_A "
+                       ." WHERE TAB_A.DISUSE_FLAG='0' "
+                       ."";
+
+                $objQuery = $objDBCA->sqlPrepare($sql);
+                $r = $objQuery->sqlExecute();
+                $rows = array();
+
+                while($row = $objQuery->resultFetch()) {
+                    $rows[] = $row;
+                }
+                            
+            }
+
+            unset($objQuery);
+            unset($r);
+            $boolRet = true;
+        }
+        catch(Exception $e){
+            if( $intErrorType===null ) $intErrorType = 501;
+            $tmpErrMsgBody = $e->getMessage();
+            $aryErrMsgBody[] = $tmpErrMsgBody;
+        }
+        $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$rows);
+        return $retArray;
+    }
+//ステータス一覧を取得する----
+
+
+function getStatusFileInfo(){
+    $arrDriversList = array(
+        3 => array(
+                    "table" => "B_ANSIBLE_IF_INFO",
+                    "column"   => "ANSIBLE_STORAGE_PATH_ANS",
+                    "path"   => "legacy/ns",
+                ),
+        4 => array(
+                    "table" => "B_ANSIBLE_IF_INFO",
+                    "column"   => "ANSIBLE_STORAGE_PATH_ANS",
+                    "path"   => "pioneer/ns",
+                ),
+        5 => array(
+                    "table" => "B_ANSIBLE_IF_INFO",
+                    "column"   => "ANSIBLE_STORAGE_PATH_ANS",
+                    "path"   => "legacy/rl",
+                ),
+        10 => array(
+                    "table" => "B_TERRAFORM_IF_INFO",
+                    "column"   => "",
+                    "path"   => "",
+                ),
+    );
+    return $arrDriversList ;
+}
 //ここまでConductor用----
 
     /////////////////////////////////////////////////////////////
